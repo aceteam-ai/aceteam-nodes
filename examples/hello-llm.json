@@ -1,0 +1,44 @@
+{
+  "nodes": [
+    {
+      "id": "llm",
+      "type": "LLM",
+      "version": "1.0.0",
+      "params": {
+        "model": "gpt-4o-mini",
+        "system_prompt": "You are a helpful assistant. Be concise."
+      }
+    }
+  ],
+  "edges": [],
+  "input_edges": [
+    {
+      "input_key": "prompt",
+      "target_id": "llm",
+      "target_key": "prompt"
+    }
+  ],
+  "output_edges": [
+    {
+      "source_id": "llm",
+      "source_key": "response",
+      "output_key": "response"
+    }
+  ],
+  "inputs": [
+    {
+      "name": "prompt",
+      "type": "long_text",
+      "display_name": "Prompt",
+      "description": "The text prompt to send to the AI model"
+    }
+  ],
+  "outputs": [
+    {
+      "name": "response",
+      "type": "long_text",
+      "display_name": "Response",
+      "description": "The AI-generated response"
+    }
+  ]
+}

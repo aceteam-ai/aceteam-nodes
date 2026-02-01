@@ -1,0 +1,45 @@
+{
+  "nodes": [
+    {
+      "id": "input",
+      "type": "TextInput",
+      "version": "1.0.0",
+      "params": {
+        "text": "Hello from AceTeam!"
+      }
+    },
+    {
+      "id": "transform",
+      "type": "DataTransform",
+      "version": "1.0.0",
+      "params": {
+        "instruction": "Pass through unchanged"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "source_id": "input",
+      "source_key": "output",
+      "target_id": "transform",
+      "target_key": "input"
+    }
+  ],
+  "input_edges": [],
+  "output_edges": [
+    {
+      "source_id": "transform",
+      "source_key": "output",
+      "output_key": "result"
+    }
+  ],
+  "inputs": [],
+  "outputs": [
+    {
+      "name": "result",
+      "type": "long_text",
+      "display_name": "Result",
+      "description": "The output text"
+    }
+  ]
+}
