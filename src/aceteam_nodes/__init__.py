@@ -1,5 +1,7 @@
 """AceTeam workflow nodes for local execution."""
 
+__version__ = "0.1.0"
+
 from .context import CLIContext
 from .execution import run_workflow_from_file
 from .field import FieldInfo, FieldType
