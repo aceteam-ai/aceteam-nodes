@@ -22,6 +22,7 @@ from workflow_engine import (
     Value,
     ValueType,
 )
+from workflow_engine.core.values.value import value_type_registry
 from workflow_engine.files import (
     JSONFileValue,
     JSONLinesFileValue,
@@ -30,24 +31,42 @@ from workflow_engine.files import (
 )
 
 
-class CSVFileValue(TextFileValue):
-    """A CSV file."""
+# Value subclasses auto-register in workflow_engine's value type registry.
+# When used alongside a platform that defines the same types (e.g., aceteam-8),
+# we reuse the already-registered class to avoid duplicate registration errors.
 
-    mime_type: ClassVar[str] = "text/csv"
 
-    async def read_data(self, context: Context) -> Sequence[Mapping[str, Any]]:
-        text = await self.read_text(context)
-        text_io = StringIO(text)
-        reader = DictReader(text_io)
-        return tuple(reader)
+def _get_or_define_value_type(name: str, cls_factory):
+    """Return existing registered class or define a new one."""
+    if name in value_type_registry.types:
+        return value_type_registry.types[name]
+    return cls_factory()
 
-    async def write_data(self, context: Context, data: Sequence[Mapping[str, Any]]):
-        text_io = StringIO()
-        writer = DictWriter(text_io, fieldnames=data[0].keys())
-        writer.writeheader()
-        writer.writerows(data)
-        text = text_io.getvalue()
-        return await self.write_text(context, text)
+
+def _make_csv_file_value():
+    class CSVFileValue(TextFileValue):
+        """A CSV file."""
+
+        mime_type: ClassVar[str] = "text/csv"
+
+        async def read_data(self, context: Context) -> Sequence[Mapping[str, Any]]:
+            text = await self.read_text(context)
+            text_io = StringIO(text)
+            reader = DictReader(text_io)
+            return tuple(reader)
+
+        async def write_data(self, context: Context, data: Sequence[Mapping[str, Any]]):
+            text_io = StringIO()
+            writer = DictWriter(text_io, fieldnames=data[0].keys())
+            writer.writeheader()
+            writer.writerows(data)
+            text = text_io.getvalue()
+            return await self.write_text(context, text)
+
+    return CSVFileValue
+
+
+CSVFileValue = _get_or_define_value_type("CSVFileValue", _make_csv_file_value)
 
 
 class FieldType(StrEnum):
@@ -146,58 +165,64 @@ class FieldInfo(BaseModel):
         return _non_parametric_field_type_to_type[self.type]
 
 
-class FieldInfoValue(Value[FieldInfo]):
-    @property
-    def name(self) -> str:
-        return self.root.name
+def _make_field_info_value():
+    class FieldInfoValue(Value[FieldInfo]):
+        @property
+        def name(self) -> str:
+            return self.root.name
 
-    @property
-    def type(self) -> FieldType:
-        return self.root.type
+        @property
+        def type(self) -> FieldType:
+            return self.root.type
 
-    @property
-    def display_name(self) -> str | None:
-        return self.root.display_name
+        @property
+        def display_name(self) -> str | None:
+            return self.root.display_name
 
-    @property
-    def description(self) -> str | None:
-        return self.root.description
+        @property
+        def description(self) -> str | None:
+            return self.root.description
 
-    @cached_property
-    def default(self) -> Value | None:
-        if self.root.default is None:
-            return None
-        if isinstance(self.root.default, self.python_type):
-            return self.root.default
-        return self.python_type.model_validate(self.root.default)
+        @cached_property
+        def default(self) -> Value | None:
+            if self.root.default is None:
+                return None
+            if isinstance(self.root.default, self.python_type):
+                return self.root.default
+            return self.python_type.model_validate(self.root.default)
 
-    @property
-    def min(self) -> float | None:
-        return self.root.min
+        @property
+        def min(self) -> float | None:
+            return self.root.min
 
-    @property
-    def max(self) -> float | None:
-        return self.root.max
+        @property
+        def max(self) -> float | None:
+            return self.root.max
 
-    @property
-    def step(self) -> float | None:
-        return self.root.step
+        @property
+        def step(self) -> float | None:
+            return self.root.step
 
-    @property
-    def database_connection(self) -> str | None:
-        return self.root.database_connection
+        @property
+        def database_connection(self) -> str | None:
+            return self.root.database_connection
 
-    @property
-    def template_parameters(self) -> str | None:
-        return self.root.template_parameters
+        @property
+        def template_parameters(self) -> str | None:
+            return self.root.template_parameters
 
-    @property
-    def python_type(self) -> ValueType:
-        return self.root.python_type
+        @property
+        def python_type(self) -> ValueType:
+            return self.root.python_type
 
-    @property
-    def options(self) -> Sequence[str] | None:
-        return self.root.options
+        @property
+        def options(self) -> Sequence[str] | None:
+            return self.root.options
+
+    return FieldInfoValue
+
+
+FieldInfoValue = _get_or_define_value_type("FieldInfoValue", _make_field_info_value)
 
 
 class IterationIndexedFieldInfo(FieldInfo):
@@ -207,73 +232,81 @@ class IterationIndexedFieldInfo(FieldInfo):
     expand: Literal[False] = False
 
 
-class IterationIndexedFieldInfoValue(Value[IterationIndexedFieldInfo]):
-    @property
-    def name(self) -> str:
-        return self.root.name
+def _make_iteration_indexed_field_info_value():
+    class IterationIndexedFieldInfoValue(Value[IterationIndexedFieldInfo]):
+        @property
+        def name(self) -> str:
+            return self.root.name
 
-    @property
-    def type(self) -> FieldType:
-        return self.root.type
+        @property
+        def type(self) -> FieldType:
+            return self.root.type
 
-    @property
-    def display_name(self) -> str | None:
-        return self.root.display_name
+        @property
+        def display_name(self) -> str | None:
+            return self.root.display_name
 
-    @property
-    def description(self) -> str | None:
-        return self.root.description
+        @property
+        def description(self) -> str | None:
+            return self.root.description
 
-    @property
-    def default(self) -> Any | None:
-        return self.root.default
+        @property
+        def default(self) -> Any | None:
+            return self.root.default
 
-    @property
-    def min(self) -> float | None:
-        return self.root.min
+        @property
+        def min(self) -> float | None:
+            return self.root.min
 
-    @property
-    def max(self) -> float | None:
-        return self.root.max
+        @property
+        def max(self) -> float | None:
+            return self.root.max
 
-    @property
-    def step(self) -> float | None:
-        return self.root.step
+        @property
+        def step(self) -> float | None:
+            return self.root.step
 
-    @property
-    def database_connection(self) -> str | None:
-        return self.root.database_connection
+        @property
+        def database_connection(self) -> str | None:
+            return self.root.database_connection
 
-    @property
-    def template_parameters(self) -> str | None:
-        return self.root.template_parameters
+        @property
+        def template_parameters(self) -> str | None:
+            return self.root.template_parameters
 
-    @property
-    def python_type(self) -> ValueType:
-        return self.root.python_type
+        @property
+        def python_type(self) -> ValueType:
+            return self.root.python_type
 
-    @property
-    def options(self) -> Sequence[str] | None:
-        return self.root.options
+        @property
+        def options(self) -> Sequence[str] | None:
+            return self.root.options
 
-    @property
-    def iteration_index(self) -> int | None:
-        return self.root.iteration_index
+        @property
+        def iteration_index(self) -> int | None:
+            return self.root.iteration_index
 
-    def to_field_info(self) -> FieldInfo:
-        return FieldInfo(
-            name=self.name,
-            type=self.type,
-            display_name=self.display_name,
-            description=self.description,
-            default=self.default,
-            min=self.min,
-            max=self.max,
-            step=self.step,
-            database_connection=self.database_connection,
-            template_parameters=self.template_parameters,
-            options=self.options,
-        )
+        def to_field_info(self) -> FieldInfo:
+            return FieldInfo(
+                name=self.name,
+                type=self.type,
+                display_name=self.display_name,
+                description=self.description,
+                default=self.default,
+                min=self.min,
+                max=self.max,
+                step=self.step,
+                database_connection=self.database_connection,
+                template_parameters=self.template_parameters,
+                options=self.options,
+            )
+
+    return IterationIndexedFieldInfoValue
+
+
+IterationIndexedFieldInfoValue = _get_or_define_value_type(
+    "IterationIndexedFieldInfoValue", _make_iteration_indexed_field_info_value
+)
 
 
 type FieldSequenceValue = SequenceValue[FieldInfoValue]

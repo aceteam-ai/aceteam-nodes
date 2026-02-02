@@ -1,6 +1,6 @@
 [project]
 name = "aceteam-nodes"
-version = "0.1.1"
+version = "0.1.2"
 description = "AceTeam workflow nodes for local execution"
 readme = "README.md"
 license = "MIT"

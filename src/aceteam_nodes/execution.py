@@ -27,7 +27,7 @@ class WorkflowDeserializationError(Exception):
 def load_workflow_from_file(file_path: str) -> AceTeamWorkflow:
     """Load a workflow from a JSON file."""
     # Import nodes to trigger auto-registration before deserialization
-    import aceteam_nodes.nodes  # noqa: F401
+    from aceteam_nodes.nodes import register_all_nodes; register_all_nodes()  # noqa: E702
 
     path = Path(file_path)
     if not path.exists():
@@ -55,7 +55,7 @@ async def run_workflow_from_file(
     Returns a dict with the workflow output values.
     """
     # Import nodes to trigger auto-registration
-    import aceteam_nodes.nodes  # noqa: F401
+    from aceteam_nodes.nodes import register_all_nodes; register_all_nodes()  # noqa: E702
 
     workflow = load_workflow_from_file(file_path)
 

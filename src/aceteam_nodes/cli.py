@@ -87,7 +87,7 @@ def cmd_validate(args: argparse.Namespace) -> dict[str, Any]:
 
 def cmd_list_nodes() -> dict[str, Any]:
     # Import nodes to trigger registration
-    import aceteam_nodes.nodes  # noqa: F401
+    from aceteam_nodes.nodes import register_all_nodes; register_all_nodes()  # noqa: E702
 
     from .node_base import aceteam_nodes as registry
 

@@ -1,6 +1,6 @@
 """AceTeam workflow nodes for local execution."""
 
-__version__ = "0.1.1"
+__version__ = "0.1.2"
 
 from .field import FieldInfo, FieldType
 from .node_base import AceTeamNode, aceteam_nodes
