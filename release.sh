@@ -196,11 +196,20 @@ echo "Done"
 # Step 3: Git commit + tag + push
 echo ""
 echo -e "${GREEN}Step 3/6: Creating git commit and tag${NC}"
-run_cmd git add pyproject.toml src/aceteam_nodes/__init__.py
-run_cmd git commit -m "release: $VERSION"
-run_cmd git tag -a "$VERSION" -m "$VERSION"
-run_cmd git push origin "$(git branch --show-current)"
-run_cmd git push origin "$VERSION"
+if [[ "$DRY_RUN" == true ]]; then
+    echo -e "${BLUE}[DRY-RUN] Would commit version bump and create tag $VERSION${NC}"
+else
+    git add pyproject.toml src/aceteam_nodes/__init__.py
+    # Commit only if there are staged changes (version might already be set)
+    if git diff --cached --quiet; then
+        echo "Version already at $VERSION_NUM, no commit needed"
+    else
+        git commit -m "release: $VERSION"
+    fi
+    git tag -a "$VERSION" -m "$VERSION"
+    git push origin "$(git branch --show-current)"
+    git push origin "$VERSION"
+fi
 echo "Done"
 
 # Step 4: Publish to PyPI
