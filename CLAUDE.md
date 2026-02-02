@@ -33,8 +33,8 @@ uv run pyright                     # Type checking
 uv build                           # Creates sdist + wheel in dist/
 
 # Release
-./release.sh -v v0.2.0 --dry-run  # Preview release
-./release.sh -v v0.2.0 -y         # Publish to PyPI + GitHub
+./scripts/release.sh -v v0.2.0 --dry-run  # Preview release
+./scripts/release.sh -v v0.2.0 -y         # Publish to PyPI + GitHub
 ```
 
 ## Architecture

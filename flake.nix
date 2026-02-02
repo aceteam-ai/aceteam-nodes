@@ -52,7 +52,7 @@
             echo "  uv run pytest           # tests"
             echo "  uv run ruff check       # lint"
             echo "  uv build                # build"
-            echo "  ./release.sh --dry-run  # release preview"
+            echo "  ./scripts/release.sh --dry-run  # release preview"
             echo ""
           '';
         };
