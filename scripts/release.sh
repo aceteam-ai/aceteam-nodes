@@ -83,7 +83,7 @@ run_cmd() {
 }
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-cd "$SCRIPT_DIR"
+cd "$SCRIPT_DIR/.."
 
 echo "Release Automation: aceteam-nodes"
 if [[ "$DRY_RUN" == true ]]; then
