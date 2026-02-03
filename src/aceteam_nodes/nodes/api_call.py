@@ -171,9 +171,7 @@ class APICallNode(
                     name="response",
                     display_name="Response File",
                     description="File containing the API response.",
-                    type=FieldType.FILE_JSON
-                    if self.supports_json_output
-                    else FieldType.FILE_TEXT,
+                    type=FieldType.FILE_JSON if self.supports_json_output else FieldType.FILE_TEXT,
                 ),
                 FieldInfo(
                     name="headers",
@@ -321,9 +319,7 @@ class APICallNode(
                 else:
                     response = await client.request(method=method, url=url, headers=headers)
         except httpx.TimeoutException as e:
-            raise UserException(
-                f"Request timed out after {self.params.timeout} seconds."
-            ) from e
+            raise UserException(f"Request timed out after {self.params.timeout} seconds.") from e
         except httpx.RequestError as e:
             raise UserException(f"Request failed: {e}") from e
         except Exception as e:

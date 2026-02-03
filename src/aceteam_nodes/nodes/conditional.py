@@ -73,9 +73,7 @@ class ConditionalInput(Data):
     condition: BooleanValue
 
 
-class IfNode(
-    AceTeamNode[Data, Empty, IfParams]
-):
+class IfNode(AceTeamNode[Data, Empty, IfParams]):
     """Runs a workflow only if a boolean condition is true."""
 
     TYPE_INFO = WENodeTypeInfo.from_parameter_type(
@@ -119,9 +117,7 @@ class IfNode(
             return None
 
 
-class IfElseNode(
-    AceTeamNode[Data, Empty, IfElseParams]
-):
+class IfElseNode(AceTeamNode[Data, Empty, IfElseParams]):
     """Runs one of two workflows based on a boolean condition."""
 
     TYPE_INFO = WENodeTypeInfo.from_parameter_type(

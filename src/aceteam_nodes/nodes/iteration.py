@@ -248,9 +248,7 @@ class JsonToSequenceNode(Node[JsonToSequenceInput, JsonToSequenceOutput, Empty])
         typed_items: list[DataValue] = []
         for item in items:
             typed_items.append(DataValue[self.data_type](root=self.data_type.model_validate(item)))
-        return self.output_type(
-            sequence=SequenceValue[DataValue[self.data_type]](root=typed_items)
-        )
+        return self.output_type(sequence=SequenceValue[DataValue[self.data_type]](root=typed_items))
 
     @classmethod
     def from_data_type(cls, id: str, data_type: Type[Data]) -> Self:
@@ -355,36 +353,46 @@ class ForEachNode(AceTeamNode[SequenceData, SequenceData, ForEachParams]):
 
             edges.append(
                 Edge.from_nodes(
-                    source=expand, source_key=expand.key(i),
-                    target=input_adapter, target_key="data",
+                    source=expand,
+                    source_key=expand.key(i),
+                    target=input_adapter,
+                    target_key="data",
                 )
             )
             for input_edge in item_workflow.input_edges:
                 edges.append(
                     Edge(
-                        source_id=input_adapter.id, source_key=input_edge.input_key,
-                        target_id=input_edge.target_id, target_key=input_edge.target_key,
+                        source_id=input_adapter.id,
+                        source_key=input_edge.input_key,
+                        target_id=input_edge.target_id,
+                        target_key=input_edge.target_key,
                     )
                 )
             edges.extend(item_workflow.edges)
             for output_edge in item_workflow.output_edges:
                 edges.append(
                     Edge(
-                        source_id=output_edge.source_id, source_key=output_edge.source_key,
-                        target_id=output_adapter.id, target_key=output_edge.output_key,
+                        source_id=output_edge.source_id,
+                        source_key=output_edge.source_key,
+                        target_id=output_adapter.id,
+                        target_key=output_edge.output_key,
                     )
                 )
             edges.append(
                 Edge.from_nodes(
-                    source=output_adapter, source_key="data",
-                    target=gather, target_key=gather.key(i),
+                    source=output_adapter,
+                    source_key="data",
+                    target=gather,
+                    target_key=gather.key(i),
                 )
             )
 
         edges.append(
             Edge.from_nodes(
-                source=json_to_sequence, source_key="sequence",
-                target=expand, target_key="sequence",
+                source=json_to_sequence,
+                source_key="sequence",
+                target=expand,
+                target_key="sequence",
             )
         )
 
@@ -397,9 +405,7 @@ class ForEachNode(AceTeamNode[SequenceData, SequenceData, ForEachParams]):
                 )
             ],
             output_edges=[
-                OutputEdge.from_node(
-                    source=gather, source_key="sequence", output_key="sequence"
-                )
+                OutputEdge.from_node(source=gather, source_key="sequence", output_key="sequence")
             ],
         )
 

@@ -30,7 +30,6 @@ from workflow_engine.files import (
     TextFileValue,
 )
 
-
 # Value subclasses auto-register in workflow_engine's value type registry.
 # When used alongside a platform that defines the same types (e.g., aceteam-8),
 # we reuse the already-registered class to avoid duplicate registration errors.

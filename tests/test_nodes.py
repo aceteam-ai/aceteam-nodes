@@ -86,27 +86,19 @@ async def test_less_than_node(context):
 
 async def test_and_node(context):
     node = AndNode(id="test", params=LogicalParams())
-    result = await node.run(
-        context, LogicalInput(a=BooleanValue(True), b=BooleanValue(True))
-    )
+    result = await node.run(context, LogicalInput(a=BooleanValue(True), b=BooleanValue(True)))
     assert result.result.root is True
 
-    result = await node.run(
-        context, LogicalInput(a=BooleanValue(True), b=BooleanValue(False))
-    )
+    result = await node.run(context, LogicalInput(a=BooleanValue(True), b=BooleanValue(False)))
     assert result.result.root is False
 
 
 async def test_or_node(context):
     node = OrNode(id="test", params=LogicalParams())
-    result = await node.run(
-        context, LogicalInput(a=BooleanValue(False), b=BooleanValue(True))
-    )
+    result = await node.run(context, LogicalInput(a=BooleanValue(False), b=BooleanValue(True)))
     assert result.result.root is True
 
-    result = await node.run(
-        context, LogicalInput(a=BooleanValue(False), b=BooleanValue(False))
-    )
+    result = await node.run(context, LogicalInput(a=BooleanValue(False), b=BooleanValue(False)))
     assert result.result.root is False
 
 

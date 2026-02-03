@@ -4,13 +4,12 @@ requires-python = ">=3.12"
 
 [[package]]
 name = "aceteam-nodes"
-version = "0.1.0"
+version = "0.1.2"
 source = { editable = "." }
 dependencies = [
     { name = "aceteam-workflow-engine" },
     { name = "httpx" },
     { name = "jinja2" },
-    { name = "litellm" },
     { name = "overrides" },
     { name = "pydantic" },
     { name = "pyyaml" },
@@ -18,10 +17,14 @@ dependencies = [
 
 [package.optional-dependencies]
 dev = [
+    { name = "litellm" },
     { name = "pyright" },
     { name = "pytest" },
     { name = "pytest-asyncio" },
     { name = "ruff" },
+]
+llm = [
+    { name = "litellm" },
 ]
 
 [package.metadata]
@@ -29,7 +32,8 @@ requires-dist = [
     { name = "aceteam-workflow-engine", specifier = ">=1.1.0rc1" },
     { name = "httpx", specifier = ">=0.28.0" },
     { name = "jinja2", specifier = ">=3.1.0" },
-    { name = "litellm", specifier = ">=1.40.0" },
+    { name = "litellm", marker = "extra == 'dev'", specifier = ">=1.40.0" },
+    { name = "litellm", marker = "extra == 'llm'", specifier = ">=1.40.0" },
     { name = "overrides", specifier = ">=7.7.0" },
     { name = "pydantic", specifier = ">=2.11.0" },
     { name = "pyright", marker = "extra == 'dev'", specifier = ">=1.1" },
@@ -38,7 +42,7 @@ requires-dist = [
     { name = "pyyaml", specifier = ">=6.0" },
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.8" },
 ]
-provides-extras = ["dev"]
+provides-extras = ["llm", "dev"]
 
 [[package]]
 name = "aceteam-workflow-engine"

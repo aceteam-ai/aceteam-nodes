@@ -84,9 +84,7 @@ class DataTransformNode(
         )
 
     @override
-    async def run(
-        self, context: Context, input: DataTransformNodeInput
-    ) -> DataTransformNodeOutput:
+    async def run(self, context: Context, input: DataTransformNodeInput) -> DataTransformNodeOutput:
         # Pass through - transformation logic can be extended
         return DataTransformNodeOutput(output=input.input)
 

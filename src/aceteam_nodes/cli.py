@@ -36,7 +36,8 @@ def parse_args() -> argparse.Namespace:
         help="Path to config file",
     )
     run_parser.add_argument(
-        "--verbose", "-v",
+        "--verbose",
+        "-v",
         action="store_true",
         help="Show progress messages",
     )
@@ -87,7 +88,9 @@ def cmd_validate(args: argparse.Namespace) -> dict[str, Any]:
 
 def cmd_list_nodes() -> dict[str, Any]:
     # Import nodes to trigger registration
-    from aceteam_nodes.nodes import register_all_nodes; register_all_nodes()  # noqa: E702
+    from aceteam_nodes.nodes import register_all_nodes
+
+    register_all_nodes()  # noqa: E702
 
     from .node_base import aceteam_nodes as registry
 
@@ -95,11 +98,13 @@ def cmd_list_nodes() -> dict[str, Any]:
     for node_cls in registry:
         try:
             info = node_cls.type_info()
-            nodes.append({
-                "type": info.type,
-                "display_name": info.display_name,
-                "description": info.description,
-            })
+            nodes.append(
+                {
+                    "type": info.type,
+                    "display_name": info.display_name,
+                    "description": info.description,
+                }
+            )
         except NotImplementedError:
             pass
     return {"nodes": nodes}
