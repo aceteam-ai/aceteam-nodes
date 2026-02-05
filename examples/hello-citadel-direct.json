@@ -1,0 +1,43 @@
+{
+  "nodes": [
+    {
+      "id": "ping",
+      "type": "APICall",
+      "version": "0.4.0",
+      "params": {
+        "url": "http://localhost:8080/ping",
+        "method": "GET",
+        "timeout": 10.0
+      }
+    }
+  ],
+  "edges": [],
+  "input_edges": [],
+  "output_edges": [
+    {
+      "source_id": "ping",
+      "source_key": "response",
+      "output_key": "result"
+    },
+    {
+      "source_id": "ping",
+      "source_key": "status_code",
+      "output_key": "status_code"
+    }
+  ],
+  "inputs": [],
+  "outputs": [
+    {
+      "name": "result",
+      "type": "json",
+      "display_name": "Result",
+      "description": "Citadel ping response"
+    },
+    {
+      "name": "status_code",
+      "type": "number",
+      "display_name": "Status Code",
+      "description": "HTTP status code"
+    }
+  ]
+}
