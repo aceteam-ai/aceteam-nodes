@@ -50,7 +50,7 @@ class CLIContext(LocalContext):
         messages.append({"role": "user", "content": prompt})
 
         response = await acompletion(model=model, messages=messages)
-        return response.choices[0].message.content
+        return response.choices[0].message.content  # type: ignore
 
     @override
     async def on_node_start(

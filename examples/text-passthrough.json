@@ -1,7 +1,15 @@
 {
-  "nodes": [
+  "input_node": {
+    "id": "input",
+    "type": "Input",
+    "version": "1.0.0",
+    "params": {
+      "fields": {}
+    }
+  },
+  "inner_nodes": [
     {
-      "id": "input",
+      "id": "text_input",
       "type": "TextInput",
       "version": "1.0.0",
       "params": {
@@ -17,29 +25,31 @@
       }
     }
   ],
+  "output_node": {
+    "id": "output",
+    "type": "Output",
+    "version": "1.0.0",
+    "params": {
+      "fields": {
+        "result": {
+          "type": "string",
+          "description": "The text to pass through"
+        }
+      }
+    }
+  },
   "edges": [
     {
-      "source_id": "input",
+      "source_id": "text_input",
       "source_key": "output",
       "target_id": "transform",
       "target_key": "input"
-    }
-  ],
-  "input_edges": [],
-  "output_edges": [
+    },
     {
       "source_id": "transform",
       "source_key": "output",
-      "output_key": "result"
-    }
-  ],
-  "inputs": [],
-  "outputs": [
-    {
-      "name": "result",
-      "type": "long_text",
-      "display_name": "Result",
-      "description": "The output text"
+      "target_id": "output",
+      "target_key": "result"
     }
   ]
 }

@@ -1,184 +1,153 @@
-"""Conditional nodes - If and IfElse branching."""
+# workflow_engine/nodes/conditional.py
+"""
+Conditional nodes that run different workflows depending on a condition input.
+"""
 
-import logging
-from collections.abc import Sequence
 from functools import cached_property
-from typing import Literal
+from typing import ClassVar, Literal, Self
 
 from overrides import override
-from pydantic import ConfigDict, Field
+from pydantic import ConfigDict
 from workflow_engine import (
     BooleanValue,
     Context,
     Data,
     Empty,
-    JSONValue,
+    NodeTypeInfo,
     Params,
+    Workflow,
+    WorkflowValue,
 )
-from workflow_engine.core import NodeTypeInfo as WENodeTypeInfo
+from workflow_engine.core.values import build_data_type, get_data_fields
+from workflow_engine.utils.mappings import mapping_intersection
 
-from ..field import FieldInfo, FieldType
 from ..node_base import AceTeamNode
-from ..node_info import NodeTypeInfo
-from ..workflow import AceTeamWorkflow
-
-logger = logging.getLogger(__name__)
-
-
-WORKFLOW_IF_TRUE_FIELD_INFO = FieldInfo(
-    name="if_true",
-    display_name="Workflow If True",
-    type=FieldType.WORKFLOW,
-    description="The workflow to run if the condition is true.",
-)
-
-WORKFLOW_IF_FALSE_FIELD_INFO = FieldInfo(
-    name="if_false",
-    display_name="Workflow If False",
-    type=FieldType.WORKFLOW,
-    description="The workflow to run if the condition is false.",
-)
-
-CONDITION_FIELD_INFO = FieldInfo(
-    name="condition",
-    display_name="Condition",
-    type=FieldType.BOOLEAN,
-    description="The condition to check.",
-)
 
 
 class IfParams(Params):
-    if_true: JSONValue = Field(default_factory=lambda: JSONValue(None))
-
-    @cached_property
-    def workflow_if_true(self) -> AceTeamWorkflow:
-        return AceTeamWorkflow.model_validate(self.if_true.root)
+    if_true: WorkflowValue
 
 
 class IfElseParams(Params):
-    if_true: JSONValue = Field(default_factory=lambda: JSONValue(None))
-    if_false: JSONValue = Field(default_factory=lambda: JSONValue(None))
-
-    @cached_property
-    def workflow_if_true(self) -> AceTeamWorkflow:
-        return AceTeamWorkflow.model_validate(self.if_true.root)
-
-    @cached_property
-    def workflow_if_false(self) -> AceTeamWorkflow:
-        return AceTeamWorkflow.model_validate(self.if_false.root)
+    if_true: WorkflowValue
+    if_false: WorkflowValue
 
 
 class ConditionalInput(Data):
-    model_config = ConfigDict(extra="allow")
+    model_config: ClassVar[ConfigDict] = ConfigDict(extra="allow")
+
     condition: BooleanValue
 
 
-class IfNode(AceTeamNode[Data, Empty, IfParams]):
-    """Runs a workflow only if a boolean condition is true."""
+class IfNode(AceTeamNode[ConditionalInput, Empty, IfParams]):
+    """
+    A node that optionally executes the internal workflow if the boolean
+    condition is true.
 
-    TYPE_INFO = WENodeTypeInfo.from_parameter_type(
+    The output of this node is always empty, since there would be no valid
+    output if the condition is false.
+    """
+
+    # TODO: allow conditional nodes with optional output
+
+    TYPE_INFO: ClassVar[NodeTypeInfo] = NodeTypeInfo.from_parameter_type(
         name="If",
         display_name="If",
-        description="Runs a workflow only if a boolean condition is true.",
+        description="Executes the internal workflow if the boolean condition is true.",
         version="0.4.0",
         parameter_type=IfParams,
     )
 
     type: Literal["If"] = "If"  # pyright: ignore[reportIncompatibleVariableOverride]
 
-    @classmethod
-    def type_info(cls) -> NodeTypeInfo:
-        return NodeTypeInfo(
-            type="If",
-            display_name="If",
-            description="Runs a workflow only if a boolean condition is true.",
-            params=(WORKFLOW_IF_TRUE_FIELD_INFO,),
-        )
+    @cached_property
+    def input_type(self):
+        fields = dict(get_data_fields(ConditionalInput))
+        for key, field in self.params.if_true.root.input_fields.items():
+            assert key not in fields
+            fields[key] = field
+        return build_data_type("IfInput", fields, base_cls=ConditionalInput)
 
     @cached_property
-    def input_fields_info(self) -> Sequence[FieldInfo]:
-        true_input_types_by_name = {
-            input.name: input.type for input in self.params.workflow_if_true.inputs
-        }
-        assert "condition" not in true_input_types_by_name, (
-            f"{self.type}: condition is a reserved keyword"
-        )
-        return (CONDITION_FIELD_INFO, *self.params.workflow_if_true.inputs)
-
-    @cached_property
-    def output_fields_info(self) -> Sequence[FieldInfo]:
-        return self.params.workflow_if_true.outputs
+    def output_type(self):
+        return Empty
 
     @override
-    async def run(self, context: Context, input: ConditionalInput) -> AceTeamWorkflow | None:
+    async def run(self, context: Context, input: ConditionalInput) -> Empty | Workflow:
         if input.condition:
-            return self.params.workflow_if_true
-        else:
-            return None
+            return self.params.if_true.root
+        return Empty()
+
+    @classmethod
+    def from_workflow(
+        cls,
+        id: str,
+        if_true: Workflow,
+    ) -> Self:
+        return cls(
+            id=id,
+            params=IfParams(if_true=WorkflowValue(if_true)),
+        )
 
 
-class IfElseNode(AceTeamNode[Data, Empty, IfElseParams]):
-    """Runs one of two workflows based on a boolean condition."""
+class IfElseNode(AceTeamNode[ConditionalInput, Data, IfElseParams]):
+    """
+    A node that executes one of the two internal workflows based on the boolean
+    condition.
 
-    TYPE_INFO = WENodeTypeInfo.from_parameter_type(
+    The output of this node is the intersection of the if_true and if_false
+    workflows.
+    """
+
+    # TODO: allow union types
+
+    TYPE_INFO: ClassVar[NodeTypeInfo] = NodeTypeInfo.from_parameter_type(
         name="IfElse",
-        display_name="If Else",
-        description="Runs one of two workflows based on a boolean condition.",
+        display_name="IfElse",
+        description="Executes one of the two internal workflows based on the boolean condition.",
         version="0.4.0",
         parameter_type=IfElseParams,
     )
-
     type: Literal["IfElse"] = "IfElse"  # pyright: ignore[reportIncompatibleVariableOverride]
 
-    @classmethod
-    def type_info(cls) -> NodeTypeInfo:
-        return NodeTypeInfo(
-            type="IfElse",
-            display_name="If Else",
-            description="Runs one of two workflows based on a boolean condition.",
-            params=(WORKFLOW_IF_TRUE_FIELD_INFO, WORKFLOW_IF_FALSE_FIELD_INFO),
-        )
+    @cached_property
+    def input_type(self):
+        fields = dict(get_data_fields(ConditionalInput))
+        for key, field in self.params.if_true.root.input_fields.items():
+            assert key not in fields
+            fields[key] = field
+        return build_data_type("IfElseInput", fields, base_cls=ConditionalInput)
 
     @cached_property
-    def input_fields_info(self) -> Sequence[FieldInfo]:
-        true_input_types_by_name = {
-            input.name: input.type for input in self.params.workflow_if_true.inputs
-        }
-        false_input_types_by_name = {
-            input.name: input.type for input in self.params.workflow_if_false.inputs
-        }
-        assert true_input_types_by_name == false_input_types_by_name, (
-            f"{self.type}: true and false inputs must match"
+    def output_type(self):
+        fields = mapping_intersection(
+            self.params.if_true.root.output_fields,
+            self.params.if_false.root.output_fields,
         )
-        assert "condition" not in true_input_types_by_name, (
-            f"{self.type}: condition is a reserved keyword"
-        )
-        return (CONDITION_FIELD_INFO, *self.params.workflow_if_true.inputs)
-
-    @cached_property
-    def output_fields_info(self) -> Sequence[FieldInfo]:
-        true_output_types_by_name = {
-            output.name: output.type for output in self.params.workflow_if_true.outputs
-        }
-        false_output_types_by_name = {
-            output.name: output.type for output in self.params.workflow_if_false.outputs
-        }
-        assert true_output_types_by_name == false_output_types_by_name, (
-            f"{self.type}: true and false outputs must match"
-        )
-        return self.params.workflow_if_true.outputs
+        return build_data_type("IfElseOutput", fields)
 
     @override
-    async def run(self, context: Context, input: ConditionalInput) -> AceTeamWorkflow:
-        if input.condition:
-            return self.params.workflow_if_true
-        else:
-            return self.params.workflow_if_false
+    async def run(self, context: Context, input: ConditionalInput) -> Workflow:
+        return self.params.if_true.root if input.condition else self.params.if_false.root
+
+    @classmethod
+    def from_workflows(
+        cls,
+        id: str,
+        if_true: Workflow,
+        if_false: Workflow,
+    ) -> Self:
+        return cls(
+            id=id,
+            params=IfElseParams(
+                if_true=WorkflowValue(if_true),
+                if_false=WorkflowValue(if_false),
+            ),
+        )
 
 
 __all__ = [
-    "IfElseNode",
-    "IfElseParams",
+    "ConditionalInput",
     "IfNode",
-    "IfParams",
+    "IfElseNode",
 ]

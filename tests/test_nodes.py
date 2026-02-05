@@ -1,7 +1,7 @@
 """Tests for individual nodes."""
 
 import pytest
-from workflow_engine import BooleanValue, FloatValue, StringValue
+from workflow_engine import BooleanValue, Empty, FloatValue, StringValue
 from workflow_engine.contexts.in_memory import InMemoryContext
 
 from aceteam_nodes.nodes.comparison import (
@@ -36,7 +36,7 @@ async def test_text_input_node(context):
         id="test",
         params=TextInputNodeParams(text=StringValue("Hello World")),
     )
-    output = await node.run(context, None)
+    output = await node.run(context, Empty())
     assert output.output.root == "Hello World"
 
 
@@ -55,7 +55,7 @@ async def test_csv_reader_node(context):
         id="test",
         params=CSVReaderNodeParams(sample_data=StringValue("name,age\nAlice,30\nBob,25")),
     )
-    output = await node.run(context, None)
+    output = await node.run(context, Empty())
     assert "Alice" in output.data.root
     assert "Bob" in output.data.root
 
