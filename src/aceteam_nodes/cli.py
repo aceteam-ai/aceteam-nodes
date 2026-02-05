@@ -12,6 +12,8 @@ import json
 import sys
 from typing import Any
 
+from aceteam_nodes import aceteam_nodes
+
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
@@ -77,8 +79,8 @@ def cmd_validate(args: argparse.Namespace) -> dict[str, Any]:
         return {
             "valid": True,
             "nodes": len(workflow.nodes),
-            "inputs": [f.name for f in workflow.inputs],
-            "outputs": [f.name for f in workflow.outputs],
+            "inputs": list(workflow.input_fields.keys()),
+            "outputs": list(workflow.output_fields.keys()),
         }
     except WorkflowFileNotFoundError as e:
         return {"valid": False, "error": str(e)}
@@ -88,19 +90,15 @@ def cmd_validate(args: argparse.Namespace) -> dict[str, Any]:
 
 def cmd_list_nodes() -> dict[str, Any]:
     # Import nodes to trigger registration
-    from aceteam_nodes.nodes import register_all_nodes
-
-    register_all_nodes()  # noqa: E702
-
-    from .node_base import aceteam_nodes as registry
+    from .nodes import aceteam_node_registry  # noqa: F401
 
     nodes = []
-    for node_cls in registry:
+    for node_cls in aceteam_nodes:
         try:
-            info = node_cls.type_info()
+            info = node_cls.TYPE_INFO
             nodes.append(
                 {
-                    "type": info.type,
+                    "type": info.name,
                     "display_name": info.display_name,
                     "description": info.description,
                 }

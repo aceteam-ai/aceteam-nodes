@@ -1,6 +1,6 @@
 """LLM node - AI text generation via litellm."""
 
-from collections.abc import Sequence
+from functools import cached_property
 from typing import Literal
 
 from overrides import override
@@ -9,9 +9,7 @@ from workflow_engine import Context, Data, Params, StringValue
 from workflow_engine.core import NodeTypeInfo as WENodeTypeInfo
 
 from ..context import CLIContext
-from ..field import FieldInfo, FieldType
 from ..node_base import AceTeamNode
-from ..node_info import NodeTypeInfo
 
 
 class LLMNodeParams(Params):
@@ -48,53 +46,13 @@ class LLMNode(
 
     type: Literal["LLM"] = "LLM"
 
-    @classmethod
-    @override
-    def type_info(cls) -> NodeTypeInfo:
-        return NodeTypeInfo(
-            type="LLM",
-            display_name="LLM",
-            description="Send a text prompt to an AI model and get a response.",
-            params=(
-                FieldInfo(
-                    name="model",
-                    display_name="Model",
-                    description="The AI model to use",
-                    type=FieldType.SHORT_TEXT,
-                    default="gpt-4o-mini",
-                    options=("gpt-4o-mini", "gpt-4o", "claude-3-5-sonnet-latest"),
-                ),
-                FieldInfo(
-                    name="system_prompt",
-                    display_name="System Prompt",
-                    description="System prompt to guide the AI's behavior",
-                    type=FieldType.LONG_TEXT,
-                    default="You are a helpful assistant.",
-                ),
-            ),
-        )
+    @cached_property
+    def input_type(self):
+        return LLMNodeInput
 
-    @property
-    def input_fields_info(self) -> Sequence[FieldInfo]:
-        return (
-            FieldInfo(
-                name="prompt",
-                display_name="Prompt",
-                description="The text prompt to send to the AI model",
-                type=FieldType.LONG_TEXT,
-            ),
-        )
-
-    @property
-    def output_fields_info(self) -> Sequence[FieldInfo]:
-        return (
-            FieldInfo(
-                name="response",
-                display_name="Response",
-                description="The AI-generated response",
-                type=FieldType.LONG_TEXT,
-            ),
-        )
+    @cached_property
+    def output_type(self):
+        return LLMNodeOutput
 
     @override
     async def run(self, context: Context, input: LLMNodeInput) -> LLMNodeOutput:

@@ -12,14 +12,47 @@ Or call register_all_nodes() to trigger auto-registration of all nodes
 (e.g., before deserializing a workflow file).
 """
 
+from workflow_engine import Node, NodeRegistry
 
-def register_all_nodes():
-    """Import all node modules to trigger auto-registration in workflow_engine."""
-    from . import api_call as _  # noqa: F401
-    from . import comparison as _  # noqa: F811, F401
-    from . import conditional as _  # noqa: F811, F401
-    from . import csv_reader as _  # noqa: F811, F401
-    from . import data_transform as _  # noqa: F811, F401
-    from . import iteration as _  # noqa: F811, F401
-    from . import llm as _  # noqa: F811, F401
-    from . import text_io as _  # noqa: F811, F401
+from ..node_base import AceTeamNode
+from .api_call import APICallNode
+from .comparison import (
+    AndNode,
+    EqualNode,
+    GreaterThanEqualNode,
+    GreaterThanNode,
+    LessThanEqualNode,
+    LessThanNode,
+    NotEqualNode,
+    NotNode,
+    OrNode,
+)
+from .conditional import IfElseNode, IfNode
+from .csv_reader import CSVReaderNode
+from .data_transform import DataTransformNode
+from .iteration import ForEachNode
+from .llm import LLMNode
+from .text_io import TextInputNode
+
+aceteam_node_registry = (
+    NodeRegistry.builder()
+    .register_base_node_class(Node)
+    .register_base_node_class(AceTeamNode)
+    .register_node_class("APICall", APICallNode)
+    .register_node_class("And", AndNode)
+    .register_node_class("CSVReader", CSVReaderNode)
+    .register_node_class("DataTransform", DataTransformNode)
+    .register_node_class("Equal", EqualNode)
+    .register_node_class("GreaterThan", GreaterThanNode)
+    .register_node_class("GreaterThanEqual", GreaterThanEqualNode)
+    .register_node_class("If", IfNode)
+    .register_node_class("IfElse", IfElseNode)
+    .register_node_class("Iteration", ForEachNode)
+    .register_node_class("LessThan", LessThanNode)
+    .register_node_class("LessThanEqual", LessThanEqualNode)
+    .register_node_class("LLM", LLMNode)
+    .register_node_class("Not", NotNode)
+    .register_node_class("NotEqual", NotEqualNode)
+    .register_node_class("Or", OrNode)
+    .register_node_class("TextInput", TextInputNode)
+).build()

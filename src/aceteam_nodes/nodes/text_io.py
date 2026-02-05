@@ -1,16 +1,14 @@
 """Text Input node - simple text source for workflows."""
 
-from collections.abc import Sequence
+from functools import cached_property
 from typing import Literal
 
 from overrides import override
 from pydantic import Field
-from workflow_engine import Context, Data, Params, StringValue
+from workflow_engine import Context, Data, Empty, Params, StringValue
 from workflow_engine.core import NodeTypeInfo as WENodeTypeInfo
 
-from ..field import FieldInfo, FieldType
 from ..node_base import AceTeamNode
-from ..node_info import NodeTypeInfo
 
 
 class TextInputNodeParams(Params):
@@ -25,7 +23,7 @@ class TextInputNodeOutput(Data):
 
 
 class TextInputNode(
-    AceTeamNode[None, TextInputNodeOutput, TextInputNodeParams],
+    AceTeamNode[Empty, TextInputNodeOutput, TextInputNodeParams],
 ):
     """A simple text source node that outputs a configurable text string."""
 
@@ -39,41 +37,12 @@ class TextInputNode(
 
     type: Literal["TextInput"] = "TextInput"
 
-    @classmethod
-    @override
-    def type_info(cls) -> NodeTypeInfo:
-        return NodeTypeInfo(
-            type="TextInput",
-            display_name="Text Input",
-            description="A simple text source.",
-            params=(
-                FieldInfo(
-                    name="text",
-                    display_name="Text",
-                    description="The text content to output",
-                    type=FieldType.LONG_TEXT,
-                    default="",
-                ),
-            ),
-        )
-
-    @property
-    def input_fields_info(self) -> Sequence[FieldInfo]:
-        return ()
-
-    @property
-    def output_fields_info(self) -> Sequence[FieldInfo]:
-        return (
-            FieldInfo(
-                name="output",
-                display_name="Output",
-                description="The text content",
-                type=FieldType.SHORT_TEXT,
-            ),
-        )
+    @cached_property
+    def output_type(self):
+        return TextInputNodeOutput
 
     @override
-    async def run(self, context: Context, input: None) -> TextInputNodeOutput:
+    async def run(self, context: Context, input: Empty) -> TextInputNodeOutput:
         return TextInputNodeOutput(output=self.params.text)
 
 

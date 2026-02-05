@@ -1,6 +1,6 @@
 """Data Transform node - simple data transformation."""
 
-from collections.abc import Sequence
+from functools import cached_property
 from typing import Literal
 
 from overrides import override
@@ -8,9 +8,7 @@ from pydantic import Field
 from workflow_engine import Context, Data, Params, StringValue
 from workflow_engine.core import NodeTypeInfo as WENodeTypeInfo
 
-from ..field import FieldInfo, FieldType
 from ..node_base import AceTeamNode
-from ..node_info import NodeTypeInfo
 
 
 class DataTransformNodeParams(Params):
@@ -21,11 +19,11 @@ class DataTransformNodeParams(Params):
 
 
 class DataTransformNodeInput(Data):
-    input: StringValue
+    input: StringValue = Field(description="The data to transform")
 
 
 class DataTransformNodeOutput(Data):
-    output: StringValue
+    output: StringValue = Field(description="The transformed data")
 
 
 class DataTransformNode(
@@ -43,45 +41,13 @@ class DataTransformNode(
 
     type: Literal["DataTransform"] = "DataTransform"
 
-    @classmethod
-    @override
-    def type_info(cls) -> NodeTypeInfo:
-        return NodeTypeInfo(
-            type="DataTransform",
-            display_name="Transform",
-            description="Processes and transforms data.",
-            params=(
-                FieldInfo(
-                    name="instruction",
-                    display_name="Instruction",
-                    description="Description of the transformation to apply",
-                    type=FieldType.LONG_TEXT,
-                    default="Pass through unchanged",
-                ),
-            ),
-        )
+    @cached_property
+    def input_type(self):
+        return DataTransformNodeInput
 
-    @property
-    def input_fields_info(self) -> Sequence[FieldInfo]:
-        return (
-            FieldInfo(
-                name="input",
-                display_name="Input",
-                description="The data to transform",
-                type=FieldType.LONG_TEXT,
-            ),
-        )
-
-    @property
-    def output_fields_info(self) -> Sequence[FieldInfo]:
-        return (
-            FieldInfo(
-                name="output",
-                display_name="Output",
-                description="The transformed data",
-                type=FieldType.LONG_TEXT,
-            ),
-        )
+    @cached_property
+    def output_type(self):
+        return DataTransformNodeOutput
 
     @override
     async def run(self, context: Context, input: DataTransformNodeInput) -> DataTransformNodeOutput:
