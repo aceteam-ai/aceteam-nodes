@@ -1,0 +1,47 @@
+{
+  "nodes": [
+    {
+      "id": "dispatch",
+      "type": "APICall",
+      "version": "0.4.0",
+      "params": {
+        "url": "http://localhost:8000/fabric/dispatch",
+        "method": "POST",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body_template": "{\"job_type\": \"SHELL_COMMAND\", \"payload\": {\"command\": \"echo hello from citadel\"}, \"timeout\": 15.0, \"queue\": \"jobs:v1:cpu-general\"}",
+        "timeout": 30.0
+      }
+    }
+  ],
+  "edges": [],
+  "input_edges": [],
+  "output_edges": [
+    {
+      "source_id": "dispatch",
+      "source_key": "response",
+      "output_key": "result"
+    },
+    {
+      "source_id": "dispatch",
+      "source_key": "status_code",
+      "output_key": "status_code"
+    }
+  ],
+  "inputs": [],
+  "outputs": [
+    {
+      "name": "result",
+      "type": "json",
+      "display_name": "Result",
+      "description": "Dispatch response from platform (job_id, status, result)"
+    },
+    {
+      "name": "status_code",
+      "type": "number",
+      "display_name": "Status Code",
+      "description": "HTTP status code"
+    }
+  ]
+}
