@@ -5,11 +5,9 @@ from typing import Literal
 
 from overrides import override
 from pydantic import Field
-from workflow_engine import Context, Data, Params, StringValue
-from workflow_engine.core import NodeTypeInfo as WENodeTypeInfo
+from workflow_engine import Context, Data, Node, NodeTypeInfo, Params, StringValue
 
 from ..context import CLIContext
-from ..node_base import AceTeamNode
 
 
 class LLMNodeParams(Params):
@@ -32,11 +30,11 @@ class LLMNodeOutput(Data):
 
 
 class LLMNode(
-    AceTeamNode[LLMNodeInput, LLMNodeOutput, LLMNodeParams],
+    Node[LLMNodeInput, LLMNodeOutput, LLMNodeParams],
 ):
     """AI text generation node. Uses litellm for multi-provider support."""
 
-    TYPE_INFO = WENodeTypeInfo.from_parameter_type(
+    TYPE_INFO = NodeTypeInfo.from_parameter_type(
         name="LLM",
         display_name="LLM",
         description="Send a text prompt to an AI model and get a response.",

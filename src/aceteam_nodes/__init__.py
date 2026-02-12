@@ -2,7 +2,8 @@
 
 __version__ = "0.2.0"
 
-from .node_base import AceTeamNode, aceteam_nodes
+
+from .nodes import aceteam_node_registry
 
 
 def __getattr__(name: str):
@@ -19,6 +20,5 @@ def __getattr__(name: str):
 
 
 __all__ = [
-    "AceTeamNode",
-    "aceteam_nodes",
+    "aceteam_node_registry",
 ]

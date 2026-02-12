@@ -5,10 +5,7 @@ from typing import Literal
 
 from overrides import override
 from pydantic import Field
-from workflow_engine import Context, Data, Params, StringValue
-from workflow_engine.core import NodeTypeInfo as WENodeTypeInfo
-
-from ..node_base import AceTeamNode
+from workflow_engine import Context, Data, Node, NodeTypeInfo, Params, StringValue
 
 
 class DataTransformNodeParams(Params):
@@ -27,11 +24,11 @@ class DataTransformNodeOutput(Data):
 
 
 class DataTransformNode(
-    AceTeamNode[DataTransformNodeInput, DataTransformNodeOutput, DataTransformNodeParams],
+    Node[DataTransformNodeInput, DataTransformNodeOutput, DataTransformNodeParams],
 ):
     """Processes and transforms input data based on configured instructions."""
 
-    TYPE_INFO = WENodeTypeInfo.from_parameter_type(
+    TYPE_INFO = NodeTypeInfo.from_parameter_type(
         name="DataTransform",
         display_name="Transform",
         description="Processes and transforms data.",
