@@ -64,6 +64,14 @@ for cmd in gh uv git; do
     fi
 done
 
+# Load environment variables from .env if it exists
+if [ -f .env ]; then
+    echo -e "${BLUE}Loading environment from .env${NC}"
+    set -a  # automatically export all variables
+    source .env
+    set +a
+fi
+
 if [[ "$DRY_RUN" != true && -z "${UV_PUBLISH_TOKEN:-}" ]]; then
     echo -e "${YELLOW}Warning: UV_PUBLISH_TOKEN is not set. Publishing to PyPI will fail.${NC}"
 fi
