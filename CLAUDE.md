@@ -12,7 +12,7 @@ The package uses `litellm` for multi-provider LLM support (OpenAI, Anthropic, Go
 
 ```bash
 # Setup
-uv sync --extra dev               # Install all dependencies
+uv sync                           # Install project + dev group (pyright, pytest, ruff, litellm)
 
 # Run
 python -m aceteam_nodes.cli run examples/hello-llm.json --input '{"prompt":"Hello"}'
@@ -84,6 +84,7 @@ src/aceteam_nodes/
 ### Relationship to ace CLI
 
 The `ace` TypeScript CLI is the user-facing tool. It handles:
+
 - Python environment detection and `aceteam-nodes` installation
 - Config file management (`~/.ace/config.yaml`)
 - Input parsing and output formatting
