@@ -43,7 +43,7 @@ export ANTHROPIC_API_KEY=sk-ant-...
 
 ## How It Works
 
-```
+```text
 Workflow JSON ──> AceTeamWorkflow (load + validate)
                        │
                        ▼
@@ -65,16 +65,14 @@ Workflow JSON ──> AceTeamWorkflow (load + validate)
 
 ## Available Nodes
 
-| Node | Description |
-|------|-------------|
-| LLM | AI text generation via litellm (100+ providers) |
-| APICall | HTTP requests with Jinja templating |
-| TextInput | Static text source |
-| DataTransform | Data transformation |
-| CSVReader | CSV data source |
-| If / IfElse | Conditional branching |
-| ForEach | Loop iteration |
-| Equal, NotEqual, GreaterThan, LessThan, And, Or, Not | Comparison/logic operators |
+| Node                                                 | Description                                     |
+| ---------------------------------------------------- | ----------------------------------------------- |
+| LLM                                                  | AI text generation via litellm (100+ providers) |
+| APICall                                              | HTTP requests with Jinja templating             |
+| TextInput                                            | Static text source                              |
+| DataTransform                                        | Data transformation                             |
+| CSVReader                                            | CSV data source                                 |
+| Equal, NotEqual, GreaterThan, LessThan, And, Or, Not | Comparison/logic operators                      |
 
 ## Development
 
