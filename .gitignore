@@ -12,3 +12,9 @@ build/
 .pytest_cache/
 .pyright/
 .direnv/
+
+# Environment files - NEVER commit these!
+.env
+.env.*
+.envrc
+!.env.example
