@@ -4,9 +4,7 @@ from functools import cached_property
 from typing import Literal
 
 from overrides import override
-from workflow_engine import BooleanValue, Context, Data, FloatValue, NodeTypeInfo, Params
-
-from ..node_base import AceTeamNode
+from workflow_engine import BooleanValue, Context, Data, FloatValue, Node, NodeTypeInfo, Params
 
 
 class ComparisonParams(Params):
@@ -42,7 +40,7 @@ class LogicalOutput(Data):
 # --- Comparison Nodes ---
 
 
-class EqualNode(AceTeamNode[ComparisonInput, ComparisonOutput, ComparisonParams]):
+class EqualNode(Node[ComparisonInput, ComparisonOutput, ComparisonParams]):
     """Checks if a == b."""
 
     TYPE_INFO = NodeTypeInfo.from_parameter_type(
@@ -67,7 +65,7 @@ class EqualNode(AceTeamNode[ComparisonInput, ComparisonOutput, ComparisonParams]
         return ComparisonOutput(result=BooleanValue(input.a.root == input.b.root))
 
 
-class NotEqualNode(AceTeamNode[ComparisonInput, ComparisonOutput, ComparisonParams]):
+class NotEqualNode(Node[ComparisonInput, ComparisonOutput, ComparisonParams]):
     """Checks if a != b."""
 
     TYPE_INFO = NodeTypeInfo.from_parameter_type(
@@ -92,7 +90,7 @@ class NotEqualNode(AceTeamNode[ComparisonInput, ComparisonOutput, ComparisonPara
         return ComparisonOutput(result=BooleanValue(input.a.root != input.b.root))
 
 
-class GreaterThanNode(AceTeamNode[ComparisonInput, ComparisonOutput, ComparisonParams]):
+class GreaterThanNode(Node[ComparisonInput, ComparisonOutput, ComparisonParams]):
     """Checks if a > b."""
 
     TYPE_INFO = NodeTypeInfo.from_parameter_type(
@@ -117,7 +115,7 @@ class GreaterThanNode(AceTeamNode[ComparisonInput, ComparisonOutput, ComparisonP
         return ComparisonOutput(result=BooleanValue(input.a.root > input.b.root))
 
 
-class GreaterThanEqualNode(AceTeamNode[ComparisonInput, ComparisonOutput, ComparisonParams]):
+class GreaterThanEqualNode(Node[ComparisonInput, ComparisonOutput, ComparisonParams]):
     """Checks if a >= b."""
 
     TYPE_INFO = NodeTypeInfo.from_parameter_type(
@@ -142,7 +140,7 @@ class GreaterThanEqualNode(AceTeamNode[ComparisonInput, ComparisonOutput, Compar
         return ComparisonOutput(result=BooleanValue(input.a.root >= input.b.root))
 
 
-class LessThanNode(AceTeamNode[ComparisonInput, ComparisonOutput, ComparisonParams]):
+class LessThanNode(Node[ComparisonInput, ComparisonOutput, ComparisonParams]):
     """Checks if a < b."""
 
     TYPE_INFO = NodeTypeInfo.from_parameter_type(
@@ -167,7 +165,7 @@ class LessThanNode(AceTeamNode[ComparisonInput, ComparisonOutput, ComparisonPara
         return ComparisonOutput(result=BooleanValue(input.a.root < input.b.root))
 
 
-class LessThanEqualNode(AceTeamNode[ComparisonInput, ComparisonOutput, ComparisonParams]):
+class LessThanEqualNode(Node[ComparisonInput, ComparisonOutput, ComparisonParams]):
     """Checks if a <= b."""
 
     TYPE_INFO = NodeTypeInfo.from_parameter_type(
@@ -195,7 +193,7 @@ class LessThanEqualNode(AceTeamNode[ComparisonInput, ComparisonOutput, Compariso
 # --- Logical Nodes ---
 
 
-class AndNode(AceTeamNode[LogicalInput, LogicalOutput, LogicalParams]):
+class AndNode(Node[LogicalInput, LogicalOutput, LogicalParams]):
     """Logical AND (a && b)."""
 
     TYPE_INFO = NodeTypeInfo.from_parameter_type(
@@ -220,7 +218,7 @@ class AndNode(AceTeamNode[LogicalInput, LogicalOutput, LogicalParams]):
         return LogicalOutput(result=BooleanValue(input.a.root and input.b.root))
 
 
-class OrNode(AceTeamNode[LogicalInput, LogicalOutput, LogicalParams]):
+class OrNode(Node[LogicalInput, LogicalOutput, LogicalParams]):
     """Logical OR (a || b)."""
 
     TYPE_INFO = NodeTypeInfo.from_parameter_type(
@@ -245,7 +243,7 @@ class OrNode(AceTeamNode[LogicalInput, LogicalOutput, LogicalParams]):
         return LogicalOutput(result=BooleanValue(input.a.root or input.b.root))
 
 
-class NotNode(AceTeamNode[NotInput, LogicalOutput, LogicalParams]):
+class NotNode(Node[NotInput, LogicalOutput, LogicalParams]):
     """Logical NOT (!a)."""
 
     TYPE_INFO = NodeTypeInfo.from_parameter_type(

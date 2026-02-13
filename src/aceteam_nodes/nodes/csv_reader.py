@@ -5,10 +5,7 @@ from typing import Literal
 
 from overrides import override
 from pydantic import Field
-from workflow_engine import Context, Data, Empty, Params, StringValue
-from workflow_engine.core import NodeTypeInfo as WENodeTypeInfo
-
-from ..node_base import AceTeamNode
+from workflow_engine import Context, Data, Empty, Node, NodeTypeInfo, Params, StringValue
 
 
 class CSVReaderNodeParams(Params):
@@ -25,11 +22,11 @@ class CSVReaderNodeOutput(Data):
 
 
 class CSVReaderNode(
-    AceTeamNode[Empty, CSVReaderNodeOutput, CSVReaderNodeParams],
+    Node[Empty, CSVReaderNodeOutput, CSVReaderNodeParams],
 ):
     """Reads CSV data and outputs it as text."""
 
-    TYPE_INFO = WENodeTypeInfo.from_parameter_type(
+    TYPE_INFO = NodeTypeInfo.from_parameter_type(
         name="CSVReader",
         display_name="CSV Reader",
         description="Reads CSV data and outputs it as text.",

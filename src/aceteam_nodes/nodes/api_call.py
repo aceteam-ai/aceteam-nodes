@@ -14,6 +14,8 @@ from workflow_engine import (
     FloatValue,
     IntegerValue,
     JSONValue,
+    Node,
+    NodeTypeInfo,
     Params,
     StringMapValue,
     StringValue,
@@ -21,11 +23,9 @@ from workflow_engine import (
     Value,
     ValueSchemaValue,
 )
-from workflow_engine.core import NodeTypeInfo as WENodeTypeInfo
 from workflow_engine.core.values.schema import DataValueSchema
 from workflow_engine.files import JSONFileValue, JSONLinesFileValue, TextFileValue
 
-from ..node_base import AceTeamNode
 from ..utils import format_jinja
 
 logger = logging.getLogger(__name__)
@@ -59,7 +59,7 @@ class APICallOutput(Data):
 
 
 class APICallNode(
-    AceTeamNode[
+    Node[
         Data,
         APICallOutput,
         APICallParams,
@@ -67,7 +67,7 @@ class APICallNode(
 ):
     """Node that makes HTTP API calls with Jinja templating for URL and request body."""
 
-    TYPE_INFO = WENodeTypeInfo.from_parameter_type(
+    TYPE_INFO = NodeTypeInfo.from_parameter_type(
         name="APICall",
         display_name="API Call",
         description="Makes HTTP API calls with Jinja templating for URL and request body.",

@@ -12,9 +12,9 @@ Or call register_all_nodes() to trigger auto-registration of all nodes
 (e.g., before deserializing a workflow file).
 """
 
-from workflow_engine import Node, NodeRegistry
+from workflow_engine import InputNode, Node, NodeRegistry, OutputNode
+from workflow_engine.nodes import ForEachNode, IfElseNode, IfNode
 
-from ..node_base import AceTeamNode
 from .api_call import APICallNode
 from .comparison import (
     AndNode,
@@ -27,17 +27,21 @@ from .comparison import (
     NotNode,
     OrNode,
 )
-from .conditional import IfElseNode, IfNode
 from .csv_reader import CSVReaderNode
 from .data_transform import DataTransformNode
-from .iteration import ForEachNode
 from .llm import LLMNode
 from .text_io import TextInputNode
 
 aceteam_node_registry = (
     NodeRegistry.builder()
+    # system nodes
     .register_base_node_class(Node)
-    .register_base_node_class(AceTeamNode)
+    .register_node_class("Input", InputNode)
+    .register_node_class("Output", OutputNode)
+    .register_node_class("ForEach", ForEachNode)
+    .register_node_class("If", IfNode)
+    .register_node_class("IfElse", IfElseNode)
+    # our nodes
     .register_node_class("APICall", APICallNode)
     .register_node_class("And", AndNode)
     .register_node_class("CSVReader", CSVReaderNode)
@@ -45,9 +49,6 @@ aceteam_node_registry = (
     .register_node_class("Equal", EqualNode)
     .register_node_class("GreaterThan", GreaterThanNode)
     .register_node_class("GreaterThanEqual", GreaterThanEqualNode)
-    .register_node_class("If", IfNode)
-    .register_node_class("IfElse", IfElseNode)
-    .register_node_class("Iteration", ForEachNode)
     .register_node_class("LessThan", LessThanNode)
     .register_node_class("LessThanEqual", LessThanEqualNode)
     .register_node_class("LLM", LLMNode)

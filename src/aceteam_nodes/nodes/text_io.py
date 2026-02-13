@@ -5,10 +5,7 @@ from typing import Literal
 
 from overrides import override
 from pydantic import Field
-from workflow_engine import Context, Data, Empty, Params, StringValue
-from workflow_engine.core import NodeTypeInfo as WENodeTypeInfo
-
-from ..node_base import AceTeamNode
+from workflow_engine import Context, Data, Empty, Node, NodeTypeInfo, Params, StringValue
 
 
 class TextInputNodeParams(Params):
@@ -23,11 +20,11 @@ class TextInputNodeOutput(Data):
 
 
 class TextInputNode(
-    AceTeamNode[Empty, TextInputNodeOutput, TextInputNodeParams],
+    Node[Empty, TextInputNodeOutput, TextInputNodeParams],
 ):
     """A simple text source node that outputs a configurable text string."""
 
-    TYPE_INFO = WENodeTypeInfo.from_parameter_type(
+    TYPE_INFO = NodeTypeInfo.from_parameter_type(
         name="TextInput",
         display_name="Text Input",
         description="A simple text source.",

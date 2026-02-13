@@ -12,7 +12,7 @@ import json
 import sys
 from typing import Any
 
-from aceteam_nodes import aceteam_nodes
+from workflow_engine.core.node import ImmutableNodeRegistry
 
 
 def parse_args() -> argparse.Namespace:
@@ -92,8 +92,9 @@ def cmd_list_nodes() -> dict[str, Any]:
     # Import nodes to trigger registration
     from .nodes import aceteam_node_registry  # noqa: F401
 
+    assert isinstance(aceteam_node_registry, ImmutableNodeRegistry)
     nodes = []
-    for node_cls in aceteam_nodes:
+    for node_cls in aceteam_node_registry._node_classes.values():
         try:
             info = node_cls.TYPE_INFO
             nodes.append(
