@@ -41,7 +41,7 @@ uv build                           # Creates sdist + wheel in dist/
 
 ### Package Structure
 
-```
+```text
 src/aceteam_nodes/
 ├── __init__.py          # Public API + __version__
 ├── __main__.py          # python -m aceteam_nodes entry point
