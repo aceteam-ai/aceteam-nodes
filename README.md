@@ -69,9 +69,6 @@ Workflow JSON ──> AceTeamWorkflow (load + validate)
 | ---------------------------------------------------- | ----------------------------------------------- |
 | LLM                                                  | AI text generation via litellm (100+ providers) |
 | APICall                                              | HTTP requests with Jinja templating             |
-| TextInput                                            | Static text source                              |
-| DataTransform                                        | Data transformation                             |
-| CSVReader                                            | CSV data source                                 |
 | Equal, NotEqual, GreaterThan, LessThan, And, Or, Not | Comparison/logic operators                      |
 
 ## Development
