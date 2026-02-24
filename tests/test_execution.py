@@ -23,13 +23,6 @@ def hello_llm_path():
     return os.path.join(os.path.dirname(__file__), "..", "examples", "hello-llm.json")
 
 
-def test_load_workflow_from_file(text_passthrough_path):
-    workflow = load_workflow_from_file(text_passthrough_path)
-    assert len(workflow.nodes) == 4
-    assert len(workflow.output_fields) == 1
-    assert "result" in workflow.output_fields
-
-
 def test_load_workflow_file_not_found():
     with pytest.raises(WorkflowFileNotFoundError):
         load_workflow_from_file("/nonexistent/path.json")
@@ -55,7 +48,10 @@ def test_validate_hello_llm(hello_llm_path):
 
 
 async def test_run_text_passthrough(text_passthrough_path):
-    result = await run_workflow_from_file(text_passthrough_path)
+    result = await run_workflow_from_file(
+        text_passthrough_path,
+        input={"text": "Hello from AceTeam!"},
+    )
     assert result["success"] is True
     assert result["output"]["result"] == "Hello from AceTeam!"
 

@@ -12,21 +12,29 @@ from ..context import CLIContext
 
 class LLMNodeParams(Params):
     model: StringValue = Field(
+        title="Model",
         default=StringValue("gpt-4o-mini"),
         description="The AI model to use for text generation",
     )
     system_prompt: StringValue = Field(
+        title="System Prompt",
         default=StringValue("You are a helpful assistant."),
         description="System prompt to guide the AI's behavior",
     )
 
 
 class LLMNodeInput(Data):
-    prompt: StringValue
+    prompt: StringValue = Field(
+        title="Prompt",
+        description="The prompt to send to the LLM.",
+    )
 
 
 class LLMNodeOutput(Data):
-    response: StringValue
+    response: StringValue = Field(
+        title="Response",
+        description="The response from the LLM.",
+    )
 
 
 class LLMNode(

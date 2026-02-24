@@ -6,9 +6,8 @@ from typing import Any
 
 import yaml
 from overrides import override
-from workflow_engine import Node, Workflow, WorkflowErrors
-from workflow_engine.contexts.local import LocalContext
-from workflow_engine.core import DataMapping
+from workflow_engine import DataMapping, Node, Workflow, WorkflowErrors
+from workflow_engine.contexts import LocalContext
 
 
 class CLIContext(LocalContext):

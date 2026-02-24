@@ -12,6 +12,17 @@
       }
     }
   },
+  "inner_nodes": [
+    {
+      "id": "llm",
+      "type": "LLM",
+      "version": "1.0.0",
+      "params": {
+        "model": "gpt-4o-mini",
+        "system_prompt": "You are a helpful assistant. Be concise."
+      }
+    }
+  ],
   "output_node": {
     "id": "output",
     "type": "Output",
@@ -25,17 +36,6 @@
       }
     }
   },
-  "inner_nodes": [
-    {
-      "id": "llm",
-      "type": "LLM",
-      "version": "1.0.0",
-      "params": {
-        "model": "gpt-4o-mini",
-        "system_prompt": "You are a helpful assistant. Be concise."
-      }
-    }
-  ],
   "edges": [
     {
       "source_id": "input",
