@@ -43,25 +43,17 @@ uv build                           # Creates sdist + wheel in dist/
 
 ```text
 src/aceteam_nodes/
-├── __init__.py          # Public API + __version__
-├── __main__.py          # python -m aceteam_nodes entry point
-├── cli.py               # CLI commands (run, validate, list-nodes)
-├── context.py           # CLIContext — runtime config (model, API keys)
-├── execution.py         # Workflow execution engine bridge
-├── field.py             # FieldInfo/FieldType — node port definitions
-├── node_base.py         # AceTeamNode base class + node registry
-├── node_info.py         # NodeTypeInfo — node metadata
-├── utils.py             # Shared utilities
-├── workflow.py          # AceTeamWorkflow — workflow loading/validation
-└── nodes/               # Node type implementations
-    ├── api_call.py      # HTTP requests with Jinja templating
-    ├── comparison.py    # Equal, NotEqual, GreaterThan, LessThan, And, Or, Not
-    ├── conditional.py   # If / IfElse branching
-    ├── csv_reader.py    # CSV data source
-    ├── data_transform.py # Data transformation
-    ├── iteration.py     # ForEach loop
-    ├── llm.py           # AI text generation via litellm
-    └── text_io.py       # TextInput static text source
+├── __init__.py        # Public API + __version__
+├── __main__.py        # python -m aceteam_nodes entry point
+├── cli.py             # CLI commands (run, validate, list-nodes)
+├── context.py         # CLIContext — runtime config (model, API keys)
+├── execution.py       # Workflow execution engine bridge
+├── utils.py           # Shared utilities
+└── nodes/             # Node type implementations
+    ├── __init__.py    # Node registration into aceteam_node_registry
+    ├── api_call.py    # HTTP requests with Jinja templating
+    ├── comparison.py  # Equal, NotEqual, GreaterThan, LessThan, And, Or, Not
+    └── llm.py         # AI text generation via litellm
 ```
 
 ### Key Dependencies
@@ -75,11 +67,10 @@ src/aceteam_nodes/
 
 ### How It Works
 
-1. The CLI loads a workflow JSON file and validates it against the schema
-2. `AceTeamWorkflow` resolves node references and builds the execution graph
-3. `aceteam-workflow-engine` executes nodes in topological order
-4. Each node type (LLM, APICall, etc.) extends `AceTeamNode` with a `run()` method
-5. `CLIContext` provides runtime configuration (model, API keys, verbosity)
+- The CLI loads a workflow JSON file and validates it against the schema
+- Each node type (LLM, APICall, etc.) extends `Node` with a `run()` method
+- `aceteam-workflow-engine`'s `WorkflowEngine` resolves node references, builds the execution graph, and executes nodes in topological order
+- `CLIContext` provides runtime configuration (model, API keys, verbosity)
 
 ### Relationship to ace CLI
 
