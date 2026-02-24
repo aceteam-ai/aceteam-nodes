@@ -11,6 +11,7 @@ from pydantic import Field
 from workflow_engine import (
     Context,
     Data,
+    FieldSchemaMappingValue,
     FloatValue,
     IntegerValue,
     JSONValue,
@@ -21,9 +22,7 @@ from workflow_engine import (
     StringValue,
     UserException,
     Value,
-    ValueSchemaValue,
 )
-from workflow_engine.core.values.schema import DataValueSchema
 from workflow_engine.files import JSONFileValue, JSONLinesFileValue, TextFileValue
 
 from ..utils import format_jinja
@@ -38,14 +37,14 @@ class APICallParams(Params):
     )
     headers: StringMapValue[StringValue] = Field(
         description="HTTP headers to include in the request.",
-        default_factory=lambda: StringMapValue[StringValue]({}),
+        default=StringMapValue({}),
     )
     body_template: StringValue = Field(
         description="The request body template.", default_factory=lambda: StringValue("")
     )
-    parameters: StringMapValue[ValueSchemaValue] = Field(
+    parameters: FieldSchemaMappingValue = Field(
         description="Parameters used in URL and body templates.",
-        default_factory=lambda: StringMapValue[ValueSchemaValue]({}),
+        default=FieldSchemaMappingValue({}),
     )
     timeout: FloatValue = Field(
         description="Request timeout in seconds.", default_factory=lambda: FloatValue(30.0)
@@ -83,12 +82,8 @@ class APICallNode(
         return content_type is not None and "application/json" in content_type
 
     @cached_property
-    def input_schema(self) -> DataValueSchema:
-        return DataValueSchema(
-            type="object",
-            title="APICallInput",
-            properties={key: value.root for key, value in self.params.parameters.items()},
-        )
+    def input_schema(self):
+        return self.params.parameters.to_data_schema("APICallInput")
 
     @cached_property
     def input_type(self):
