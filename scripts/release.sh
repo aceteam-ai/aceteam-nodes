@@ -147,7 +147,7 @@ if [[ "$DRY_RUN" == true ]]; then
     echo -e "${BLUE}[DRY-RUN] Would commit, tag $VERSION, and push${NC}"
 else
     # Commit version bump if needed
-    git add pyproject.toml src/aceteam_nodes/__init__.py
+    git add pyproject.toml src/aceteam_nodes/__init__.py uv.lock
     if git diff --cached --quiet; then
         echo "No version changes to commit"
     else
