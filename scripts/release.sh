@@ -131,9 +131,11 @@ fi
 echo ""
 echo -e "${GREEN}Step 2/6: Build sdist + wheel${NC}"
 if [[ "$DRY_RUN" == true ]]; then
+    echo -e "${BLUE}[DRY-RUN] Would run: uv sync${NC}"
     echo -e "${BLUE}[DRY-RUN] Would run: uv build${NC}"
 else
     rm -rf dist/
+    uv sync
     uv build
     echo "Done"
 fi
