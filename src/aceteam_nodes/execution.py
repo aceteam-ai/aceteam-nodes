@@ -12,7 +12,7 @@ from workflow_engine.execution import TopologicalExecutionAlgorithm
 
 from .context import CLIContext
 from .nodes import aceteam_node_registry
-from .utils import dump_data_mapping
+from .utils import build_data_mapping, dump_data_mapping
 
 logger = logging.getLogger(__name__)
 
@@ -63,10 +63,13 @@ async def run_workflow_from_file(
         config_path=config_path,
         verbose=verbose,
     )
+    if input is None:
+        input = {}
+    input_mapping = build_data_mapping(input, workflow.input_fields)
     errors, output_values = await engine.execute(
         context=context,
         workflow=workflow,
-        input=input or {},
+        input=input_mapping,
     )
 
     output = dump_data_mapping(output_values)

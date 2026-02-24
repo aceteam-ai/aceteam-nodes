@@ -31,30 +31,50 @@ logger = logging.getLogger(__name__)
 
 
 class APICallParams(Params):
-    url: StringValue = Field(description="The API endpoint URL.")
+    url: StringValue = Field(
+        title="URL",
+        description="The API endpoint URL.",
+    )
     method: StringValue = Field(
-        description="The HTTP method to use.", default_factory=lambda: StringValue("GET")
+        title="Method",
+        description="The HTTP method to use.",
+        default=StringValue("GET"),
     )
     headers: StringMapValue[StringValue] = Field(
+        title="Headers",
         description="HTTP headers to include in the request.",
         default=StringMapValue({}),
     )
     body_template: StringValue = Field(
-        description="The request body template.", default_factory=lambda: StringValue("")
+        title="Body Template",
+        description="The request body template.",
+        default=StringValue(""),
     )
     parameters: FieldSchemaMappingValue = Field(
+        title="Parameters",
         description="Parameters used in URL and body templates.",
         default=FieldSchemaMappingValue({}),
     )
     timeout: FloatValue = Field(
-        description="Request timeout in seconds.", default_factory=lambda: FloatValue(30.0)
+        title="Timeout",
+        description="Request timeout in seconds.",
+        default=FloatValue(30.0),
     )
 
 
 class APICallOutput(Data):
-    status_code: IntegerValue
-    response: JSONValue
-    headers: StringMapValue[StringValue]
+    status_code: IntegerValue = Field(
+        title="Status Code",
+        description="The HTTP status code of the response.",
+    )
+    response: JSONValue = Field(
+        title="Response",
+        description="The response data.",
+    )
+    headers: StringMapValue[StringValue] = Field(
+        title="Headers",
+        description="HTTP headers of the response.",
+    )
 
 
 class APICallNode(

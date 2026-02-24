@@ -4,7 +4,17 @@ from functools import cached_property
 from typing import Literal
 
 from overrides import override
-from workflow_engine import BooleanValue, Context, Data, FloatValue, Node, NodeTypeInfo, Params
+from pydantic import Field
+from workflow_engine import (
+    BooleanValue,
+    Context,
+    Data,
+    Empty,
+    FloatValue,
+    Node,
+    NodeTypeInfo,
+    Params,
+)
 
 
 class ComparisonParams(Params):
@@ -12,16 +22,21 @@ class ComparisonParams(Params):
 
 
 class ComparisonInput(Data):
-    a: FloatValue
-    b: FloatValue
+    a: FloatValue = Field(
+        title="A",
+        description="The left value in the comparison.",
+    )
+    b: FloatValue = Field(
+        title="B",
+        description="The right value in the comparison.",
+    )
 
 
 class ComparisonOutput(Data):
-    result: BooleanValue
-
-
-class LogicalParams(Params):
-    pass
+    result: BooleanValue = Field(
+        title="Result",
+        description="The result of the comparison.",
+    )
 
 
 class LogicalInput(Data):
@@ -41,13 +56,11 @@ class LogicalOutput(Data):
 
 
 class EqualNode(Node[ComparisonInput, ComparisonOutput, ComparisonParams]):
-    """Checks if a == b."""
-
     TYPE_INFO = NodeTypeInfo.from_parameter_type(
         name="Equal",
         display_name="Equal",
-        description="Checks if two numbers are equal (a == b).",
-        version="1.0.0",
+        description="Outputs true if the two input values are equal.",
+        version="1.0.1",
         parameter_type=ComparisonParams,
     )
     type: Literal["Equal"] = "Equal"
@@ -66,13 +79,11 @@ class EqualNode(Node[ComparisonInput, ComparisonOutput, ComparisonParams]):
 
 
 class NotEqualNode(Node[ComparisonInput, ComparisonOutput, ComparisonParams]):
-    """Checks if a != b."""
-
     TYPE_INFO = NodeTypeInfo.from_parameter_type(
         name="NotEqual",
         display_name="Not Equal",
-        description="Checks if two numbers are not equal (a != b).",
-        version="1.0.0",
+        description="Outputs true if the two input values are not equal.",
+        version="1.0.1",
         parameter_type=ComparisonParams,
     )
     type: Literal["NotEqual"] = "NotEqual"
@@ -91,13 +102,11 @@ class NotEqualNode(Node[ComparisonInput, ComparisonOutput, ComparisonParams]):
 
 
 class GreaterThanNode(Node[ComparisonInput, ComparisonOutput, ComparisonParams]):
-    """Checks if a > b."""
-
     TYPE_INFO = NodeTypeInfo.from_parameter_type(
         name="GreaterThan",
         display_name="Greater Than",
-        description="Checks if a > b.",
-        version="1.0.0",
+        description="Outputs true if the first value is greater than the second.",
+        version="1.0.1",
         parameter_type=ComparisonParams,
     )
     type: Literal["GreaterThan"] = "GreaterThan"
@@ -116,13 +125,11 @@ class GreaterThanNode(Node[ComparisonInput, ComparisonOutput, ComparisonParams])
 
 
 class GreaterThanEqualNode(Node[ComparisonInput, ComparisonOutput, ComparisonParams]):
-    """Checks if a >= b."""
-
     TYPE_INFO = NodeTypeInfo.from_parameter_type(
         name="GreaterThanEqual",
         display_name="Greater Than or Equal",
-        description="Checks if a >= b.",
-        version="1.0.0",
+        description="Outputs true if the first value is greater than or equal to the second.",
+        version="1.0.1",
         parameter_type=ComparisonParams,
     )
     type: Literal["GreaterThanEqual"] = "GreaterThanEqual"
@@ -141,13 +148,11 @@ class GreaterThanEqualNode(Node[ComparisonInput, ComparisonOutput, ComparisonPar
 
 
 class LessThanNode(Node[ComparisonInput, ComparisonOutput, ComparisonParams]):
-    """Checks if a < b."""
-
     TYPE_INFO = NodeTypeInfo.from_parameter_type(
         name="LessThan",
         display_name="Less Than",
-        description="Checks if a < b.",
-        version="1.0.0",
+        description="Outputs true if the first value is less than the second.",
+        version="1.0.1",
         parameter_type=ComparisonParams,
     )
     type: Literal["LessThan"] = "LessThan"
@@ -166,13 +171,11 @@ class LessThanNode(Node[ComparisonInput, ComparisonOutput, ComparisonParams]):
 
 
 class LessThanEqualNode(Node[ComparisonInput, ComparisonOutput, ComparisonParams]):
-    """Checks if a <= b."""
-
     TYPE_INFO = NodeTypeInfo.from_parameter_type(
         name="LessThanEqual",
         display_name="Less Than or Equal",
-        description="Checks if a <= b.",
-        version="1.0.0",
+        description="Outputs true if the first value is less than or equal to the second.",
+        version="1.0.1",
         parameter_type=ComparisonParams,
     )
     type: Literal["LessThanEqual"] = "LessThanEqual"
@@ -193,15 +196,13 @@ class LessThanEqualNode(Node[ComparisonInput, ComparisonOutput, ComparisonParams
 # --- Logical Nodes ---
 
 
-class AndNode(Node[LogicalInput, LogicalOutput, LogicalParams]):
-    """Logical AND (a && b)."""
-
+class AndNode(Node[LogicalInput, LogicalOutput, Empty]):
     TYPE_INFO = NodeTypeInfo.from_parameter_type(
         name="And",
         display_name="Logical AND",
-        description="Logical AND (a && b).",
-        version="1.0.0",
-        parameter_type=LogicalParams,
+        description="Outputs true only when all inputs are true.",
+        version="1.0.1",
+        parameter_type=Empty,
     )
     type: Literal["And"] = "And"
 
@@ -214,19 +215,21 @@ class AndNode(Node[LogicalInput, LogicalOutput, LogicalParams]):
         return LogicalOutput
 
     @override
-    async def run(self, context: Context, input: LogicalInput) -> LogicalOutput:
+    async def run(
+        self,
+        context: Context,
+        input: LogicalInput,
+    ) -> LogicalOutput:
         return LogicalOutput(result=BooleanValue(input.a.root and input.b.root))
 
 
-class OrNode(Node[LogicalInput, LogicalOutput, LogicalParams]):
-    """Logical OR (a || b)."""
-
+class OrNode(Node[LogicalInput, LogicalOutput, Empty]):
     TYPE_INFO = NodeTypeInfo.from_parameter_type(
         name="Or",
         display_name="Logical OR",
-        description="Logical OR (a || b).",
-        version="1.0.0",
-        parameter_type=LogicalParams,
+        description="Outputs true when at least one input is true.",
+        version="1.0.1",
+        parameter_type=Empty,
     )
     type: Literal["Or"] = "Or"
 
@@ -239,19 +242,21 @@ class OrNode(Node[LogicalInput, LogicalOutput, LogicalParams]):
         return LogicalOutput
 
     @override
-    async def run(self, context: Context, input: LogicalInput) -> LogicalOutput:
+    async def run(
+        self,
+        context: Context,
+        input: LogicalInput,
+    ) -> LogicalOutput:
         return LogicalOutput(result=BooleanValue(input.a.root or input.b.root))
 
 
-class NotNode(Node[NotInput, LogicalOutput, LogicalParams]):
-    """Logical NOT (!a)."""
-
+class NotNode(Node[NotInput, LogicalOutput, Empty]):
     TYPE_INFO = NodeTypeInfo.from_parameter_type(
         name="Not",
         display_name="Logical NOT",
-        description="Logical NOT (!a).",
-        version="1.0.0",
-        parameter_type=LogicalParams,
+        description="Returns the opposite of the input value.",
+        version="1.0.1",
+        parameter_type=Empty,
     )
     type: Literal["Not"] = "Not"
 
@@ -264,7 +269,11 @@ class NotNode(Node[NotInput, LogicalOutput, LogicalParams]):
         return LogicalOutput
 
     @override
-    async def run(self, context: Context, input: NotInput) -> LogicalOutput:
+    async def run(
+        self,
+        context: Context,
+        input: NotInput,
+    ) -> LogicalOutput:
         return LogicalOutput(result=BooleanValue(not input.a.root))
 
 

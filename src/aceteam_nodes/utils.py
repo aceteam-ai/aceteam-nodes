@@ -5,7 +5,7 @@ from collections.abc import Mapping
 from typing import Any
 
 from jinja2 import BaseLoader, Environment, select_autoescape
-from workflow_engine import DataMapping
+from workflow_engine import DataMapping, ValueType
 
 
 def format_string(
@@ -51,6 +51,19 @@ def format_jinja(
 
     template = env.from_string(template_string)
     return template.render(**variables)
+
+
+def build_data_mapping(
+    input: Mapping[str, Any],
+    fields: Mapping[str, tuple[ValueType, bool]],
+) -> DataMapping:
+    mapping: DataMapping = {}
+    for name, (value_type, required) in fields.items():
+        value = input.get(name)
+        if value is None and required:
+            raise ValueError(f"Input field {name} is required")
+        mapping[name] = value_type.model_validate(value)
+    return mapping
 
 
 def dump_data_mapping(mapping: DataMapping) -> Mapping[str, Any]:

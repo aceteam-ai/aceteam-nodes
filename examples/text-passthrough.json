@@ -4,27 +4,15 @@
     "type": "Input",
     "version": "1.0.0",
     "params": {
-      "fields": {}
+      "fields": {
+        "text": {
+          "type": "string",
+          "description": "The text to pass through"
+        }
+      }
     }
   },
-  "inner_nodes": [
-    {
-      "id": "text_input",
-      "type": "TextInput",
-      "version": "1.0.0",
-      "params": {
-        "text": "Hello from AceTeam!"
-      }
-    },
-    {
-      "id": "transform",
-      "type": "DataTransform",
-      "version": "1.0.0",
-      "params": {
-        "instruction": "Pass through unchanged"
-      }
-    }
-  ],
+  "inner_nodes": [],
   "output_node": {
     "id": "output",
     "type": "Output",
@@ -40,14 +28,8 @@
   },
   "edges": [
     {
-      "source_id": "text_input",
-      "source_key": "output",
-      "target_id": "transform",
-      "target_key": "input"
-    },
-    {
-      "source_id": "transform",
-      "source_key": "output",
+      "source_id": "input",
+      "source_key": "text",
       "target_id": "output",
       "target_key": "result"
     }
