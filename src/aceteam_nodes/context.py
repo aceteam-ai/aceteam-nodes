@@ -1,12 +1,13 @@
 """CLI execution context extending workflow-engine's LocalContext."""
 
 import sys
+from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
 
 import yaml
 from overrides import override
-from workflow_engine import DataMapping, Node, Workflow, WorkflowErrors
+from workflow_engine import DataMapping, Node, ShouldYield, Workflow, WorkflowErrors
 from workflow_engine.contexts import LocalContext
 
 
@@ -122,9 +123,14 @@ class CLIContext(LocalContext):
         input: DataMapping,
         errors: WorkflowErrors,
         partial_output: DataMapping,
+        node_yields: Mapping[str, ShouldYield],
     ) -> tuple[WorkflowErrors, DataMapping]:
         result = await super().on_workflow_error(
-            workflow=workflow, input=input, errors=errors, partial_output=partial_output
+            workflow=workflow,
+            input=input,
+            errors=errors,
+            partial_output=partial_output,
+            node_yields=node_yields,
         )
         if self.verbose:
             print(f"Workflow completed with errors: {errors}", file=sys.stderr)

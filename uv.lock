@@ -34,7 +34,7 @@ llm = [
 
 [package.metadata]
 requires-dist = [
-    { name = "aceteam-workflow-engine", specifier = ">=2.0.0rc3" },
+    { name = "aceteam-workflow-engine", specifier = ">=2.0.0rc4" },
     { name = "httpx", specifier = ">=0.28.0" },
     { name = "jinja2", specifier = ">=3.1.0" },
     { name = "litellm", marker = "extra == 'llm'", specifier = ">=1.40.0" },
@@ -56,7 +56,7 @@ llm = [{ name = "litellm", specifier = ">=1.40.0" }]
 
 [[package]]
 name = "aceteam-workflow-engine"
-version = "2.0.0rc3"
+version = "2.0.0rc4"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "dotenv" },
@@ -64,9 +64,9 @@ dependencies = [
     { name = "overrides" },
     { name = "pydantic" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/24/79/f9c30d3380ce64e6db33ec5266be36fe18669e9022a7a9949a3123838b29/aceteam_workflow_engine-2.0.0rc3.tar.gz", hash = "sha256:ebbca8a1d6816de449afe7ea8ac67a58ce58f3e837a84050884db02b2e20b2b6", size = 169911, upload-time = "2026-02-24T01:50:47.873Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/34/d8/1fa57e2127f7cb94aa510f2fbba2f730b4f56d362fd6b60a96f682702c45/aceteam_workflow_engine-2.0.0rc4.tar.gz", hash = "sha256:0793af00eb28e277e8eab5674a1da748bd145a6ab35ff3949f6743d56378ff5f", size = 173076, upload-time = "2026-02-25T19:22:25.313Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/86/00/5f0df732e2a45b7224738d2a340ef814d83d7465f4248d663925b6046a6c/aceteam_workflow_engine-2.0.0rc3-py3-none-any.whl", hash = "sha256:d167aaeb33683f57ccc288c34d85a5cd91af3d400452a7ef08ac5258bc7790d9", size = 82169, upload-time = "2026-02-24T01:50:46.206Z" },
+    { url = "https://files.pythonhosted.org/packages/51/a6/452b64acf89709fe79540244251ae453ad4964b059d50d6b715ca45e8f7c/aceteam_workflow_engine-2.0.0rc4-py3-none-any.whl", hash = "sha256:c2f63e379887a8650c4ca081856b4cfc080118ac7100b03626da4b824b49973b", size = 83695, upload-time = "2026-02-25T19:22:23.666Z" },
 ]
 
 [[package]]
