@@ -6,7 +6,7 @@ readme = "README.md"
 license = "MIT"
 requires-python = ">=3.12"
 dependencies = [
-    "aceteam-workflow-engine>=2.0.0rc3",
+    "aceteam-workflow-engine>=2.0.0rc4",
     "httpx>=0.28.0",
     "jinja2>=3.1.0",
     "pyyaml>=6.0",
