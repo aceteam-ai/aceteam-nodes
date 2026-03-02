@@ -7,7 +7,13 @@ from typing import Any
 
 import yaml
 from overrides import override
-from workflow_engine import DataMapping, Node, ShouldYield, Workflow, WorkflowErrors
+from workflow_engine import (
+    DataMapping,
+    Node,
+    Workflow,
+    WorkflowErrors,
+    WorkflowExecutionResult,
+)
 from workflow_engine.contexts import LocalContext
 
 
@@ -96,7 +102,7 @@ class CLIContext(LocalContext):
         *,
         workflow: Workflow,
         input: DataMapping,
-    ) -> tuple[WorkflowErrors, DataMapping] | None:
+    ) -> WorkflowExecutionResult | None:
         result = await super().on_workflow_start(workflow=workflow, input=input)
         if self.verbose:
             print(f"Workflow started ({len(workflow.nodes)} nodes)", file=sys.stderr)
@@ -109,7 +115,7 @@ class CLIContext(LocalContext):
         workflow: Workflow,
         input: DataMapping,
         output: DataMapping,
-    ) -> DataMapping:
+    ) -> WorkflowExecutionResult:
         result = await super().on_workflow_finish(workflow=workflow, input=input, output=output)
         if self.verbose:
             print("Workflow completed successfully", file=sys.stderr)
@@ -123,8 +129,8 @@ class CLIContext(LocalContext):
         input: DataMapping,
         errors: WorkflowErrors,
         partial_output: DataMapping,
-        node_yields: Mapping[str, ShouldYield],
-    ) -> tuple[WorkflowErrors, DataMapping]:
+        node_yields: Mapping[str, str],
+    ) -> WorkflowExecutionResult:
         result = await super().on_workflow_error(
             workflow=workflow,
             input=input,
