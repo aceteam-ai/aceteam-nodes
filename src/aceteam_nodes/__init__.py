@@ -1,6 +1,6 @@
 """AceTeam workflow nodes for local execution."""
 
-__version__ = "0.4.3"
+__version__ = "0.4.4"
 
 
 from .nodes import aceteam_node_registry
