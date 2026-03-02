@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Any
 
 from pydantic import ValidationError
-from workflow_engine import Workflow, WorkflowEngine
+from workflow_engine import Workflow, WorkflowEngine, WorkflowExecutionResultStatus
 from workflow_engine.execution import TopologicalExecutionAlgorithm
 
 from .context import CLIContext
@@ -66,24 +66,24 @@ async def run_workflow_from_file(
     if input is None:
         input = {}
     input_mapping = build_data_mapping(input, workflow.input_fields)
-    errors, output_values = await engine.execute(
+    result = await engine.execute(
         context=context,
         workflow=workflow,
         input=input_mapping,
     )
 
-    output = dump_data_mapping(output_values)
+    output = dump_data_mapping(result.output)
 
-    if errors.workflow_errors or errors.node_errors:
+    if result.status == WorkflowExecutionResultStatus.ERROR:
         return {
             "success": False,
-            "output": dict(output),
-            "errors": errors.model_dump(),
+            "output": output,
+            "errors": result.errors.model_dump(),
         }
 
     return {
         "success": True,
-        "output": dict(output),
+        "output": output,
     }
 
 
