@@ -15,12 +15,12 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-llm = ["aceteam-aep @ git+https://github.com/aceteam-ai/aceteam-aep.git"]
+llm = ["aceteam-aep>=0.2.0"]
 
 [dependency-groups]
-llm = ["aceteam-aep @ git+https://github.com/aceteam-ai/aceteam-aep.git"]
+llm = ["aceteam-aep>=0.2.0"]
 dev = [
-    "aceteam-aep @ git+https://github.com/aceteam-ai/aceteam-aep.git",
+    "aceteam-aep>=0.2.0",
     "pytest>=8.0",
     "pytest-asyncio>=0.24",
     "ruff>=0.8",
@@ -33,9 +33,6 @@ aceteam-nodes = "aceteam_nodes.cli:main"
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
-
-[tool.hatch.metadata]
-allow-direct-references = true
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/aceteam_nodes"]

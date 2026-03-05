@@ -4,14 +4,18 @@ requires-python = ">=3.12"
 
 [[package]]
 name = "aceteam-aep"
-version = "0.1.0"
-source = { git = "https://github.com/aceteam-ai/aceteam-aep.git#c9ecd3ef2d614267259a340d8aba694b6e0e8629" }
+version = "0.2.0"
+source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "anthropic" },
     { name = "google-genai" },
     { name = "httpx" },
     { name = "openai" },
     { name = "pydantic" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/17/ba/27453e9f85e0d6d455df025a8debabe9357e0245dc7512a6de78218e8c35/aceteam_aep-0.2.0.tar.gz", hash = "sha256:7fcf3c0d6f8d92cd832ebae8ba528d5d74dadbfbc18eaee090389ba9b6d8ded7", size = 69124, upload-time = "2026-03-05T04:48:47.838Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/e1/d5/8575d43edcb7decbc8b5412d8838c5beb48c2a60da5a129d3fcc5680fd60/aceteam_aep-0.2.0-py3-none-any.whl", hash = "sha256:ef2f2cd57511c79095c6f0a90864be65cc0c60b2407bcc033e722928df353dd6", size = 28535, upload-time = "2026-03-05T04:48:46.942Z" },
 ]
 
 [[package]]
@@ -46,7 +50,7 @@ llm = [
 
 [package.metadata]
 requires-dist = [
-    { name = "aceteam-aep", marker = "extra == 'llm'", git = "https://github.com/aceteam-ai/aceteam-aep.git" },
+    { name = "aceteam-aep", marker = "extra == 'llm'", specifier = ">=0.2.0" },
     { name = "aceteam-workflow-engine", specifier = ">=2.0.0rc5" },
     { name = "httpx", specifier = ">=0.28.0" },
     { name = "jinja2", specifier = ">=3.1.0" },
@@ -58,13 +62,13 @@ provides-extras = ["llm"]
 
 [package.metadata.requires-dev]
 dev = [
-    { name = "aceteam-aep", git = "https://github.com/aceteam-ai/aceteam-aep.git" },
+    { name = "aceteam-aep", specifier = ">=0.2.0" },
     { name = "pyright", specifier = ">=1.1" },
     { name = "pytest", specifier = ">=8.0" },
     { name = "pytest-asyncio", specifier = ">=0.24" },
     { name = "ruff", specifier = ">=0.8" },
 ]
-llm = [{ name = "aceteam-aep", git = "https://github.com/aceteam-ai/aceteam-aep.git" }]
+llm = [{ name = "aceteam-aep", specifier = ">=0.2.0" }]
 
 [[package]]
 name = "aceteam-workflow-engine"
