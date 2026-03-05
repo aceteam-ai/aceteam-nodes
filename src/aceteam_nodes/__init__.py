@@ -7,7 +7,7 @@ from .nodes import aceteam_node_registry
 
 
 def __getattr__(name: str):
-    """Lazy imports for modules that require optional dependencies (litellm)."""
+    """Lazy imports for modules that require optional dependencies (aceteam-aep)."""
     if name == "CLIContext":
         from .context import CLIContext
 

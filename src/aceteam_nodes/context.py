@@ -19,7 +19,7 @@ from workflow_engine.contexts import LocalContext
 
 class CLIContext(LocalContext):
     """
-    Extends LocalContext with LLM support via litellm and console output hooks.
+    Extends LocalContext with LLM support via aceteam-aep and console output hooks.
 
     Configuration is loaded from ~/.ace/config.yaml which stores API keys
     and model preferences.
@@ -43,20 +43,38 @@ class CLIContext(LocalContext):
         with open(path) as f:
             return yaml.safe_load(f) or {}
 
+    def _resolve_api_key(self, model: str) -> str:
+        """Resolve API key from config or environment based on model name."""
+        import os
+
+        if key := self.config.get("api_key"):
+            return key
+        m = model.lower()
+        if m.startswith("claude") or "anthropic" in m:
+            return os.environ.get("ANTHROPIC_API_KEY", "")
+        if m.startswith("gemini") or "google" in m:
+            return os.environ.get("GOOGLE_API_KEY", "") or os.environ.get("GEMINI_API_KEY", "")
+        if m.startswith("ollama"):
+            return ""
+        # Default: OpenAI
+        return os.environ.get("OPENAI_API_KEY", "")
+
     async def call_llm(self, model: str, system_prompt: str, prompt: str) -> str:
-        """LLM call via litellm (supports OpenAI, Anthropic, 100+ providers)."""
-        from litellm import acompletion
+        """LLM call via aceteam-aep (supports OpenAI, Anthropic, Google, and more)."""
+        from aceteam_aep import ChatMessage, create_client
 
         # Apply model override from config if set
         model = self.config.get("default_model", model)
+        api_key = self._resolve_api_key(model)
 
-        messages = []
+        client = create_client(model, api_key=api_key)
+        messages: list[ChatMessage] = []
         if system_prompt:
-            messages.append({"role": "system", "content": system_prompt})
-        messages.append({"role": "user", "content": prompt})
+            messages.append(ChatMessage(role="system", content=system_prompt))
+        messages.append(ChatMessage(role="user", content=prompt))
 
-        response = await acompletion(model=model, messages=messages)
-        return response.choices[0].message.content  # type: ignore
+        response = await client.chat(messages)
+        return response.message.text
 
     @override
     async def on_node_start(

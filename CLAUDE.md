@@ -6,13 +6,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 `aceteam-nodes` is a Python package that implements workflow node types for local CLI execution. It provides the runtime that powers the `ace` CLI — when a user runs `ace workflow run`, the TypeScript CLI delegates execution to this package via subprocess.
 
-The package uses `litellm` for multi-provider LLM support (OpenAI, Anthropic, Google, and 100+ more) and `aceteam-workflow-engine` for DAG-based workflow graph execution.
+The package uses `aceteam-aep` for multi-provider LLM support (OpenAI, Anthropic, Google, xAI, Ollama) via direct SDK calls, and `aceteam-workflow-engine` for DAG-based workflow graph execution.
 
 ## Development Commands
 
 ```bash
 # Setup
-uv sync                           # Install project + dev group (pyright, pytest, ruff, litellm)
+uv sync --group dev               # Install project + dev group (pyright, pytest, ruff, aceteam-aep)
 
 # Run
 python -m aceteam_nodes.cli run examples/hello-llm.json --input '{"prompt":"Hello"}'
@@ -53,13 +53,13 @@ src/aceteam_nodes/
     ├── __init__.py    # Node registration into aceteam_node_registry
     ├── api_call.py    # HTTP requests with Jinja templating
     ├── comparison.py  # Equal, NotEqual, GreaterThan, LessThan, And, Or, Not
-    └── llm.py         # AI text generation via litellm
+    └── llm.py         # AI text generation via aceteam-aep (direct SDK calls)
 ```
 
 ### Key Dependencies
 
 - `aceteam-workflow-engine` — DAG execution engine (shared with the platform)
-- `litellm` — Multi-provider LLM abstraction
+- `aceteam-aep` — Multi-provider LLM abstraction (direct SDK calls, no native deps)
 - `httpx` — Async HTTP client (for API call nodes)
 - `jinja2` — Template rendering in API call nodes
 - `pydantic` — Data validation

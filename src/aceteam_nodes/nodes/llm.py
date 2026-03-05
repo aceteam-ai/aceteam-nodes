@@ -1,4 +1,4 @@
-"""LLM node - AI text generation via litellm."""
+"""LLM node - AI text generation via aceteam-aep."""
 
 from functools import cached_property
 from typing import Literal
@@ -40,7 +40,7 @@ class LLMNodeOutput(Data):
 class LLMNode(
     Node[LLMNodeInput, LLMNodeOutput, LLMNodeParams],
 ):
-    """AI text generation node. Uses litellm for multi-provider support."""
+    """AI text generation node. Uses aceteam-aep for multi-provider support."""
 
     TYPE_INFO = NodeTypeInfo.from_parameter_type(
         name="LLM",
