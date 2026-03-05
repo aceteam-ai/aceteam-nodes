@@ -20,7 +20,7 @@ wheels = [
 
 [[package]]
 name = "aceteam-nodes"
-version = "0.4.5"
+version = "0.5.0"
 source = { editable = "." }
 dependencies = [
     { name = "aceteam-workflow-engine" },
