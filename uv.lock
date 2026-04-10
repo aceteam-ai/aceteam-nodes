@@ -20,7 +20,7 @@ wheels = [
 
 [[package]]
 name = "aceteam-nodes"
-version = "0.5.0"
+version = "0.5.1"
 source = { editable = "." }
 dependencies = [
     { name = "aceteam-workflow-engine" },
@@ -80,6 +80,7 @@ dependencies = [
     { name = "overrides" },
     { name = "pydantic" },
 ]
+sdist = { url = "https://files.pythonhosted.org/packages/a8/b0/ae97d6164a500e53aaa497e8ceb09e4af14f44e1dfceb132a55336ce320e/aceteam_workflow_engine-2.0.0rc8.tar.gz", hash = "sha256:fa3844ca97878a5930da61518dec2636642a0884f21f718f1d18c70c226fef2b", size = 187877, upload-time = "2026-04-10T04:19:39.197Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/03/d8/203360bda3c880d6914a7eb3bc215e96f064a0d0a386726a31e5e00c4dbc/aceteam_workflow_engine-2.0.0rc8-py3-none-any.whl", hash = "sha256:c9c61505d2a90ca4ff1e5aaa01ec6800a3895daee9c11f99225ccc156127468e", size = 90197, upload-time = "2026-04-10T04:19:37.793Z" },
 ]
