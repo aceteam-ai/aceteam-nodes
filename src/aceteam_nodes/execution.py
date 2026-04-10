@@ -8,13 +8,20 @@ from typing import Any
 
 from pydantic import ValidationError
 from workflow_engine import Workflow, WorkflowEngine, WorkflowExecutionResultStatus
-from workflow_engine.execution import TopologicalExecutionAlgorithm
+from workflow_engine.core import ValidatedWorkflow
+from workflow_engine.execution import ParallelExecutionAlgorithm
 
 from .context import CLIContext
 from .nodes import aceteam_node_registry
-from .utils import build_data_mapping, dump_data_mapping
+from .utils import dump_data_mapping
 
 logger = logging.getLogger(__name__)
+
+
+engine = WorkflowEngine(
+    node_registry=aceteam_node_registry,
+    execution_algorithm=ParallelExecutionAlgorithm(),
+)
 
 
 class WorkflowFileNotFoundError(Exception):
@@ -25,7 +32,7 @@ class WorkflowDeserializationError(Exception):
     pass
 
 
-def load_workflow_from_file(file_path: str) -> Workflow:
+async def load_workflow_from_file(file_path: str) -> ValidatedWorkflow:
     """Load a workflow from a JSON file."""
     # Import nodes to trigger auto-registration before deserialization
     path = Path(file_path)
@@ -36,9 +43,11 @@ def load_workflow_from_file(file_path: str) -> Workflow:
         data = json.load(f)
 
     try:
-        return Workflow.model_validate(data)
+        raw_workflow = Workflow.model_validate(data)
     except ValidationError as e:
         raise WorkflowDeserializationError(f"Invalid workflow file: {e}") from e
+
+    return await engine.validate(raw_workflow)
 
 
 async def run_workflow_from_file(
@@ -53,23 +62,17 @@ async def run_workflow_from_file(
 
     Returns a dict with the workflow output values.
     """
-
-    engine = WorkflowEngine(
-        node_registry=aceteam_node_registry,
-        execution_algorithm=TopologicalExecutionAlgorithm(),
-    )
-    workflow = engine.load(load_workflow_from_file(file_path))
+    workflow = await load_workflow_from_file(file_path)
     context = CLIContext(
         config_path=config_path,
         verbose=verbose,
     )
     if input is None:
         input = {}
-    input_mapping = build_data_mapping(input, workflow.input_fields)
     result = await engine.execute(
         context=context,
         workflow=workflow,
-        input=input_mapping,
+        input=input,
     )
 
     output = dump_data_mapping(result.output)

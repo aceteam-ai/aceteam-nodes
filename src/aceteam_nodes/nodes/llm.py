@@ -1,11 +1,10 @@
 """LLM node - AI text generation via aceteam-aep."""
 
-from functools import cached_property
-from typing import Literal
+from typing import Literal, Type
 
 from overrides import override
 from pydantic import Field
-from workflow_engine import Context, Data, Node, NodeTypeInfo, Params, StringValue
+from workflow_engine import Data, ExecutionContext, Node, NodeTypeInfo, Params, StringValue
 
 from ..context import CLIContext
 
@@ -52,31 +51,37 @@ class LLMNode(
 
     type: Literal["LLM"] = "LLM"
 
-    @cached_property
-    def input_type(self):
+    @classmethod
+    @override
+    def static_input_type(cls) -> Type[LLMNodeInput]:
         return LLMNodeInput
 
-    @cached_property
-    def output_type(self):
+    @classmethod
+    @override
+    def static_output_type(cls) -> Type[LLMNodeOutput]:
         return LLMNodeOutput
 
     @override
-    async def run(self, context: Context, input: LLMNodeInput) -> LLMNodeOutput:
+    async def run(
+        self,
+        *,
+        context: ExecutionContext,
+        input_type: Type[LLMNodeInput],
+        output_type: Type[LLMNodeOutput],
+        input: LLMNodeInput,
+    ) -> LLMNodeOutput:
         prompt_text = input.prompt.root
         model = self.params.model.root
         system_prompt = self.params.system_prompt.root
 
-        if isinstance(context, CLIContext):
-            response_text = await context.call_llm(
-                model=model,
-                system_prompt=system_prompt,
-                prompt=prompt_text,
-            )
-        else:
-            # Fallback stub for non-CLI contexts
-            response_text = f"[LLM response to: {prompt_text[:100]}...]"
+        assert isinstance(context, CLIContext)
+        response_text = await context.call_llm(
+            model=model,
+            system_prompt=system_prompt,
+            prompt=prompt_text,
+        )
 
-        return LLMNodeOutput(response=StringValue(response_text))
+        return output_type(response=StringValue(response_text))
 
 
 __all__ = [

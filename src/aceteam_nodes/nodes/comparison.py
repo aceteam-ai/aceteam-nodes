@@ -1,15 +1,14 @@
 """Comparison and logical operator nodes."""
 
-from functools import cached_property
-from typing import Literal
+from typing import Literal, Type
 
 from overrides import override
 from pydantic import Field
 from workflow_engine import (
     BooleanValue,
-    Context,
     Data,
     Empty,
+    ExecutionContext,
     FloatValue,
     Node,
     NodeTypeInfo,
@@ -65,17 +64,26 @@ class EqualNode(Node[ComparisonInput, ComparisonOutput, ComparisonParams]):
     )
     type: Literal["Equal"] = "Equal"
 
-    @cached_property
-    def input_type(self):
+    @classmethod
+    @override
+    def static_input_type(cls) -> Type[ComparisonInput]:
         return ComparisonInput
 
-    @cached_property
-    def output_type(self):
+    @classmethod
+    @override
+    def static_output_type(cls) -> Type[ComparisonOutput]:
         return ComparisonOutput
 
     @override
-    async def run(self, context: Context, input: ComparisonInput) -> ComparisonOutput:
-        return ComparisonOutput(result=BooleanValue(input.a.root == input.b.root))
+    async def run(
+        self,
+        *,
+        context: ExecutionContext,
+        input_type: Type[ComparisonInput],
+        output_type: Type[ComparisonOutput],
+        input: ComparisonInput,
+    ) -> ComparisonOutput:
+        return output_type(result=BooleanValue(input.a.root == input.b.root))
 
 
 class NotEqualNode(Node[ComparisonInput, ComparisonOutput, ComparisonParams]):
@@ -88,17 +96,26 @@ class NotEqualNode(Node[ComparisonInput, ComparisonOutput, ComparisonParams]):
     )
     type: Literal["NotEqual"] = "NotEqual"
 
-    @cached_property
-    def input_type(self):
+    @classmethod
+    @override
+    def static_input_type(cls) -> Type[ComparisonInput]:
         return ComparisonInput
 
-    @cached_property
-    def output_type(self):
+    @classmethod
+    @override
+    def static_output_type(cls) -> Type[ComparisonOutput]:
         return ComparisonOutput
 
     @override
-    async def run(self, context: Context, input: ComparisonInput) -> ComparisonOutput:
-        return ComparisonOutput(result=BooleanValue(input.a.root != input.b.root))
+    async def run(
+        self,
+        *,
+        context: ExecutionContext,
+        input_type: Type[ComparisonInput],
+        output_type: Type[ComparisonOutput],
+        input: ComparisonInput,
+    ) -> ComparisonOutput:
+        return output_type(result=BooleanValue(input.a.root != input.b.root))
 
 
 class GreaterThanNode(Node[ComparisonInput, ComparisonOutput, ComparisonParams]):
@@ -111,17 +128,26 @@ class GreaterThanNode(Node[ComparisonInput, ComparisonOutput, ComparisonParams])
     )
     type: Literal["GreaterThan"] = "GreaterThan"
 
-    @cached_property
-    def input_type(self):
+    @classmethod
+    @override
+    def static_input_type(cls) -> Type[ComparisonInput]:
         return ComparisonInput
 
-    @cached_property
-    def output_type(self):
+    @classmethod
+    @override
+    def static_output_type(cls) -> Type[ComparisonOutput]:
         return ComparisonOutput
 
     @override
-    async def run(self, context: Context, input: ComparisonInput) -> ComparisonOutput:
-        return ComparisonOutput(result=BooleanValue(input.a.root > input.b.root))
+    async def run(
+        self,
+        *,
+        context: ExecutionContext,
+        input_type: Type[ComparisonInput],
+        output_type: Type[ComparisonOutput],
+        input: ComparisonInput,
+    ) -> ComparisonOutput:
+        return output_type(result=BooleanValue(input.a.root > input.b.root))
 
 
 class GreaterThanEqualNode(Node[ComparisonInput, ComparisonOutput, ComparisonParams]):
@@ -134,17 +160,26 @@ class GreaterThanEqualNode(Node[ComparisonInput, ComparisonOutput, ComparisonPar
     )
     type: Literal["GreaterThanEqual"] = "GreaterThanEqual"
 
-    @cached_property
-    def input_type(self):
+    @classmethod
+    @override
+    def static_input_type(cls) -> Type[ComparisonInput]:
         return ComparisonInput
 
-    @cached_property
-    def output_type(self):
+    @classmethod
+    @override
+    def static_output_type(cls) -> Type[ComparisonOutput]:
         return ComparisonOutput
 
     @override
-    async def run(self, context: Context, input: ComparisonInput) -> ComparisonOutput:
-        return ComparisonOutput(result=BooleanValue(input.a.root >= input.b.root))
+    async def run(
+        self,
+        *,
+        context: ExecutionContext,
+        input_type: Type[ComparisonInput],
+        output_type: Type[ComparisonOutput],
+        input: ComparisonInput,
+    ) -> ComparisonOutput:
+        return output_type(result=BooleanValue(input.a.root >= input.b.root))
 
 
 class LessThanNode(Node[ComparisonInput, ComparisonOutput, ComparisonParams]):
@@ -157,17 +192,26 @@ class LessThanNode(Node[ComparisonInput, ComparisonOutput, ComparisonParams]):
     )
     type: Literal["LessThan"] = "LessThan"
 
-    @cached_property
-    def input_type(self):
+    @classmethod
+    @override
+    def static_input_type(cls) -> Type[ComparisonInput]:
         return ComparisonInput
 
-    @cached_property
-    def output_type(self):
+    @classmethod
+    @override
+    def static_output_type(cls) -> Type[ComparisonOutput]:
         return ComparisonOutput
 
     @override
-    async def run(self, context: Context, input: ComparisonInput) -> ComparisonOutput:
-        return ComparisonOutput(result=BooleanValue(input.a.root < input.b.root))
+    async def run(
+        self,
+        *,
+        context: ExecutionContext,
+        input_type: Type[ComparisonInput],
+        output_type: Type[ComparisonOutput],
+        input: ComparisonInput,
+    ) -> ComparisonOutput:
+        return output_type(result=BooleanValue(input.a.root < input.b.root))
 
 
 class LessThanEqualNode(Node[ComparisonInput, ComparisonOutput, ComparisonParams]):
@@ -180,17 +224,26 @@ class LessThanEqualNode(Node[ComparisonInput, ComparisonOutput, ComparisonParams
     )
     type: Literal["LessThanEqual"] = "LessThanEqual"
 
-    @cached_property
-    def input_type(self):
+    @classmethod
+    @override
+    def static_input_type(cls) -> Type[ComparisonInput]:
         return ComparisonInput
 
-    @cached_property
-    def output_type(self):
+    @classmethod
+    @override
+    def static_output_type(cls) -> Type[ComparisonOutput]:
         return ComparisonOutput
 
     @override
-    async def run(self, context: Context, input: ComparisonInput) -> ComparisonOutput:
-        return ComparisonOutput(result=BooleanValue(input.a.root <= input.b.root))
+    async def run(
+        self,
+        *,
+        context: ExecutionContext,
+        input_type: Type[ComparisonInput],
+        output_type: Type[ComparisonOutput],
+        input: ComparisonInput,
+    ) -> ComparisonOutput:
+        return output_type(result=BooleanValue(input.a.root <= input.b.root))
 
 
 # --- Logical Nodes ---
@@ -206,21 +259,26 @@ class AndNode(Node[LogicalInput, LogicalOutput, Empty]):
     )
     type: Literal["And"] = "And"
 
-    @cached_property
-    def input_type(self):
+    @classmethod
+    @override
+    def static_input_type(cls) -> Type[LogicalInput]:
         return LogicalInput
 
-    @cached_property
-    def output_type(self):
+    @classmethod
+    @override
+    def static_output_type(cls) -> Type[LogicalOutput]:
         return LogicalOutput
 
     @override
     async def run(
         self,
-        context: Context,
+        *,
+        context: ExecutionContext,
+        input_type: Type[LogicalInput],
+        output_type: Type[LogicalOutput],
         input: LogicalInput,
     ) -> LogicalOutput:
-        return LogicalOutput(result=BooleanValue(input.a.root and input.b.root))
+        return output_type(result=BooleanValue(input.a.root and input.b.root))
 
 
 class OrNode(Node[LogicalInput, LogicalOutput, Empty]):
@@ -233,21 +291,26 @@ class OrNode(Node[LogicalInput, LogicalOutput, Empty]):
     )
     type: Literal["Or"] = "Or"
 
-    @cached_property
-    def input_fields_info(self):
+    @classmethod
+    @override
+    def static_input_type(cls) -> Type[LogicalInput]:
         return LogicalInput
 
-    @property
-    def output_type(self):
+    @classmethod
+    @override
+    def static_output_type(cls) -> Type[LogicalOutput]:
         return LogicalOutput
 
     @override
     async def run(
         self,
-        context: Context,
+        *,
+        context: ExecutionContext,
+        input_type: Type[LogicalInput],
+        output_type: Type[LogicalOutput],
         input: LogicalInput,
     ) -> LogicalOutput:
-        return LogicalOutput(result=BooleanValue(input.a.root or input.b.root))
+        return output_type(result=BooleanValue(input.a.root or input.b.root))
 
 
 class NotNode(Node[NotInput, LogicalOutput, Empty]):
@@ -260,21 +323,26 @@ class NotNode(Node[NotInput, LogicalOutput, Empty]):
     )
     type: Literal["Not"] = "Not"
 
-    @cached_property
-    def input_type(self):
+    @classmethod
+    @override
+    def static_input_type(cls) -> Type[NotInput]:
         return NotInput
 
-    @cached_property
-    def output_type(self):
+    @classmethod
+    @override
+    def static_output_type(cls) -> Type[LogicalOutput]:
         return LogicalOutput
 
     @override
     async def run(
         self,
-        context: Context,
+        *,
+        context: ExecutionContext,
+        input_type: Type[NotInput],
+        output_type: Type[LogicalOutput],
         input: NotInput,
     ) -> LogicalOutput:
-        return LogicalOutput(result=BooleanValue(not input.a.root))
+        return output_type(result=BooleanValue(not input.a.root))
 
 
 __all__ = [

@@ -3,14 +3,15 @@
 import json
 import logging
 from functools import cached_property
-from typing import Any, Literal
+from json import JSONDecodeError
+from typing import Any, Literal, Type
 
 import httpx
 from overrides import override
 from pydantic import Field
 from workflow_engine import (
-    Context,
     Data,
+    ExecutionContext,
     FieldSchemaMappingValue,
     FloatValue,
     IntegerValue,
@@ -20,9 +21,11 @@ from workflow_engine import (
     Params,
     StringMapValue,
     StringValue,
-    UserException,
+    ValidationContext,
     Value,
+    WorkflowException,
 )
+from workflow_engine.core import StakeholderLevel
 from workflow_engine.files import JSONFileValue, JSONLinesFileValue, TextFileValue
 
 from ..utils import format_jinja
@@ -101,36 +104,46 @@ class APICallNode(
         content_type = self.params.headers.get("Accept")
         return content_type is not None and "application/json" in content_type
 
-    @cached_property
-    def input_schema(self):
-        return self.params.parameters.to_data_schema("APICallInput")
+    @override
+    async def dynamic_input_type(
+        self,
+        context: ValidationContext,
+    ) -> Type[Data]:
+        schema = self.params.parameters.to_data_schema("APICallInput")
+        return schema.build_data_cls()
 
-    @cached_property
-    def input_type(self):
-        return self.input_schema.build_data_cls()
-
-    @cached_property
-    def output_type(self):
+    @classmethod
+    @override
+    def static_output_type(cls) -> Type[APICallOutput]:
         return APICallOutput
 
-    async def _expand_parameter_value(self, context: Context, value: Value) -> Any:
+    async def _expand_parameter_value(self, context: ExecutionContext, value: Value) -> Any:
         """Expand data files into their content for templating."""
         assert isinstance(value, Value)
         if isinstance(value, JSONFileValue):
             try:
                 return await value.read_data(context)
             except Exception as e:
-                raise UserException(f"Failed to read JSON file '{value.path}'.") from e
+                raise WorkflowException(
+                    f"Failed to read JSON file '{value.path}'.",
+                    level=StakeholderLevel.USER,
+                ) from e
         elif isinstance(value, JSONLinesFileValue):
             try:
                 return await value.read_data(context)
             except Exception as e:
-                raise UserException(f"Failed to read JSON lines file '{value.path}'.") from e
+                raise WorkflowException(
+                    f"Failed to read JSON lines file '{value.path}'.",
+                    level=StakeholderLevel.USER,
+                ) from e
         elif isinstance(value, TextFileValue):
             try:
                 return await value.read_text(context)
             except Exception as e:
-                raise UserException(f"Failed to read text file '{value.path}'.") from e
+                raise WorkflowException(
+                    f"Failed to read text file '{value.path}'.",
+                    level=StakeholderLevel.USER,
+                ) from e
         return value.root
 
     def _is_json_response(self, response: httpx.Response) -> bool:
@@ -145,7 +158,7 @@ class APICallNode(
                 return response.json()
             else:
                 return response.text
-        except json.JSONDecodeError:
+        except JSONDecodeError:
             try:
                 return response.text
             except Exception:
@@ -154,7 +167,7 @@ class APICallNode(
             return str(response.content)
 
     @override
-    async def run(self, context: Context, input: Data) -> APICallOutput:
+    async def run(self, context: ExecutionContext, input: Data) -> APICallOutput:
         # Prepare template parameters
         parameters: dict[str, Any] = {}
         if len(self.params.parameters) > 0:
@@ -166,7 +179,10 @@ class APICallNode(
             url_template = self.params.url.root
             url = format_jinja(url_template, parameters)
         except Exception as e:
-            raise UserException(f"Failed to format URL template: {e}") from e
+            raise WorkflowException(
+                f"Failed to format URL template: {e}",
+                level=StakeholderLevel.USER,
+            ) from e
 
         # Format request body with Jinja templating
         request_body = None
@@ -177,12 +193,15 @@ class APICallNode(
                 if body_text.strip().startswith(("{", "[")):
                     try:
                         request_body = json.loads(body_text)
-                    except json.JSONDecodeError:
+                    except JSONDecodeError:
                         request_body = body_text
                 else:
                     request_body = body_text
             except Exception as e:
-                raise UserException(f"Failed to format request body template: {e}") from e
+                raise WorkflowException(
+                    f"Failed to format request body template: {e}",
+                    level=StakeholderLevel.USER,
+                ) from e
 
         # Prepare headers
         headers = {k: v.root for k, v in self.params.headers.items()}
@@ -200,20 +219,35 @@ class APICallNode(
             async with httpx.AsyncClient(timeout=timeout) as client:
                 if isinstance(request_body, (dict, list)):
                     response = await client.request(
-                        method=method, url=url, headers=headers, json=request_body
+                        method=method,
+                        url=url,
+                        headers=headers,
+                        json=request_body,
                     )
                 elif request_body is not None:
                     response = await client.request(
-                        method=method, url=url, headers=headers, content=request_body
+                        method=method,
+                        url=url,
+                        headers=headers,
+                        content=request_body,
                     )
                 else:
                     response = await client.request(method=method, url=url, headers=headers)
         except httpx.TimeoutException as e:
-            raise UserException(f"Request timed out after {self.params.timeout} seconds.") from e
+            raise WorkflowException(
+                f"Request timed out after {self.params.timeout} seconds.",
+                level=StakeholderLevel.USER,
+            ) from e
         except httpx.RequestError as e:
-            raise UserException(f"Request failed: {e}") from e
+            raise WorkflowException(
+                f"Request failed: {e}",
+                level=StakeholderLevel.USER,
+            ) from e
         except Exception as e:
-            raise UserException(f"Unexpected error during API call: {e}") from e
+            raise WorkflowException(
+                f"Unexpected error during API call: {e}",
+                level=StakeholderLevel.USER,
+            ) from e
 
         # Parse response
         status_code = IntegerValue(response.status_code)

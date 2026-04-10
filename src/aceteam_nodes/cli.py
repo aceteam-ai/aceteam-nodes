@@ -67,7 +67,7 @@ async def cmd_run(args: argparse.Namespace) -> dict[str, Any]:
     return result
 
 
-def cmd_validate(args: argparse.Namespace) -> dict[str, Any]:
+async def cmd_validate(args: argparse.Namespace) -> dict[str, Any]:
     from .execution import (
         WorkflowDeserializationError,
         WorkflowFileNotFoundError,
@@ -75,12 +75,12 @@ def cmd_validate(args: argparse.Namespace) -> dict[str, Any]:
     )
 
     try:
-        workflow = load_workflow_from_file(args.file)
+        workflow = await load_workflow_from_file(args.file)
         return {
             "valid": True,
             "nodes": len(workflow.nodes),
-            "inputs": list(workflow.input_fields.keys()),
-            "outputs": list(workflow.output_fields.keys()),
+            "inputs": list(workflow.input_type.model_fields.keys()),
+            "outputs": list(workflow.output_type.model_fields.keys()),
         }
     except WorkflowFileNotFoundError as e:
         return {"valid": False, "error": str(e)}
@@ -116,7 +116,7 @@ def main():
         if args.command == "run":
             result = asyncio.run(cmd_run(args))
         elif args.command == "validate":
-            result = cmd_validate(args)
+            result = asyncio.run(cmd_validate(args))
         elif args.command == "list-nodes":
             result = cmd_list_nodes()
         else:
