@@ -23,28 +23,27 @@ def hello_llm_path():
     return os.path.join(os.path.dirname(__file__), "..", "examples", "hello-llm.json")
 
 
-def test_load_workflow_file_not_found():
+async def test_load_workflow_file_not_found():
     with pytest.raises(WorkflowFileNotFoundError):
-        load_workflow_from_file("/nonexistent/path.json")
+        await load_workflow_from_file("/nonexistent/path.json")
 
 
-def test_load_workflow_invalid_json():
+async def test_load_workflow_invalid_json():
     with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
         f.write('{"nodes": "invalid"}')
         f.flush()
         try:
             with pytest.raises(WorkflowDeserializationError):
-                load_workflow_from_file(f.name)
+                await load_workflow_from_file(f.name)
         finally:
             os.unlink(f.name)
 
 
-def test_validate_hello_llm(hello_llm_path):
-    workflow = load_workflow_from_file(hello_llm_path)
+async def test_validate_hello_llm(hello_llm_path):
+    workflow = await load_workflow_from_file(hello_llm_path)
     assert len(workflow.nodes) == 3
     assert workflow.nodes[1].type == "LLM"
-    assert len(workflow.input_fields) == 1
-    assert "prompt" in workflow.input_fields
+    assert set(workflow.input_type.model_fields.keys()) == {"prompt"}
 
 
 async def test_run_text_passthrough(text_passthrough_path):

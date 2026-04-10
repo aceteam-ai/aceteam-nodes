@@ -8,13 +8,14 @@ from typing import Any
 import yaml
 from overrides import override
 from workflow_engine import (
+    Data,
     DataMapping,
     Node,
-    Workflow,
     WorkflowErrors,
     WorkflowExecutionResult,
 )
 from workflow_engine.contexts import LocalContext
+from workflow_engine.core import ValidatedWorkflow
 
 
 class CLIContext(LocalContext):
@@ -81,9 +82,16 @@ class CLIContext(LocalContext):
         self,
         *,
         node: Node,
+        input_type: type[Data],
+        output_type: type[Data],
         input: DataMapping,
     ) -> DataMapping | None:
-        result = await super().on_node_start(node=node, input=input)
+        result = await super().on_node_start(
+            node=node,
+            input_type=input_type,
+            output_type=output_type,
+            input=input,
+        )
         if self.verbose:
             print(f"  [{node.type}] running...", file=sys.stderr)
         return result
@@ -93,10 +101,18 @@ class CLIContext(LocalContext):
         self,
         *,
         node: Node,
+        input_type: type[Data],
+        output_type: type[Data],
         input: DataMapping,
         output: DataMapping,
     ) -> DataMapping:
-        result = await super().on_node_finish(node=node, input=input, output=output)
+        result = await super().on_node_finish(
+            node=node,
+            input_type=input_type,
+            output_type=output_type,
+            input=input,
+            output=output,
+        )
         if self.verbose:
             print(f"  [{node.type}] done", file=sys.stderr)
         return result
@@ -106,10 +122,18 @@ class CLIContext(LocalContext):
         self,
         *,
         node: Node,
+        input_type: type[Data],
+        output_type: type[Data],
         input: DataMapping,
         exception: Exception,
     ) -> Exception | DataMapping:
-        result = await super().on_node_error(node=node, input=input, exception=exception)
+        result = await super().on_node_error(
+            node=node,
+            input_type=input_type,
+            output_type=output_type,
+            input=input,
+            exception=exception,
+        )
         if self.verbose:
             print(f"  [{node.type}] error: {exception}", file=sys.stderr)
         return result
@@ -118,10 +142,13 @@ class CLIContext(LocalContext):
     async def on_workflow_start(
         self,
         *,
-        workflow: Workflow,
+        workflow: ValidatedWorkflow,
         input: DataMapping,
     ) -> WorkflowExecutionResult | None:
-        result = await super().on_workflow_start(workflow=workflow, input=input)
+        result = await super().on_workflow_start(
+            workflow=workflow,
+            input=input,
+        )
         if self.verbose:
             print(f"Workflow started ({len(workflow.nodes)} nodes)", file=sys.stderr)
         return result
@@ -130,11 +157,15 @@ class CLIContext(LocalContext):
     async def on_workflow_finish(
         self,
         *,
-        workflow: Workflow,
+        workflow: ValidatedWorkflow,
         input: DataMapping,
         output: DataMapping,
     ) -> WorkflowExecutionResult:
-        result = await super().on_workflow_finish(workflow=workflow, input=input, output=output)
+        result = await super().on_workflow_finish(
+            workflow=workflow,
+            input=input,
+            output=output,
+        )
         if self.verbose:
             print("Workflow completed successfully", file=sys.stderr)
         return result
@@ -143,7 +174,7 @@ class CLIContext(LocalContext):
     async def on_workflow_error(
         self,
         *,
-        workflow: Workflow,
+        workflow: ValidatedWorkflow,
         input: DataMapping,
         errors: WorkflowErrors,
         partial_output: DataMapping,
