@@ -16,11 +16,14 @@ dependencies = [
 
 [project.optional-dependencies]
 llm = ["aceteam-aep>=0.2.0"]
+playwright = ["playwright>=1.47.0"]
 
 [dependency-groups]
 llm = ["aceteam-aep>=0.2.0"]
+playwright = ["playwright>=1.47.0"]
 dev = [
     "aceteam-aep>=0.2.0",
+    "playwright>=1.47.0",
     "pytest>=8.0",
     "pytest-asyncio>=0.24",
     "ruff>=0.8",
