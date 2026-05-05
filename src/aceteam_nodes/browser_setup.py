@@ -11,7 +11,7 @@ async def run_browser_setup() -> dict[str, Any]:
     profile_display = html.escape(str(profile_dir))
 
     try:
-        async with playwright_profile_context(headless=True) as context:
+        async with playwright_profile_context(headless=False) as context:
             page = context.pages[0] if context.pages else await context.new_page()
             await page.set_content(
                 f"""<!DOCTYPE html>
