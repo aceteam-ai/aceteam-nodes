@@ -4,6 +4,7 @@ Usage:
     python -m aceteam_nodes.cli run workflow.json --input '{"prompt":"Hello"}'
     python -m aceteam_nodes.cli list-nodes
     python -m aceteam_nodes.cli validate workflow.json
+    python -m aceteam_nodes.cli browser-setup
 """
 
 import argparse
@@ -50,6 +51,12 @@ def parse_args() -> argparse.Namespace:
 
     # list-nodes command
     subparsers.add_parser("list-nodes", help="List available node types")
+
+    # browser-setup: interactive Chromium profile for BrowserFetch / Playwright nodes
+    subparsers.add_parser(
+        "browser-setup",
+        help="Open Chromium with the shared Ace profile; sign in, then close the window to save",
+    )
 
     return parser.parse_args()
 
@@ -109,6 +116,12 @@ def cmd_list_nodes() -> dict[str, Any]:
     return {"nodes": nodes}
 
 
+async def cmd_browser_setup() -> dict[str, Any]:
+    from .browser_setup import run_browser_setup
+
+    return await run_browser_setup()
+
+
 def main():
     args = parse_args()
 
@@ -119,6 +132,8 @@ def main():
             result = asyncio.run(cmd_validate(args))
         elif args.command == "list-nodes":
             result = cmd_list_nodes()
+        elif args.command == "browser-setup":
+            result = asyncio.run(cmd_browser_setup())
         else:
             print(f"Unknown command: {args.command}", file=sys.stderr)
             sys.exit(1)
@@ -126,6 +141,8 @@ def main():
         print(json.dumps(result, indent=2, default=str))
 
         if args.command == "run" and not result.get("success", True):
+            sys.exit(1)
+        if args.command == "browser-setup" and not result.get("success", True):
             sys.exit(1)
 
     except Exception as e:

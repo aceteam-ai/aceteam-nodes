@@ -8,6 +8,7 @@ requires-python = ">=3.12"
 dependencies = [
     "aceteam-workflow-engine>=2.0.0rc8",
     "httpx>=0.28.0",
+    "platformdirs>=4.0.0",
     "jinja2>=3.1.0",
     "pyyaml>=6.0",
     "pydantic>=2.11.0",
@@ -16,14 +17,15 @@ dependencies = [
 
 [project.optional-dependencies]
 llm = ["aceteam-aep>=0.2.0"]
-playwright = ["playwright>=1.47.0"]
+playwright = ["playwright>=1.47.0", "playwright-stealth>=2.0.3"]
 
 [dependency-groups]
 llm = ["aceteam-aep>=0.2.0"]
-playwright = ["playwright>=1.47.0"]
+playwright = ["playwright>=1.47.0", "playwright-stealth>=2.0.3"]
 dev = [
     "aceteam-aep>=0.2.0",
     "playwright>=1.47.0",
+    "playwright-stealth>=2.0.3",
     "pytest>=8.0",
     "pytest-asyncio>=0.24",
     "ruff>=0.8",
