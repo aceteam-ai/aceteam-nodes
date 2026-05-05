@@ -1,0 +1,41 @@
+{
+  "input_node": {
+    "id": "input",
+    "type": "Input",
+    "version": "1.0.0",
+    "params": {
+      "fields": {}
+    }
+  },
+  "inner_nodes": [
+    {
+      "id": "fetch",
+      "type": "BrowserFetch",
+      "version": "0.1.0",
+      "params": {
+        "url": "https://www.cbc.ca/news"
+      }
+    }
+  ],
+  "output_node": {
+    "id": "output",
+    "type": "Output",
+    "version": "1.0.0",
+    "params": {
+      "fields": {
+        "html": {
+          "title": "Page HTML",
+          "x-value-type": "StringValue"
+        }
+      }
+    }
+  },
+  "edges": [
+    {
+      "source_id": "fetch",
+      "source_key": "html",
+      "target_id": "output",
+      "target_key": "html"
+    }
+  ]
+}

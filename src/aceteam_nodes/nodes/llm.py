@@ -1,6 +1,6 @@
 """LLM node - AI text generation via aceteam-aep."""
 
-from typing import Literal, Type
+from typing import ClassVar, Literal, Type
 
 from overrides import override
 from pydantic import Field
@@ -41,7 +41,7 @@ class LLMNode(
 ):
     """AI text generation node. Uses aceteam-aep for multi-provider support."""
 
-    TYPE_INFO = NodeTypeInfo.from_parameter_type(
+    TYPE_INFO: ClassVar[NodeTypeInfo] = NodeTypeInfo.from_parameter_type(
         name="LLM",
         display_name="LLM",
         description="Send a text prompt to an AI model and get a response.",
@@ -49,7 +49,7 @@ class LLMNode(
         parameter_type=LLMNodeParams,
     )
 
-    type: Literal["LLM"] = "LLM"
+    type: Literal["LLM"] = "LLM"  # pyright: ignore[reportIncompatibleVariableOverride]
 
     @classmethod
     @override

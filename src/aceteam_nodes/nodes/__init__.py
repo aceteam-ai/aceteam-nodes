@@ -4,6 +4,7 @@ from workflow_engine import InputNode, Node, NodeRegistry, OutputNode
 from workflow_engine.nodes import ForEachNode, IfElseNode, IfNode
 
 from .api_call import APICallNode
+from .browser_fetch import BrowserFetchNode
 from .comparison import (
     AndNode,
     EqualNode,
@@ -29,6 +30,7 @@ aceteam_node_registry = (
     # our nodes
     .register_node_class(APICallNode)
     .register_node_class(AndNode)
+    .register_node_class(BrowserFetchNode)
     .register_node_class(EqualNode)
     .register_node_class(GreaterThanNode)
     .register_node_class(GreaterThanEqualNode)

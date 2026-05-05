@@ -4,7 +4,7 @@ import json
 import logging
 from functools import cached_property
 from json import JSONDecodeError
-from typing import Any, Literal, Type
+from typing import Any, ClassVar, Literal, Type
 
 import httpx
 from overrides import override
@@ -89,7 +89,7 @@ class APICallNode(
 ):
     """Node that makes HTTP API calls with Jinja templating for URL and request body."""
 
-    TYPE_INFO = NodeTypeInfo.from_parameter_type(
+    TYPE_INFO: ClassVar[NodeTypeInfo] = NodeTypeInfo.from_parameter_type(
         name="APICall",
         display_name="API Call",
         description="Makes HTTP API calls with Jinja templating for URL and request body.",
@@ -97,7 +97,7 @@ class APICallNode(
         parameter_type=APICallParams,
     )
 
-    type: Literal["APICall"] = "APICall"
+    type: Literal["APICall"] = "APICall"  # pyright: ignore[reportIncompatibleVariableOverride]
 
     @cached_property
     def supports_json_output(self) -> bool:
