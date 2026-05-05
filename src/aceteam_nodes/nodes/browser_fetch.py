@@ -195,9 +195,9 @@ class BrowserFetchNode(
         timeout_s = self.params.timeout.root
 
         parsed = urlparse(url)
-        if not parsed.scheme or not parsed.netloc:
+        if parsed.scheme.lower() not in {"http", "https"} or not parsed.netloc:
             raise WorkflowException(
-                f"Invalid URL: {url!r}",
+                f"Invalid URL: {url!r}. Only http:// and https:// URLs are supported.",
                 level=StakeholderLevel.USER,
             )
 
