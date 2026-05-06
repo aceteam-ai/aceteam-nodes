@@ -90,7 +90,6 @@ class APICallNode(
     """Node that makes HTTP API calls with Jinja templating for URL and request body."""
 
     TYPE_INFO: ClassVar[NodeTypeInfo] = NodeTypeInfo.from_parameter_type(
-        name="APICall",
         display_name="API Call",
         description="Makes HTTP API calls with Jinja templating for URL and request body.",
         version="0.4.0",

@@ -63,7 +63,7 @@ playwright = [
 [package.metadata]
 requires-dist = [
     { name = "aceteam-aep", marker = "extra == 'llm'", specifier = ">=0.2.0" },
-    { name = "aceteam-workflow-engine", specifier = ">=2.0.0rc8" },
+    { name = "aceteam-workflow-engine", specifier = ">=2.0.0rc11" },
     { name = "httpx", specifier = ">=0.28.0" },
     { name = "jinja2", specifier = ">=3.1.0" },
     { name = "lxml", specifier = ">=6.1.0" },
@@ -94,17 +94,21 @@ playwright = [
 
 [[package]]
 name = "aceteam-workflow-engine"
-version = "2.0.0rc8"
+version = "2.0.0rc11"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
+    { name = "click" },
     { name = "dotenv" },
     { name = "networkx" },
     { name = "overrides" },
+    { name = "platformdirs" },
     { name = "pydantic" },
+    { name = "pyyaml" },
+    { name = "tomli-w" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/a8/b0/ae97d6164a500e53aaa497e8ceb09e4af14f44e1dfceb132a55336ce320e/aceteam_workflow_engine-2.0.0rc8.tar.gz", hash = "sha256:fa3844ca97878a5930da61518dec2636642a0884f21f718f1d18c70c226fef2b", size = 187877, upload-time = "2026-04-10T04:19:39.197Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/ed/0c/d51da714e900f113e9f5d60be5e43b659f8071c583b0b1cae9f27e565729/aceteam_workflow_engine-2.0.0rc11.tar.gz", hash = "sha256:c5483e7dc18c2240842bec1ce16e527fb518be6dc35ff597d6bb08b27a386dd5", size = 210682, upload-time = "2026-05-06T15:18:20.859Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/03/d8/203360bda3c880d6914a7eb3bc215e96f064a0d0a386726a31e5e00c4dbc/aceteam_workflow_engine-2.0.0rc8-py3-none-any.whl", hash = "sha256:c9c61505d2a90ca4ff1e5aaa01ec6800a3895daee9c11f99225ccc156127468e", size = 90197, upload-time = "2026-04-10T04:19:37.793Z" },
+    { url = "https://files.pythonhosted.org/packages/33/c0/7cdbb7c5ac70f54e04f1c1de627a8c6f9a61db594fafdb8bee6ec9f05d69/aceteam_workflow_engine-2.0.0rc11-py3-none-any.whl", hash = "sha256:8c1f2167a5ebfeeaacfde0648e985f42c69a22590c7632a75fc8bffbbadad130", size = 101941, upload-time = "2026-05-06T15:18:19.348Z" },
 ]
 
 [[package]]
@@ -269,6 +273,18 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/4b/51/8ade005e5ca5b0d80fb4aff72a3775b325bdc3d27408c8113811a7cbe640/charset_normalizer-3.4.4-cp314-cp314-win_amd64.whl", hash = "sha256:8a6562c3700cce886c5be75ade4a5db4214fda19fede41d9792d100288d8f94c", size = 107104, upload-time = "2025-10-14T04:41:51.051Z" },
     { url = "https://files.pythonhosted.org/packages/da/5f/6b8f83a55bb8278772c5ae54a577f3099025f9ade59d0136ac24a0df4bde/charset_normalizer-3.4.4-cp314-cp314-win_arm64.whl", hash = "sha256:de00632ca48df9daf77a2c65a484531649261ec9f25489917f09e455cb09ddb2", size = 100743, upload-time = "2025-10-14T04:41:52.122Z" },
     { url = "https://files.pythonhosted.org/packages/0a/4c/925909008ed5a988ccbb72dcc897407e5d6d3bd72410d69e051fc0c14647/charset_normalizer-3.4.4-py3-none-any.whl", hash = "sha256:7a32c560861a02ff789ad905a2fe94e3f840803362c84fecf1851cb4cf3dc37f", size = 53402, upload-time = "2025-10-14T04:42:31.76Z" },
+]
+
+[[package]]
+name = "click"
+version = "8.3.3"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "colorama", marker = "sys_platform == 'win32'" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/bb/63/f9e1ea081ce35720d8b92acde70daaedace594dc93b693c869e0d5910718/click-8.3.3.tar.gz", hash = "sha256:398329ad4837b2ff7cbe1dd166a4c0f8900c3ca3a218de04466f38f6497f18a2", size = 328061, upload-time = "2026-04-22T15:11:27.506Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/ae/44/c1221527f6a71a01ec6fbad7fa78f1d50dfa02217385cf0fa3eec7087d59/click-8.3.3-py3-none-any.whl", hash = "sha256:a2bf429bb3033c89fa4936ffb35d5cb471e3719e1f3c8a7c3fff0b8314305613", size = 110502, upload-time = "2026-04-22T15:11:25.044Z" },
 ]
 
 [[package]]
@@ -1134,6 +1150,15 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/47/c6/ee486fd809e357697ee8a44d3d69222b344920433d3b6666ccd9b374630c/tenacity-9.1.4.tar.gz", hash = "sha256:adb31d4c263f2bd041081ab33b498309a57c77f9acf2db65aadf0898179cf93a", size = 49413, upload-time = "2026-02-07T10:45:33.841Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/d7/c1/eb8f9debc45d3b7918a32ab756658a0904732f75e555402972246b0b8e71/tenacity-9.1.4-py3-none-any.whl", hash = "sha256:6095a360c919085f28c6527de529e76a06ad89b23659fa881ae0649b867a9d55", size = 28926, upload-time = "2026-02-07T10:45:32.24Z" },
+]
+
+[[package]]
+name = "tomli-w"
+version = "1.2.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/19/75/241269d1da26b624c0d5e110e8149093c759b7a286138f4efd61a60e75fe/tomli_w-1.2.0.tar.gz", hash = "sha256:2dd14fac5a47c27be9cd4c976af5a12d87fb1f0b4512f81d69cce3b35ae25021", size = 7184, upload-time = "2025-01-15T12:07:24.262Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/c7/18/c86eb8e0202e32dd3df50d43d7ff9854f8e0603945ff398974c1d91ac1ef/tomli_w-1.2.0-py3-none-any.whl", hash = "sha256:188306098d013b691fcadc011abd66727d3c414c571bb01b1a174ba8c983cf90", size = 6675, upload-time = "2025-01-15T12:07:22.074Z" },
 ]
 
 [[package]]

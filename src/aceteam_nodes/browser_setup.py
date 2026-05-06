@@ -1,6 +1,9 @@
 """Interactive Playwright profile setup."""
 
+import asyncio
 import html
+import json
+import sys
 from typing import Any
 
 from .playwright_profile import playwright_profile_context, playwright_profile_dir
@@ -42,3 +45,16 @@ async def run_browser_setup() -> dict[str, Any]:
         "profile": str(profile_dir),
         "message": "Browser profile saved. Headless runs use this directory.",
     }
+
+
+def main() -> None:
+    """Launch Chromium with the shared Ace profile; close the window to save."""
+    try:
+        result = asyncio.run(run_browser_setup())
+        print(json.dumps(result, indent=2, default=str))
+        if not result.get("success", True):
+            sys.exit(1)
+    except Exception as e:
+        error_result = {"success": False, "error": str(e)}
+        print(json.dumps(error_result, indent=2), file=sys.stderr)
+        sys.exit(1)
