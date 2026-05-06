@@ -4,7 +4,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
 
-AceTeam workflow nodes for local CLI execution. Run AceTeam workflows on your own machine with any LLM provider.
+AceTeam workflow node types for local execution. Use the [Ace CLI](https://github.com/aceteam-ai/ace) to run workflows; this package provides the Python runtime and optional tooling such as browser profile setup for Playwright-based nodes.
 
 ## Install
 
@@ -14,15 +14,12 @@ pip install aceteam-nodes
 
 ## Quick Start
 
+Run workflows with the [Ace CLI](https://github.com/aceteam-ai/ace) (`ace workflow run`). This repository ships node implementations and a small helper for Chromium profile setup used by BrowserFetch:
+
 ```bash
-# Run a workflow
-python -m aceteam_nodes.cli run examples/hello-llm.json --input '{"prompt":"Explain AI in one sentence"}'
-
-# List available nodes
-python -m aceteam_nodes.cli list-nodes
-
-# Validate a workflow file
-python -m aceteam_nodes.cli validate examples/hello-llm.json
+# After: uv sync --group playwright && playwright install chromium
+ace-browser-setup
+# equivalent: python -m aceteam_nodes  or  aceteam-nodes
 ```
 
 ## Configuration

@@ -160,11 +160,11 @@ class BrowserFetchNode(
     """Fetches a page in a headless browser and returns its HTML for downstream use (e.g. LLM)."""
 
     TYPE_INFO: ClassVar[NodeTypeInfo] = NodeTypeInfo.from_parameter_type(
-        name="BrowserFetch",
         display_name="Browser Fetch",
         description=(
             "Loads a URL with Playwright and returns the rendered page HTML. Uses the shared "
-            "Chromium profile from `aceteam-nodes browser-setup`. Optional scroll-settling "
+            "Chromium profile from `ace-browser-setup` (or `python -m aceteam_nodes`). "
+            "Optional scroll-settling "
             "nudges every sizable scroll container plus the window, then waits for quiescence "
             "(no scroll progress, all at bottom, short-request idle, DOM stable) before capture."
         ),

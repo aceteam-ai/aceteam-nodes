@@ -14,10 +14,10 @@ The package uses `aceteam-aep` for multi-provider LLM support (OpenAI, Anthropic
 # Setup
 uv sync --group dev               # Install project + dev group (pyright, pytest, ruff, aceteam-aep)
 
-# Run
-python -m aceteam_nodes.cli run examples/hello-llm.json --input '{"prompt":"Hello"}'
-python -m aceteam_nodes.cli list-nodes
-python -m aceteam_nodes.cli validate examples/hello-llm.json
+# Browser profile (Playwright; optional group)
+python -m aceteam_nodes
+# or: ace-browser-setup / aceteam-nodes (console scripts)
+# or: uv run python scripts/browser_setup.py
 
 # Test
 uv run pytest                      # Run all tests
@@ -44,8 +44,9 @@ uv build                           # Creates sdist + wheel in dist/
 ```text
 src/aceteam_nodes/
 ├── __init__.py        # Public API + __version__
-├── __main__.py        # python -m aceteam_nodes entry point
-├── cli.py             # CLI commands (run, validate, list-nodes)
+├── __main__.py        # python -m aceteam_nodes → browser profile setup
+├── browser_setup_cli.py  # Console entry (aceteam-nodes, ace-browser-setup)
+├── browser_setup.py   # Interactive Chromium profile for BrowserFetch
 ├── context.py         # CLIContext — runtime config (model, API keys)
 ├── execution.py       # Workflow execution engine bridge
 ├── utils.py           # Shared utilities
@@ -67,7 +68,7 @@ src/aceteam_nodes/
 
 ### How It Works
 
-- The CLI loads a workflow JSON file and validates it against the schema
+- Workflow runs are triggered by the `ace` CLI or library code (`run_workflow_from_file`, etc.); this package ships no workflow runner CLI
 - Each node type (LLM, APICall, etc.) extends `Node` with a `run()` method
 - `aceteam-workflow-engine`'s `WorkflowEngine` resolves node references, builds the execution graph, and executes nodes in topological order
 - `CLIContext` provides runtime configuration (model, API keys, verbosity)
@@ -80,7 +81,7 @@ The `ace` TypeScript CLI is the user-facing tool. It handles:
 - Config file management (`~/.ace/config.yaml`)
 - Input parsing and output formatting
 
-Execution is delegated to `aceteam-nodes` via `python -m aceteam_nodes.cli`.
+Workflow execution is delegated to this package from `ace` (subprocess); the `aceteam-nodes` console script only runs interactive browser profile setup for Playwright nodes.
 
 ## Conventions
 

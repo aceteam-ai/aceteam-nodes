@@ -42,7 +42,6 @@ class LLMNode(
     """AI text generation node. Uses aceteam-aep for multi-provider support."""
 
     TYPE_INFO: ClassVar[NodeTypeInfo] = NodeTypeInfo.from_parameter_type(
-        name="LLM",
         display_name="LLM",
         description="Send a text prompt to an AI model and get a response.",
         version="1.0.0",

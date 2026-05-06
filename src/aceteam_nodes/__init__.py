@@ -3,22 +3,34 @@
 __version__ = "0.5.1"
 
 
-from .nodes import aceteam_node_registry
-
-
-def __getattr__(name: str):
-    """Lazy imports for modules that require optional dependencies (aceteam-aep)."""
-    if name == "CLIContext":
-        from .context import CLIContext
-
-        return CLIContext
-    if name == "run_workflow_from_file":
-        from .execution import run_workflow_from_file
-
-        return run_workflow_from_file
-    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
-
+from .nodes import (
+    AndNode,
+    APICallNode,
+    BrowserFetchNode,
+    EqualNode,
+    GreaterThanEqualNode,
+    GreaterThanNode,
+    LessThanEqualNode,
+    LessThanNode,
+    LLMNode,
+    NotEqualNode,
+    NotNode,
+    OrNode,
+    XPathExtractNode,
+)
 
 __all__ = [
-    "aceteam_node_registry",
+    "APICallNode",
+    "BrowserFetchNode",
+    "AndNode",
+    "EqualNode",
+    "GreaterThanEqualNode",
+    "GreaterThanNode",
+    "LessThanEqualNode",
+    "LessThanNode",
+    "NotEqualNode",
+    "NotNode",
+    "OrNode",
+    "LLMNode",
+    "XPathExtractNode",
 ]

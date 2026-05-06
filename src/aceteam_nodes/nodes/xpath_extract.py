@@ -12,10 +12,10 @@ from workflow_engine import (
     NodeTypeInfo,
     Params,
     SequenceValue,
+    StakeholderLevel,
     StringValue,
     WorkflowException,
 )
-from workflow_engine.core import StakeholderLevel
 from workflow_engine.files import TextFileValue
 
 
@@ -54,7 +54,6 @@ class XPathExtractNode(
     """Parse HTML and extract a sequence of strings via an XPath expression."""
 
     TYPE_INFO: ClassVar[NodeTypeInfo] = NodeTypeInfo.from_parameter_type(
-        name="XPathExtract",
         display_name="XPath Extract",
         description=(
             "Parses HTML with lxml and evaluates an XPath 1.0 expression. Element matches "

@@ -56,7 +56,6 @@ class LogicalOutput(Data):
 
 class EqualNode(Node[ComparisonInput, ComparisonOutput, ComparisonParams]):
     TYPE_INFO: ClassVar[NodeTypeInfo] = NodeTypeInfo.from_parameter_type(
-        name="Equal",
         display_name="Equal",
         description="Outputs true if the two input values are equal.",
         version="1.0.1",
@@ -88,7 +87,6 @@ class EqualNode(Node[ComparisonInput, ComparisonOutput, ComparisonParams]):
 
 class NotEqualNode(Node[ComparisonInput, ComparisonOutput, ComparisonParams]):
     TYPE_INFO: ClassVar[NodeTypeInfo] = NodeTypeInfo.from_parameter_type(
-        name="NotEqual",
         display_name="Not Equal",
         description="Outputs true if the two input values are not equal.",
         version="1.0.1",
@@ -120,7 +118,6 @@ class NotEqualNode(Node[ComparisonInput, ComparisonOutput, ComparisonParams]):
 
 class GreaterThanNode(Node[ComparisonInput, ComparisonOutput, ComparisonParams]):
     TYPE_INFO: ClassVar[NodeTypeInfo] = NodeTypeInfo.from_parameter_type(
-        name="GreaterThan",
         display_name="Greater Than",
         description="Outputs true if the first value is greater than the second.",
         version="1.0.1",
@@ -152,7 +149,6 @@ class GreaterThanNode(Node[ComparisonInput, ComparisonOutput, ComparisonParams])
 
 class GreaterThanEqualNode(Node[ComparisonInput, ComparisonOutput, ComparisonParams]):
     TYPE_INFO: ClassVar[NodeTypeInfo] = NodeTypeInfo.from_parameter_type(
-        name="GreaterThanEqual",
         display_name="Greater Than or Equal",
         description="Outputs true if the first value is greater than or equal to the second.",
         version="1.0.1",
@@ -184,7 +180,6 @@ class GreaterThanEqualNode(Node[ComparisonInput, ComparisonOutput, ComparisonPar
 
 class LessThanNode(Node[ComparisonInput, ComparisonOutput, ComparisonParams]):
     TYPE_INFO: ClassVar[NodeTypeInfo] = NodeTypeInfo.from_parameter_type(
-        name="LessThan",
         display_name="Less Than",
         description="Outputs true if the first value is less than the second.",
         version="1.0.1",
@@ -216,7 +211,6 @@ class LessThanNode(Node[ComparisonInput, ComparisonOutput, ComparisonParams]):
 
 class LessThanEqualNode(Node[ComparisonInput, ComparisonOutput, ComparisonParams]):
     TYPE_INFO: ClassVar[NodeTypeInfo] = NodeTypeInfo.from_parameter_type(
-        name="LessThanEqual",
         display_name="Less Than or Equal",
         description="Outputs true if the first value is less than or equal to the second.",
         version="1.0.1",
@@ -251,7 +245,6 @@ class LessThanEqualNode(Node[ComparisonInput, ComparisonOutput, ComparisonParams
 
 class AndNode(Node[LogicalInput, LogicalOutput, Empty]):
     TYPE_INFO: ClassVar[NodeTypeInfo] = NodeTypeInfo.from_parameter_type(
-        name="And",
         display_name="Logical AND",
         description="Outputs true only when all inputs are true.",
         version="1.0.1",
@@ -283,7 +276,6 @@ class AndNode(Node[LogicalInput, LogicalOutput, Empty]):
 
 class OrNode(Node[LogicalInput, LogicalOutput, Empty]):
     TYPE_INFO: ClassVar[NodeTypeInfo] = NodeTypeInfo.from_parameter_type(
-        name="Or",
         display_name="Logical OR",
         description="Outputs true when at least one input is true.",
         version="1.0.1",
@@ -315,7 +307,6 @@ class OrNode(Node[LogicalInput, LogicalOutput, Empty]):
 
 class NotNode(Node[NotInput, LogicalOutput, Empty]):
     TYPE_INFO: ClassVar[NodeTypeInfo] = NodeTypeInfo.from_parameter_type(
-        name="Not",
         display_name="Logical NOT",
         description="Returns the opposite of the input value.",
         version="1.0.1",

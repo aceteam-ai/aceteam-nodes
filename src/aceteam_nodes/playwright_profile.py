@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 
 def playwright_profile_dir() -> Path:
     """
-    Directory persisted across `browser-setup` and BrowserFetch.
+    Directory persisted across browser profile setup and BrowserFetch.
     """
     base = Path(user_data_dir("aceteam-nodes", "AceTeam"))
     path = base / "playwright-chromium-profile"
@@ -72,7 +72,7 @@ async def playwright_profile_context(
     ``apply_stealth_async``, why ``--accept-lang``, CDP UA).
 
     Closes the context on exit; if the user already closed the browser (e.g. during
-    ``browser-setup``), closing again is best-effort.
+    interactive profile setup), closing again is best-effort.
     """
     from playwright.async_api import async_playwright
     from playwright_stealth import Stealth

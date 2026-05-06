@@ -12,6 +12,7 @@ from workflow_engine import (
     DataMapping,
     Node,
     WorkflowErrors,
+    WorkflowException,
     WorkflowExecutionResult,
 )
 from workflow_engine.contexts import LocalContext
@@ -125,8 +126,8 @@ class CLIContext(LocalContext):
         input_type: type[Data],
         output_type: type[Data],
         input: DataMapping,
-        exception: Exception,
-    ) -> Exception | DataMapping:
+        exception: WorkflowException,
+    ) -> WorkflowException | DataMapping:
         result = await super().on_node_error(
             node=node,
             input_type=input_type,
