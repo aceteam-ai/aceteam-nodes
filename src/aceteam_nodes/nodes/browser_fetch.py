@@ -12,6 +12,7 @@ from pydantic import Field
 from workflow_engine import (
     Data,
     ExecutionContext,
+    File,
     FloatValue,
     Node,
     NodeTypeInfo,
@@ -20,6 +21,7 @@ from workflow_engine import (
     WorkflowException,
 )
 from workflow_engine.core import StakeholderLevel
+from workflow_engine.files import TextFileValue
 
 from ..playwright_profile import playwright_profile_context
 
@@ -140,7 +142,7 @@ class BrowserFetchParams(Params):
 
 
 class BrowserFetchOutput(Data):
-    html: StringValue = Field(
+    html: TextFileValue = Field(
         title="HTML",
         description=(
             "Full document HTML after load, optional wait_for, and optional scroll-settle capture."
@@ -204,7 +206,7 @@ class BrowserFetchNode(
         try:
             async with playwright_profile_context() as browser_context:
                 page = await browser_context.new_page()
-                return await self._capture_html(
+                html = await self._capture_html(
                     page=page,
                     url=url,
                     timeout_s=timeout_s,
@@ -215,6 +217,10 @@ class BrowserFetchNode(
                 "(`uv sync --group playwright`) and run `playwright install chromium`.",
                 level=StakeholderLevel.OPERATOR,
             ) from e
+
+        file = TextFileValue(File(path=f"{StringValue(html).md5}.html"))
+        file = await file.write_text(context, html)
+        return BrowserFetchOutput(html=file)
 
     @staticmethod
     @contextmanager
@@ -258,7 +264,7 @@ class BrowserFetchNode(
         page: "Page",
         url: str,
         timeout_s: float,
-    ) -> BrowserFetchOutput:
+    ) -> str:
         end_time = time.monotonic() + timeout_s
         page.set_default_timeout(timeout_s * 1_000.0)
         with self._page_inflight_counter(page) as get_inflight:
@@ -274,8 +280,7 @@ class BrowserFetchNode(
                 end_time=end_time,
                 get_inflight=get_inflight,
             )
-        html = await page.content()
-        return BrowserFetchOutput(html=StringValue(html))
+        return await page.content()
 
     async def _scroll_until_settled(
         self,

@@ -17,6 +17,7 @@ from .comparison import (
     OrNode,
 )
 from .llm import LLMNode
+from .xpath_extract import XPathExtractNode
 
 aceteam_node_registry = (
     NodeRegistry.builder()
@@ -40,4 +41,5 @@ aceteam_node_registry = (
     .register_node_class(NotNode)
     .register_node_class(NotEqualNode)
     .register_node_class(OrNode)
+    .register_node_class(XPathExtractNode)
 ).build()
