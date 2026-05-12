@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 import subprocess
 import sys
 
@@ -17,7 +18,10 @@ logger = logging.getLogger(__name__)
 
 mcp = FastMCP(
     "ace-local",
-    instructions="Run AceTeam workflows locally. List nodes, validate and execute DAG-based workflows on your machine.",
+    instructions=(
+        "Run AceTeam workflows locally. List nodes, validate and execute"
+        " DAG-based workflows on your machine."
+    ),
 )
 
 REGISTRY_BASE_URL = (
@@ -173,7 +177,7 @@ async def install_nodes(package: str) -> str:
                 + package
                 + " aceteam-nodes[mcp]",
             })
-        is_uvx = "UV_TOOL_DIR" not in os.environ
+        is_uvx = "UV_TOOL_DIR" in os.environ
         restart_note = (
             f"Installed {package}. Restart the MCP server to load new nodes."
             if not is_uvx
