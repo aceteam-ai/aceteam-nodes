@@ -16,6 +16,10 @@ def __getattr__(name: str):
         from .execution import run_workflow_from_file
 
         return run_workflow_from_file
+    if name == "build_full_registry":
+        from .discovery import build_full_registry
+
+        return build_full_registry
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 

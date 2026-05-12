@@ -16,6 +16,7 @@ dependencies = [
 
 [project.optional-dependencies]
 llm = ["aceteam-aep>=0.2.0"]
+mcp = ["fastmcp>=2.2.11"]
 
 [dependency-groups]
 llm = ["aceteam-aep>=0.2.0"]
@@ -29,6 +30,7 @@ dev = [
 
 [project.scripts]
 aceteam-nodes = "aceteam_nodes.cli:main"
+ace-local-mcp = "aceteam_nodes.mcp_server:main"
 
 [build-system]
 requires = ["hatchling"]
