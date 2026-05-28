@@ -4,19 +4,18 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-`aceteam-nodes` is a Python package that implements workflow node types for local CLI execution. It provides the runtime that powers the `ace` CLI — when a user runs `ace workflow run`, the TypeScript CLI delegates execution to this package via subprocess.
+`aceteam-nodes` is a Python package that publishes a bundle of workflow node types (LLM, HTTP, browser fetch, XPath extraction, comparisons) for `aceteam-workflow-engine`. It is a **node-source package**, not a runner: it ships no CLI and no execution engine. It advertises its nodes through the `aceteam_workflow_engine.nodes` entry-point group, and an operator mounts them into an engine with `wengine install aceteam-nodes`.
 
-The package uses `aceteam-aep` for multi-provider LLM support (OpenAI, Anthropic, Google, xAI, Ollama) via direct SDK calls, and `aceteam-workflow-engine` for DAG-based workflow graph execution.
+The package uses `aceteam-aep` for multi-provider LLM support (OpenAI, Anthropic, Google, xAI, Ollama) via direct SDK calls, and depends on `aceteam-workflow-engine` for the `Node` base class and value types.
 
 ## Development Commands
 
 ```bash
 # Setup
-uv sync --group dev               # Install project + dev group (pyright, pytest, ruff, aceteam-aep)
+uv sync --group dev               # Install project + dev group (pyright, pytest, ruff, aceteam-aep, playwright, lxml)
 
-# Browser profile (Playwright; optional group)
-python -m aceteam_nodes
-# or: ace-browser-setup / aceteam-nodes (console scripts)
+# Browser profile (Playwright; for BrowserFetch)
+ace-browser-setup                 # console script
 # or: uv run python scripts/browser_setup.py
 
 # Test
@@ -43,45 +42,39 @@ uv build                           # Creates sdist + wheel in dist/
 
 ```text
 src/aceteam_nodes/
-├── __init__.py        # Public API + __version__
-├── __main__.py        # python -m aceteam_nodes → browser profile setup
-├── browser_setup_cli.py  # Console entry (aceteam-nodes, ace-browser-setup)
-├── browser_setup.py   # Interactive Chromium profile for BrowserFetch
-├── context.py         # CLIContext — runtime config (model, API keys)
-├── execution.py       # Workflow execution engine bridge
-├── utils.py           # Shared utilities
-└── nodes/             # Node type implementations
-    ├── __init__.py    # Node registration into aceteam_node_registry
-    ├── api_call.py    # HTTP requests with Jinja templating
-    ├── comparison.py  # Equal, NotEqual, GreaterThan, LessThan, And, Or, Not
-    └── llm.py         # AI text generation via aceteam-aep (direct SDK calls)
+├── __init__.py            # Public API + __version__ (re-exports node classes)
+├── browser_setup.py       # Interactive Chromium profile setup for BrowserFetch (ace-browser-setup)
+├── playwright_profile.py  # Playwright profile location/management helpers
+├── context.py             # CLIContext — a LocalContext subclass (model, API keys)
+├── utils.py               # Shared utilities
+└── nodes/                 # Node type implementations
+    ├── __init__.py        # Re-exports node classes
+    ├── api_call.py        # HTTP requests with Jinja templating (APICall)
+    ├── browser_fetch.py   # Authenticated web fetch via Playwright (BrowserFetch)
+    ├── xpath_extract.py   # XPath extraction over HTML/XML (XPathExtract)
+    ├── comparison.py      # Equal, NotEqual, GreaterThan(Equal), LessThan(Equal), And, Or, Not
+    └── llm.py             # AI text generation via aceteam-aep (LLM)
 ```
 
 ### Key Dependencies
 
-- `aceteam-workflow-engine` — DAG execution engine (shared with the platform)
-- `aceteam-aep` — Multi-provider LLM abstraction (direct SDK calls, no native deps)
-- `httpx` — Async HTTP client (for API call nodes)
-- `jinja2` — Template rendering in API call nodes
-- `pydantic` — Data validation
-- `pyyaml` — Config file parsing
+- `aceteam-workflow-engine` — provides the `Node` base class, value types, and the engine that runs these nodes
+- `aceteam-aep` — multi-provider LLM abstraction (direct SDK calls); `llm` extra
+- `httpx` — async HTTP client (APICall)
+- `jinja2` — template rendering (APICall)
+- `pydantic` — data validation
+- `playwright` / `playwright-stealth` — `browser-fetch` extra (BrowserFetch)
+- `lxml` — `xpath-extract` extra (XPathExtract)
 
-### How It Works
+### How node distribution works
 
-- Workflow runs are triggered by the `ace` CLI or library code (`run_workflow_from_file`, etc.); this package ships no workflow runner CLI
-- Each node type (LLM, APICall, etc.) extends `Node` with a `run()` method
-- `aceteam-workflow-engine`'s `WorkflowEngine` resolves node references, builds the execution graph, and executes nodes in topological order
-- `CLIContext` provides runtime configuration (model, API keys, verbosity)
+The engine discovers nodes **only** through the `aceteam_workflow_engine.nodes` entry-point group declared in `pyproject.toml` — there is no import-time auto-registration. Each entry maps a node's `type` discriminator (e.g. `LLM`) to its `module:Class`, with an optional `[extra]` suffix naming the optional-dependency that node needs (e.g. `LLM = "...:LLMNode [llm]"`). An operator runs `wengine install aceteam-nodes` (or hand-edits their `engine.yaml`) to mount these into an engine; the engine reads the table from package metadata without importing the modules. See `aceteam-workflow-engine`'s `docs/node-distribution.md`.
 
-### Relationship to ace CLI
+When adding a node, add three things in lockstep: the class (with its `type: Literal[...]` and `TYPE_INFO`), the entry-point line in `pyproject.toml`, and the expected name in `tests/test_entry_points.py`.
 
-The `ace` TypeScript CLI is the user-facing tool. It handles:
+### Conventions for extras
 
-- Python environment detection and `aceteam-nodes` installation
-- Config file management (`~/.ace/config.yaml`)
-- Input parsing and output formatting
-
-Workflow execution is delegated to this package from `ace` (subprocess); the `aceteam-nodes` console script only runs interactive browser profile setup for Playwright nodes.
+Each node needing a heavy/optional dependency gets **one extra named after the node** (`browser-fetch`, `xpath-extract`, `llm`), so a `pyproject.toml` line like `aceteam-nodes[browser-fetch]` reads as "BrowserFetch is installed." Comparison and APICall nodes need no extra (their deps are core).
 
 ## Conventions
 
@@ -89,5 +82,5 @@ Workflow execution is delegated to this package from `ace` (subprocess); the `ac
 - Ruff for linting and formatting (line length 100)
 - Pyright for type checking (basic mode)
 - pytest with asyncio auto mode
-- All node types go in `nodes/` directory and extend `AceTeamNode`
+- All node types go in `nodes/` and extend `workflow_engine.Node`
 - Version is tracked in both `pyproject.toml` and `__init__.py`
