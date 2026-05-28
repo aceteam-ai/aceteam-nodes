@@ -13,20 +13,23 @@ dependencies = [
     "pyyaml>=6.0",
     "pydantic>=2.11.0",
     "overrides>=7.7.0",
-    "lxml>=6.1.0",
 ]
 
+# One extra per node that needs heavy/optional deps, named after the node, so
+# `aceteam-nodes[browser-fetch]` reads as "BrowserFetch is installed" — the
+# convention the engine's entry-point extras syntax expects (see the
+# `[extra]` suffixes in the node entry points below).
 [project.optional-dependencies]
 llm = ["aceteam-aep>=0.2.0"]
-playwright = ["playwright>=1.47.0", "playwright-stealth>=2.0.3"]
+browser-fetch = ["playwright>=1.47.0", "playwright-stealth>=2.0.3"]
+xpath-extract = ["lxml>=6.1.0"]
 
 [dependency-groups]
-llm = ["aceteam-aep>=0.2.0"]
-playwright = ["playwright>=1.47.0", "playwright-stealth>=2.0.3"]
 dev = [
     "aceteam-aep>=0.2.0",
     "playwright>=1.47.0",
     "playwright-stealth>=2.0.3",
+    "lxml>=6.1.0",
     "pytest>=8.0",
     "pytest-asyncio>=0.24",
     "ruff>=0.8",
@@ -35,6 +38,26 @@ dev = [
 
 [project.scripts]
 ace-browser-setup = "aceteam_nodes.browser_setup:main"
+
+# Advertise each node to the workflow engine via the standard entry-point
+# group. The engine discovers nodes only through this table (read from package
+# metadata without importing); `wengine install aceteam-nodes` reads it too.
+# Each entry name is the node's `type` discriminator; the `[extra]` suffix
+# names the optional-dependency a node needs.
+[project.entry-points."aceteam_workflow_engine.nodes"]
+LLM = "aceteam_nodes.nodes.llm:LLMNode [llm]"
+APICall = "aceteam_nodes.nodes.api_call:APICallNode"
+BrowserFetch = "aceteam_nodes.nodes.browser_fetch:BrowserFetchNode [browser-fetch]"
+XPathExtract = "aceteam_nodes.nodes.xpath_extract:XPathExtractNode [xpath-extract]"
+Equal = "aceteam_nodes.nodes.comparison:EqualNode"
+NotEqual = "aceteam_nodes.nodes.comparison:NotEqualNode"
+GreaterThan = "aceteam_nodes.nodes.comparison:GreaterThanNode"
+GreaterThanEqual = "aceteam_nodes.nodes.comparison:GreaterThanEqualNode"
+LessThan = "aceteam_nodes.nodes.comparison:LessThanNode"
+LessThanEqual = "aceteam_nodes.nodes.comparison:LessThanEqualNode"
+And = "aceteam_nodes.nodes.comparison:AndNode"
+Or = "aceteam_nodes.nodes.comparison:OrNode"
+Not = "aceteam_nodes.nodes.comparison:NotNode"
 
 [build-system]
 requires = ["hatchling"]

@@ -26,7 +26,6 @@ dependencies = [
     { name = "aceteam-workflow-engine" },
     { name = "httpx" },
     { name = "jinja2" },
-    { name = "lxml" },
     { name = "overrides" },
     { name = "platformdirs" },
     { name = "pydantic" },
@@ -34,30 +33,27 @@ dependencies = [
 ]
 
 [package.optional-dependencies]
+browser-fetch = [
+    { name = "playwright" },
+    { name = "playwright-stealth" },
+]
 llm = [
     { name = "aceteam-aep" },
 ]
-playwright = [
-    { name = "playwright" },
-    { name = "playwright-stealth" },
+xpath-extract = [
+    { name = "lxml" },
 ]
 
 [package.dev-dependencies]
 dev = [
     { name = "aceteam-aep" },
+    { name = "lxml" },
     { name = "playwright" },
     { name = "playwright-stealth" },
     { name = "pyright" },
     { name = "pytest" },
     { name = "pytest-asyncio" },
     { name = "ruff" },
-]
-llm = [
-    { name = "aceteam-aep" },
-]
-playwright = [
-    { name = "playwright" },
-    { name = "playwright-stealth" },
 ]
 
 [package.metadata]
@@ -66,30 +62,26 @@ requires-dist = [
     { name = "aceteam-workflow-engine", specifier = ">=2.0.0rc11" },
     { name = "httpx", specifier = ">=0.28.0" },
     { name = "jinja2", specifier = ">=3.1.0" },
-    { name = "lxml", specifier = ">=6.1.0" },
+    { name = "lxml", marker = "extra == 'xpath-extract'", specifier = ">=6.1.0" },
     { name = "overrides", specifier = ">=7.7.0" },
     { name = "platformdirs", specifier = ">=4.0.0" },
-    { name = "playwright", marker = "extra == 'playwright'", specifier = ">=1.47.0" },
-    { name = "playwright-stealth", marker = "extra == 'playwright'", specifier = ">=2.0.3" },
+    { name = "playwright", marker = "extra == 'browser-fetch'", specifier = ">=1.47.0" },
+    { name = "playwright-stealth", marker = "extra == 'browser-fetch'", specifier = ">=2.0.3" },
     { name = "pydantic", specifier = ">=2.11.0" },
     { name = "pyyaml", specifier = ">=6.0" },
 ]
-provides-extras = ["llm", "playwright"]
+provides-extras = ["llm", "browser-fetch", "xpath-extract"]
 
 [package.metadata.requires-dev]
 dev = [
     { name = "aceteam-aep", specifier = ">=0.2.0" },
+    { name = "lxml", specifier = ">=6.1.0" },
     { name = "playwright", specifier = ">=1.47.0" },
     { name = "playwright-stealth", specifier = ">=2.0.3" },
     { name = "pyright", specifier = ">=1.1" },
     { name = "pytest", specifier = ">=8.0" },
     { name = "pytest-asyncio", specifier = ">=0.24" },
     { name = "ruff", specifier = ">=0.8" },
-]
-llm = [{ name = "aceteam-aep", specifier = ">=0.2.0" }]
-playwright = [
-    { name = "playwright", specifier = ">=1.47.0" },
-    { name = "playwright-stealth", specifier = ">=2.0.3" },
 ]
 
 [[package]]
