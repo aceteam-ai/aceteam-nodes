@@ -26,7 +26,6 @@ dependencies = [
     { name = "aceteam-workflow-engine" },
     { name = "httpx" },
     { name = "jinja2" },
-    { name = "lxml" },
     { name = "overrides" },
     { name = "platformdirs" },
     { name = "pydantic" },
@@ -34,17 +33,21 @@ dependencies = [
 ]
 
 [package.optional-dependencies]
+browser-fetch = [
+    { name = "playwright" },
+    { name = "playwright-stealth" },
+]
 llm = [
     { name = "aceteam-aep" },
 ]
-playwright = [
-    { name = "playwright" },
-    { name = "playwright-stealth" },
+xpath-extract = [
+    { name = "lxml" },
 ]
 
 [package.dev-dependencies]
 dev = [
     { name = "aceteam-aep" },
+    { name = "lxml" },
     { name = "playwright" },
     { name = "playwright-stealth" },
     { name = "pyright" },
@@ -52,33 +55,27 @@ dev = [
     { name = "pytest-asyncio" },
     { name = "ruff" },
 ]
-llm = [
-    { name = "aceteam-aep" },
-]
-playwright = [
-    { name = "playwright" },
-    { name = "playwright-stealth" },
-]
 
 [package.metadata]
 requires-dist = [
     { name = "aceteam-aep", marker = "extra == 'llm'", specifier = ">=0.2.0" },
-    { name = "aceteam-workflow-engine", specifier = ">=2.0.0rc11" },
+    { name = "aceteam-workflow-engine", specifier = ">=2.0.0rc12" },
     { name = "httpx", specifier = ">=0.28.0" },
     { name = "jinja2", specifier = ">=3.1.0" },
-    { name = "lxml", specifier = ">=6.1.0" },
+    { name = "lxml", marker = "extra == 'xpath-extract'", specifier = ">=6.1.0" },
     { name = "overrides", specifier = ">=7.7.0" },
     { name = "platformdirs", specifier = ">=4.0.0" },
-    { name = "playwright", marker = "extra == 'playwright'", specifier = ">=1.47.0" },
-    { name = "playwright-stealth", marker = "extra == 'playwright'", specifier = ">=2.0.3" },
+    { name = "playwright", marker = "extra == 'browser-fetch'", specifier = ">=1.47.0" },
+    { name = "playwright-stealth", marker = "extra == 'browser-fetch'", specifier = ">=2.0.3" },
     { name = "pydantic", specifier = ">=2.11.0" },
     { name = "pyyaml", specifier = ">=6.0" },
 ]
-provides-extras = ["llm", "playwright"]
+provides-extras = ["llm", "browser-fetch", "xpath-extract"]
 
 [package.metadata.requires-dev]
 dev = [
     { name = "aceteam-aep", specifier = ">=0.2.0" },
+    { name = "lxml", specifier = ">=6.1.0" },
     { name = "playwright", specifier = ">=1.47.0" },
     { name = "playwright-stealth", specifier = ">=2.0.3" },
     { name = "pyright", specifier = ">=1.1" },
@@ -86,29 +83,24 @@ dev = [
     { name = "pytest-asyncio", specifier = ">=0.24" },
     { name = "ruff", specifier = ">=0.8" },
 ]
-llm = [{ name = "aceteam-aep", specifier = ">=0.2.0" }]
-playwright = [
-    { name = "playwright", specifier = ">=1.47.0" },
-    { name = "playwright-stealth", specifier = ">=2.0.3" },
-]
 
 [[package]]
 name = "aceteam-workflow-engine"
-version = "2.0.0rc11"
+version = "2.0.0rc12"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "click" },
     { name = "dotenv" },
     { name = "networkx" },
     { name = "overrides" },
-    { name = "platformdirs" },
+    { name = "packaging" },
     { name = "pydantic" },
-    { name = "pyyaml" },
+    { name = "ruamel-yaml" },
     { name = "tomli-w" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/ed/0c/d51da714e900f113e9f5d60be5e43b659f8071c583b0b1cae9f27e565729/aceteam_workflow_engine-2.0.0rc11.tar.gz", hash = "sha256:c5483e7dc18c2240842bec1ce16e527fb518be6dc35ff597d6bb08b27a386dd5", size = 210682, upload-time = "2026-05-06T15:18:20.859Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/46/b4/937240ede7dd3c627a2ccd8c7346ac73d7dbfa47ac230ece97b859954567/aceteam_workflow_engine-2.0.0rc12.tar.gz", hash = "sha256:6c6d089f782f4fb4966add0e9060f165a491bf79ccc11d836ad6f3a54d04b545", size = 261267, upload-time = "2026-05-29T08:10:52.838Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/33/c0/7cdbb7c5ac70f54e04f1c1de627a8c6f9a61db594fafdb8bee6ec9f05d69/aceteam_workflow_engine-2.0.0rc11-py3-none-any.whl", hash = "sha256:8c1f2167a5ebfeeaacfde0648e985f42c69a22590c7632a75fc8bffbbadad130", size = 101941, upload-time = "2026-05-06T15:18:19.348Z" },
+    { url = "https://files.pythonhosted.org/packages/e5/2c/6570236278938ecd51b682c4f85d9abcaede40ed7e20729aec519fc4a7d2/aceteam_workflow_engine-2.0.0rc12-py3-none-any.whl", hash = "sha256:620ebc57bbd4f06d3b226c0634e0717236273059137355b968044124965664de", size = 123527, upload-time = "2026-05-29T08:10:51.409Z" },
 ]
 
 [[package]]
@@ -1106,6 +1098,15 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/da/8a/22b7beea3ee0d44b1916c0c1cb0ee3af23b700b6da9f04991899d0c555d4/rsa-4.9.1.tar.gz", hash = "sha256:e7bdbfdb5497da4c07dfd35530e1a902659db6ff241e39d9953cad06ebd0ae75", size = 29034, upload-time = "2025-04-16T09:51:18.218Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/64/8d/0133e4eb4beed9e425d9a98ed6e081a55d195481b7632472be1af08d2f6b/rsa-4.9.1-py3-none-any.whl", hash = "sha256:68635866661c6836b8d39430f97a996acbd61bfa49406748ea243539fe239762", size = 34696, upload-time = "2025-04-16T09:51:17.142Z" },
+]
+
+[[package]]
+name = "ruamel-yaml"
+version = "0.19.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/c7/3b/ebda527b56beb90cb7652cb1c7e4f91f48649fbcd8d2eb2fb6e77cd3329b/ruamel_yaml-0.19.1.tar.gz", hash = "sha256:53eb66cd27849eff968ebf8f0bf61f46cdac2da1d1f3576dd4ccee9b25c31993", size = 142709, upload-time = "2026-01-02T16:50:31.84Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/b8/0c/51f6841f1d84f404f92463fc2b1ba0da357ca1e3db6b7fbda26956c3b82a/ruamel_yaml-0.19.1-py3-none-any.whl", hash = "sha256:27592957fedf6e0b62f281e96effd28043345e0e66001f97683aa9a40c667c93", size = 118102, upload-time = "2026-01-02T16:50:29.201Z" },
 ]
 
 [[package]]
