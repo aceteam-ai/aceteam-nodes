@@ -85,6 +85,9 @@ uv run pyright
 
 # Build
 uv build
+
+# Release
+scripts/release.sh -v vX.Y.Z
 ```
 
 ## Related
