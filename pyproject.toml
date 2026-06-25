@@ -45,18 +45,9 @@ ace-browser-setup = "aceteam_nodes.browser_setup:main"
 # Each entry name is the node's `type` discriminator; the `[extra]` suffix
 # names the optional-dependency a node needs.
 [project.entry-points."aceteam_workflow_engine.nodes"]
-And = "aceteam_nodes.nodes.comparison:AndNode"
 APICall = "aceteam_nodes.nodes.api_call:APICallNode"
 BrowserFetch = "aceteam_nodes.nodes.browser_fetch:BrowserFetchNode [browser-fetch]"
-Equal = "aceteam_nodes.nodes.comparison:EqualNode"
-GreaterThan = "aceteam_nodes.nodes.comparison:GreaterThanNode"
-GreaterThanEqual = "aceteam_nodes.nodes.comparison:GreaterThanEqualNode"
-LessThan = "aceteam_nodes.nodes.comparison:LessThanNode"
-LessThanEqual = "aceteam_nodes.nodes.comparison:LessThanEqualNode"
 LLM = "aceteam_nodes.nodes.llm:LLMNode [llm]"
-Not = "aceteam_nodes.nodes.comparison:NotNode"
-NotEqual = "aceteam_nodes.nodes.comparison:NotEqualNode"
-Or = "aceteam_nodes.nodes.comparison:OrNode"
 XPathExtract = "aceteam_nodes.nodes.xpath_extract:XPathExtractNode [xpath-extract]"
 
 [build-system]
