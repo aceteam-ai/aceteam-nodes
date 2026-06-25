@@ -51,6 +51,7 @@ APICall = "aceteam_nodes.nodes.api_call:APICallNode"
 Shell = "aceteam_nodes.nodes.shell:ShellNode"
 BrowserFetch = "aceteam_nodes.nodes.browser_fetch:BrowserFetchNode [browser-fetch]"
 LLM = "aceteam_nodes.nodes.llm:LLMNode [llm]"
+SlackSendMessage = "aceteam_nodes.nodes.slack_send:SlackSendMessageNode"
 TelegramSendMessage = "aceteam_nodes.nodes.telegram_send:TelegramSendMessageNode [telegram-send]"
 XPathExtract = "aceteam_nodes.nodes.xpath_extract:XPathExtractNode [xpath-extract]"
 
