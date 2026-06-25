@@ -1,10 +1,16 @@
 {
     "cSpell.words": [
         "aceteam",
+        "asyncio",
+        "httpx",
         "lxml",
         "Ollama",
+        "platformdirs",
+        "pydantic",
         "pyproject",
         "pytest",
+        "pyyaml",
+        "testpaths",
         "wengine"
     ]
 }

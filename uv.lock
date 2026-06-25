@@ -1,6 +1,10 @@
 version = 1
 revision = 3
 requires-python = ">=3.12"
+resolution-markers = [
+    "python_full_version >= '3.14'",
+    "python_full_version < '3.14'",
+]
 
 [[package]]
 name = "aceteam-aep"
@@ -40,6 +44,9 @@ browser-fetch = [
 llm = [
     { name = "aceteam-aep" },
 ]
+telegram-send = [
+    { name = "python-telegram-bot" },
+]
 xpath-extract = [
     { name = "lxml" },
 ]
@@ -53,6 +60,7 @@ dev = [
     { name = "pyright" },
     { name = "pytest" },
     { name = "pytest-asyncio" },
+    { name = "python-telegram-bot" },
     { name = "ruff" },
 ]
 
@@ -68,9 +76,10 @@ requires-dist = [
     { name = "playwright", marker = "extra == 'browser-fetch'", specifier = ">=1.47.0" },
     { name = "playwright-stealth", marker = "extra == 'browser-fetch'", specifier = ">=2.0.3" },
     { name = "pydantic", specifier = ">=2.11.0" },
+    { name = "python-telegram-bot", marker = "extra == 'telegram-send'", specifier = ">=21.0" },
     { name = "pyyaml", specifier = ">=6.0" },
 ]
-provides-extras = ["llm", "browser-fetch", "xpath-extract"]
+provides-extras = ["llm", "browser-fetch", "xpath-extract", "telegram-send"]
 
 [package.metadata.requires-dev]
 dev = [
@@ -81,6 +90,7 @@ dev = [
     { name = "pyright", specifier = ">=1.1" },
     { name = "pytest", specifier = ">=8.0" },
     { name = "pytest-asyncio", specifier = ">=0.24" },
+    { name = "python-telegram-bot", specifier = ">=21.0" },
     { name = "ruff", specifier = ">=0.8" },
 ]
 
@@ -1025,6 +1035,19 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/f0/26/19cadc79a718c5edbec86fd4919a6b6d3f681039a2f6d66d14be94e75fb9/python_dotenv-1.2.1.tar.gz", hash = "sha256:42667e897e16ab0d66954af0e60a9caa94f0fd4ecf3aaf6d2d260eec1aa36ad6", size = 44221, upload-time = "2025-10-26T15:12:10.434Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/14/1b/a298b06749107c305e1fe0f814c6c74aea7b2f1e10989cb30f544a1b3253/python_dotenv-1.2.1-py3-none-any.whl", hash = "sha256:b81ee9561e9ca4004139c6cbba3a238c32b03e4894671e181b671e8cb8425d61", size = 21230, upload-time = "2025-10-26T15:12:09.109Z" },
+]
+
+[[package]]
+name = "python-telegram-bot"
+version = "22.8"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "httpcore", marker = "python_full_version >= '3.14'" },
+    { name = "httpx" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/ba/77/153517bb1ac1bba670c6fb1dbf09e1fd0730494b1705934e715391413a0d/python_telegram_bot-22.8.tar.gz", hash = "sha256:f9d3847fcb23ee603477e442800b33bb4adf851a73e0619d2050be879decf1ef", size = 1551700, upload-time = "2026-06-12T08:10:29.1Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/60/7c/ed7d4dd94280bd434173cae9f7a7aedaaab9af128ae4f494423a5687c820/python_telegram_bot-22.8-py3-none-any.whl", hash = "sha256:42373918097f1b837cc4e717d588c19ea79651497ec712bb5b0c76e5e63c50e1", size = 769397, upload-time = "2026-06-12T08:10:27.066Z" },
 ]
 
 [[package]]

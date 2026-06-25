@@ -70,8 +70,8 @@ def dump_data_mapping(mapping: DataMapping) -> Mapping[str, Any]:
     return {name: value.model_dump() for name, value in mapping.items()}
 
 
-__all__ = [
+__all__ = (
     "dump_data_mapping",
     "format_jinja",
     "format_string",
-]
+)

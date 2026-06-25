@@ -103,7 +103,7 @@ async def playwright_profile_context(
                 await browser_context.close()
 
 
-__all__ = [
+__all__ = (
     "playwright_profile_context",
     "playwright_profile_dir",
-]
+)

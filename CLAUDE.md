@@ -69,7 +69,7 @@ src/aceteam_nodes/
 
 The engine discovers nodes **only** through the `aceteam_workflow_engine.nodes` entry-point group declared in `pyproject.toml` — there is no import-time auto-registration. Each entry maps a node's `type` discriminator (e.g. `LLM`) to its `module:Class`, with an optional `[extra]` suffix naming the optional-dependency that node needs (e.g. `LLM = "...:LLMNode [llm]"`). An operator runs `wengine install aceteam-nodes` (or hand-edits their `engine.yaml`) to mount these into an engine; the engine reads the table from package metadata without importing the modules. See `aceteam-workflow-engine`'s `docs/node-distribution.md`.
 
-When adding a node, add three things in lockstep: the class (with its `type: Literal[...]` and `TYPE_INFO`), the entry-point line in `pyproject.toml`, and the expected name in `tests/test_entry_points.py`.
+When adding a node, add four things in lockstep: the class (with its `TYPE_INFO`), the export in `nodes/__init__.py`, the export in `__init__.py`, and the entry-point line in `pyproject.toml`.
 
 ### Conventions for extras
 

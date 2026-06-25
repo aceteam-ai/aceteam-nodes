@@ -10,9 +10,9 @@ from .nodes import (
     XPathExtractNode,
 )
 
-__all__ = [
+__all__ = (
     "APICallNode",
     "BrowserFetchNode",
     "LLMNode",
     "XPathExtractNode",
-]
+)

@@ -23,6 +23,7 @@ dependencies = [
 llm = ["aceteam-aep>=0.2.0"]
 browser-fetch = ["playwright>=1.47.0", "playwright-stealth>=2.0.3"]
 xpath-extract = ["lxml>=6.1.0"]
+telegram-send = ["python-telegram-bot>=21.0"]
 
 [dependency-groups]
 dev = [
@@ -33,6 +34,7 @@ dev = [
     "pyright>=1.1",
     "pytest-asyncio>=0.24",
     "pytest>=8.0",
+    "python-telegram-bot>=21.0",
     "ruff>=0.8",
 ]
 
@@ -48,6 +50,7 @@ ace-browser-setup = "aceteam_nodes.browser_setup:main"
 APICall = "aceteam_nodes.nodes.api_call:APICallNode"
 BrowserFetch = "aceteam_nodes.nodes.browser_fetch:BrowserFetchNode [browser-fetch]"
 LLM = "aceteam_nodes.nodes.llm:LLMNode [llm]"
+TelegramSendMessage = "aceteam_nodes.nodes.telegram_send:TelegramSendMessageNode [telegram-send]"
 XPathExtract = "aceteam_nodes.nodes.xpath_extract:XPathExtractNode [xpath-extract]"
 
 [build-system]

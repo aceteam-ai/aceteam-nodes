@@ -1,6 +1,6 @@
 """LLM node - AI text generation via aceteam-aep."""
 
-from typing import ClassVar, Literal, Type
+from typing import ClassVar, Type
 
 from overrides import override
 from pydantic import Field
@@ -48,8 +48,6 @@ class LLMNode(
         parameter_type=LLMNodeParams,
     )
 
-    type: Literal["LLM"] = "LLM"  # pyright: ignore[reportIncompatibleVariableOverride]
-
     @classmethod
     @override
     def static_input_type(cls) -> Type[LLMNodeInput]:
@@ -83,9 +81,9 @@ class LLMNode(
         return output_type(response=StringValue(response_text))
 
 
-__all__ = [
+__all__ = (
     "LLMNode",
     "LLMNodeInput",
     "LLMNodeOutput",
     "LLMNodeParams",
-]
+)
