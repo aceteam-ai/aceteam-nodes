@@ -6,6 +6,7 @@ __version__ = "6.1.0"
 from .nodes import (
     APICallNode,
     BrowserFetchNode,
+    DiscordSendMessageNode,
     LLMNode,
     ShellNode,
     SlackSendMessageNode,
@@ -16,6 +17,7 @@ from .nodes import (
 __all__ = (
     "APICallNode",
     "BrowserFetchNode",
+    "DiscordSendMessageNode",
     "LLMNode",
     "ShellNode",
     "SlackSendMessageNode",
