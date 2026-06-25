@@ -1,19 +1,13 @@
-"""Telegram Send Message node - sends a message via the Telegram Bot API.
-
-Mirrors the AceTeam ``telegram_send_message`` MCP tool as a self-contained
-workflow node. The bot token is resolved from the execution environment via
-``context.get_env`` (never baked into the workflow definition), so the only
-platform coupling is whatever the context chooses to back ``get_env`` with.
-"""
+"""Telegram Send Message node - sends a message via the Telegram Bot API."""
 
 import logging
-from typing import ClassVar, Literal, Type
+from typing import ClassVar, Type
 
-import httpx
 from overrides import override
 from pydantic import Field
+from telegram import Bot
+from telegram.error import BadRequest, NetworkError, TelegramError
 from workflow_engine import (
-    BooleanValue,
     Data,
     ExecutionContext,
     IntegerValue,
@@ -27,18 +21,10 @@ from workflow_engine.core import StakeholderLevel
 
 logger = logging.getLogger(__name__)
 
-_TELEGRAM_API_BASE = "https://api.telegram.org"
+_TELEGRAM_TOKEN_ENV_VAR = "TELEGRAM_BOT_TOKEN"
 
 
 class TelegramSendMessageParams(Params):
-    bot_token_env: StringValue = Field(
-        title="Bot Token Env Var",
-        description=(
-            "Name of the environment variable holding the Telegram bot token. "
-            "The token itself is resolved at runtime, not stored in the workflow."
-        ),
-        default=StringValue("TELEGRAM_BOT_TOKEN"),
-    )
     timeout: IntegerValue = Field(
         title="Timeout",
         description="Request timeout in seconds.",
@@ -58,10 +44,6 @@ class TelegramSendMessageInput(Data):
 
 
 class TelegramSendMessageOutput(Data):
-    ok: BooleanValue = Field(
-        title="OK",
-        description="Whether Telegram accepted the message.",
-    )
     message_id: IntegerValue = Field(
         title="Message ID",
         description="The id of the sent message.",
@@ -84,8 +66,6 @@ class TelegramSendMessageNode(
         parameter_type=TelegramSendMessageParams,
     )
 
-    type: Literal["TelegramSendMessage"] = "TelegramSendMessage"  # pyright: ignore[reportIncompatibleVariableOverride]
-
     @classmethod
     @override
     def static_input_type(cls) -> Type[TelegramSendMessageInput]:
@@ -98,46 +78,46 @@ class TelegramSendMessageNode(
 
     @override
     async def run(
-        self, context: ExecutionContext, input: TelegramSendMessageInput
+        self,
+        context: ExecutionContext,
+        input: TelegramSendMessageInput,
     ) -> TelegramSendMessageOutput:
-        token = await context.get_env(self.params.bot_token_env.root)
-        url = f"{_TELEGRAM_API_BASE}/bot{token}/sendMessage"
-        payload = {"chat_id": input.chat_id.root, "text": input.text.root}
+        token = context.get_env(_TELEGRAM_TOKEN_ENV_VAR)
+        timeout = float(self.params.timeout.root)
 
         try:
-            async with httpx.AsyncClient(timeout=self.params.timeout.root) as client:
-                response = await client.post(url, json=payload)
-        except httpx.RequestError as e:
+            async with Bot(token=token) as bot:
+                message = await bot.send_message(
+                    chat_id=input.chat_id.root,
+                    text=input.text.root,
+                    read_timeout=timeout,
+                    write_timeout=timeout,
+                    connect_timeout=timeout,
+                )
+        except BadRequest as e:
             raise WorkflowException(
-                f"Failed to reach Telegram: {e}",
+                f"Telegram rejected the message: {e.message}",
+                level=StakeholderLevel.USER,
+            ) from e
+        except NetworkError as e:
+            raise WorkflowException(
+                f"Failed to reach Telegram: {e.message}",
+                level=StakeholderLevel.USER,
+            ) from e
+        except TelegramError as e:
+            raise WorkflowException(
+                f"Telegram rejected the message: {e.message}",
                 level=StakeholderLevel.USER,
             ) from e
 
-        try:
-            body = response.json()
-        except ValueError as e:
-            raise WorkflowException(
-                "Telegram returned a non-JSON response.",
-                level=StakeholderLevel.USER,
-            ) from e
-
-        if not response.is_success or not body.get("ok", False):
-            description = body.get("description", f"HTTP {response.status_code}")
-            raise WorkflowException(
-                f"Telegram rejected the message: {description}",
-                level=StakeholderLevel.USER,
-            )
-
-        result = body.get("result", {})
         return TelegramSendMessageOutput(
-            ok=BooleanValue(True),
-            message_id=IntegerValue(result.get("message_id", 0)),
+            message_id=IntegerValue(message.message_id),
         )
 
 
-__all__ = [
+__all__ = (
     "TelegramSendMessageInput",
     "TelegramSendMessageNode",
     "TelegramSendMessageOutput",
     "TelegramSendMessageParams",
-]
+)

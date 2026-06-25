@@ -4,7 +4,7 @@ import json
 import logging
 from functools import cached_property
 from json import JSONDecodeError
-from typing import Any, ClassVar, Literal, Type
+from typing import Any, ClassVar, Type
 
 import httpx
 from overrides import override
@@ -95,8 +95,6 @@ class APICallNode(
         version="0.4.0",
         parameter_type=APICallParams,
     )
-
-    type: Literal["APICall"] = "APICall"  # pyright: ignore[reportIncompatibleVariableOverride]
 
     @cached_property
     def supports_json_output(self) -> bool:
@@ -262,7 +260,7 @@ class APICallNode(
         )
 
 
-__all__ = [
+__all__ = (
     "APICallNode",
     "APICallParams",
-]
+)

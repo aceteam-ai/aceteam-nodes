@@ -1,6 +1,6 @@
 """XPath Extract node - extract a sequence of texts from an HTML document."""
 
-from typing import ClassVar, Literal, Type
+from typing import ClassVar, Type
 
 from lxml import html as lxml_html
 from overrides import override
@@ -63,8 +63,6 @@ class XPathExtractNode(
         version="0.1.0",
         parameter_type=XPathExtractParams,
     )
-
-    type: Literal["XPathExtract"] = "XPathExtract"  # pyright: ignore[reportIncompatibleVariableOverride]
 
     @classmethod
     @override

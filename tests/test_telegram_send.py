@@ -4,66 +4,98 @@ The token is resolved through ``context.get_env`` and the Bot API call is
 mocked, so these exercise the node's logic without network access or secrets.
 """
 
-import httpx
+import os
+
 import pytest
-from workflow_engine import StringValue, WorkflowException
-from workflow_engine.contexts.in_memory import InMemoryExecutionContext
+from telegram.error import BadRequest
+from workflow_engine import StringValue, WorkflowEngine, WorkflowException
+from workflow_engine.contexts import InMemoryExecutionContext
 
 from aceteam_nodes.nodes.telegram_send import (
     TelegramSendMessageInput,
     TelegramSendMessageNode,
-    TelegramSendMessageParams,
 )
 
 
-def _node() -> TelegramSendMessageNode:
-    return TelegramSendMessageNode(id="test", params=TelegramSendMessageParams())
+class _EnvContext(InMemoryExecutionContext):
+    def get_env(self, name: str) -> str:
+        value = os.environ.get(name)
+        if value is None:
+            raise ValueError(f"Missing environment variable: {name}")
+        return value
+
+
+def _node(engine: WorkflowEngine) -> TelegramSendMessageNode:
+    return engine.create_node(TelegramSendMessageNode, id="test")
 
 
 def _input(chat_id: str = "12345", text: str = "hello") -> TelegramSendMessageInput:
     return TelegramSendMessageInput(chat_id=StringValue(chat_id), text=StringValue(text))
 
 
-def _mock_post(monkeypatch: pytest.MonkeyPatch, status_code: int, body: dict) -> dict:
-    """Patch httpx.AsyncClient.post to return a canned response; capture the call."""
+class _FakeMessage:
+    message_id = 99
+
+
+def _mock_bot(monkeypatch: pytest.MonkeyPatch) -> dict:
+    """Patch Bot to capture send_message calls without network access."""
     captured: dict = {}
 
-    async def fake_post(self, url, *, json):
-        captured["url"] = url
-        captured["json"] = json
-        return httpx.Response(
-            status_code, json=body, request=httpx.Request("POST", url)
-        )
+    class FakeBot:
+        def __init__(self, token: str):
+            self.token = token
 
-    monkeypatch.setattr(httpx.AsyncClient, "post", fake_post)
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, *args):
+            pass
+
+        async def send_message(self, chat_id, text, **kwargs):
+            captured["token"] = self.token
+            captured["chat_id"] = chat_id
+            captured["text"] = text
+            captured["kwargs"] = kwargs
+            if "error" in captured:
+                raise captured["error"]
+            return _FakeMessage()
+
+    monkeypatch.setattr("aceteam_nodes.nodes.telegram_send.Bot", FakeBot)
     return captured
 
 
 @pytest.mark.asyncio
-async def test_sends_message_and_maps_output(monkeypatch: pytest.MonkeyPatch):
+async def test_sends_message_and_maps_output(
+    engine: WorkflowEngine,
+    monkeypatch: pytest.MonkeyPatch,
+):
     monkeypatch.setenv("TELEGRAM_BOT_TOKEN", "secret-token")
-    captured = _mock_post(monkeypatch, 200, {"ok": True, "result": {"message_id": 99}})
+    captured = _mock_bot(monkeypatch)
 
-    output = await _node().run(context=InMemoryExecutionContext(), input=_input())
+    output = await _node(engine).run(context=_EnvContext(), input=_input())
 
-    assert output.ok.root is True
     assert output.message_id.root == 99
-    # token from get_env is in the URL, never in params; payload carries the args
-    assert "bot secret-token".replace(" ", "") in captured["url"]
-    assert captured["json"] == {"chat_id": "12345", "text": "hello"}
+    assert captured["token"] == "secret-token"
+    assert captured["chat_id"] == "12345"
+    assert captured["text"] == "hello"
+    assert captured["kwargs"]["read_timeout"] == 30.0
 
 
 @pytest.mark.asyncio
-async def test_missing_token_raises(monkeypatch: pytest.MonkeyPatch):
+async def test_missing_token_raises(engine: WorkflowEngine, monkeypatch: pytest.MonkeyPatch):
     monkeypatch.delenv("TELEGRAM_BOT_TOKEN", raising=False)
-    with pytest.raises(ValueError):
-        await _node().run(context=InMemoryExecutionContext(), input=_input())
+    with pytest.raises(ValueError, match="Missing environment variable"):
+        await _node(engine).run(context=_EnvContext(), input=_input())
 
 
 @pytest.mark.asyncio
-async def test_api_error_raises_workflow_exception(monkeypatch: pytest.MonkeyPatch):
+async def test_api_error_raises_workflow_exception(
+    engine: WorkflowEngine,
+    monkeypatch: pytest.MonkeyPatch,
+):
     monkeypatch.setenv("TELEGRAM_BOT_TOKEN", "secret-token")
-    _mock_post(monkeypatch, 400, {"ok": False, "description": "chat not found"})
+    captured = _mock_bot(monkeypatch)
+    captured["error"] = BadRequest("chat not found")
 
     with pytest.raises(WorkflowException, match="chat not found"):
-        await _node().run(context=InMemoryExecutionContext(), input=_input())
+        await _node(engine).run(context=_EnvContext(), input=_input())

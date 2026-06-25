@@ -4,7 +4,7 @@ import asyncio
 import logging
 import time
 from contextlib import contextmanager
-from typing import TYPE_CHECKING, Callable, ClassVar, Iterator, Literal, Type
+from typing import TYPE_CHECKING, Callable, ClassVar, Iterator, Type
 from urllib.parse import urlparse
 
 from overrides import override
@@ -171,8 +171,6 @@ class BrowserFetchNode(
         version="0.1.0",
         parameter_type=BrowserFetchParams,
     )
-
-    type: Literal["BrowserFetch"] = "BrowserFetch"  # pyright: ignore[reportIncompatibleVariableOverride]
 
     @classmethod
     @override
@@ -363,8 +361,8 @@ class BrowserFetchNode(
                 return
 
 
-__all__ = [
+__all__ = (
     "BrowserFetchNode",
     "BrowserFetchOutput",
     "BrowserFetchParams",
-]
+)

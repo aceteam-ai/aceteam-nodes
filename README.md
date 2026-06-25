@@ -126,9 +126,10 @@ scripts/release.sh -v vX.Y.Z -y          # publish to PyPI + GitHub
 
 Add three things in lockstep:
 
-1. The node class in `src/aceteam_nodes/nodes/` (with its `type: Literal[...]` and `TYPE_INFO`).
-2. The entry-point line under `[project.entry-points."aceteam_workflow_engine.nodes"]` in `pyproject.toml` (append `[extra_dependency_name]` if it needs an optional dependency).
-3. The expected name in `tests/test_entry_points.py`.
+1. The node class in `src/aceteam_nodes/nodes/` (with its `TYPE_INFO`).
+2. The export in `nodes/__init__.py`.
+3. The export in `__init__.py`.
+4. The entry-point line under `[project.entry-points."aceteam_workflow_engine.nodes"]` in `pyproject.toml` (append `[extra_dependency_name]` if it needs an optional dependency).
 
 ## Related
 
