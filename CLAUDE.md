@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-`aceteam-nodes` is a Python package that publishes a bundle of workflow node types (LLM, HTTP, browser fetch, XPath extraction, comparisons) for `aceteam-workflow-engine`. It is a **node-source package**, not a runner: it ships no CLI and no execution engine. It advertises its nodes through the `aceteam_workflow_engine.nodes` entry-point group, and an operator mounts them into an engine with `wengine install aceteam-nodes`.
+`aceteam-nodes` is a Python package that publishes a bundle of workflow node types (LLM, HTTP, browser fetch, XPath extraction) for `aceteam-workflow-engine`. It is a **node-source package**, not a runner: it ships no CLI and no execution engine. It advertises its nodes through the `aceteam_workflow_engine.nodes` entry-point group, and an operator mounts them into an engine with `wengine install aceteam-nodes`.
 
 The package uses `aceteam-aep` for multi-provider LLM support (OpenAI, Anthropic, Google, xAI, Ollama) via direct SDK calls, and depends on `aceteam-workflow-engine` for the `Node` base class and value types.
 
@@ -52,7 +52,6 @@ src/aceteam_nodes/
     ├── api_call.py        # HTTP requests with Jinja templating (APICall)
     ├── browser_fetch.py   # Authenticated web fetch via Playwright (BrowserFetch)
     ├── xpath_extract.py   # XPath extraction over HTML/XML (XPathExtract)
-    ├── comparison.py      # Equal, NotEqual, GreaterThan(Equal), LessThan(Equal), And, Or, Not
     └── llm.py             # AI text generation via aceteam-aep (LLM)
 ```
 
@@ -74,7 +73,7 @@ When adding a node, add three things in lockstep: the class (with its `type: Lit
 
 ### Conventions for extras
 
-Each node needing a heavy/optional dependency gets **one extra named after the node** (`browser-fetch`, `xpath-extract`, `llm`), so a `pyproject.toml` line like `aceteam-nodes[browser-fetch]` reads as "BrowserFetch is installed." Comparison and APICall nodes need no extra (their deps are core).
+Each node needing a heavy/optional dependency gets **one extra named after the node** (`browser-fetch`, `xpath-extract`, `llm`), so a `pyproject.toml` line like `aceteam-nodes[browser-fetch]` reads as "BrowserFetch is installed." The APICall node needs no extra (its deps are core).
 
 ## Conventions
 

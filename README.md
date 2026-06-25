@@ -5,8 +5,8 @@
 [![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
 
 A bundle of workflow node types for [aceteam-workflow-engine](https://github.com/adanomad/workflow-engine):
-LLM text generation, HTTP requests, authenticated browser fetch, XPath
-extraction, and comparison/logic operators.
+LLM text generation, HTTP requests, authenticated browser fetch, and XPath
+extraction.
 
 This is a **node-source package**, not a runner. It ships no CLI and no execution
 engine — it advertises its nodes through the `aceteam_workflow_engine.nodes`
@@ -20,7 +20,7 @@ the `wengine` CLI (which drives `uv` under the hood). From an engine project:
 
 ```bash
 # Create an engine project if you don't have one yet
-wengine init                       # creates engine.yaml + a pyproject.toml to install into
+wengine init  # creates engine.yaml + a pyproject.toml to install into
 
 # Mount every node this package exposes
 wengine install aceteam-nodes
@@ -71,12 +71,10 @@ uv add "aceteam-nodes[xpath-extract]" # + XPathExtract (lxml)
 | APICall                                                                               | —               | HTTP requests with Jinja templating                                         |
 | BrowserFetch                                                                          | `browser-fetch` | Authenticated web fetch via Playwright                                      |
 | XPathExtract                                                                          | `xpath-extract` | XPath extraction over HTML/XML                                              |
-| Equal, NotEqual, GreaterThan, GreaterThanEqual, LessThan, LessThanEqual, And, Or, Not | —               | Comparison / logic operators                                                |
 
 Each node needing a heavy/optional dependency has **one extra named after the
 node** (`llm`, `browser-fetch`, `xpath-extract`), so `aceteam-nodes[browser-fetch]`
-reads as "BrowserFetch is installed." APICall and the comparison nodes need no
-extra.
+reads as "BrowserFetch is installed." The APICall node needs no extra.
 
 ## Browser profile setup
 
