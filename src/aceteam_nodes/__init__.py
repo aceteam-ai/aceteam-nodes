@@ -5,6 +5,7 @@ __version__ = "6.1.0"
 
 from .nodes import (
     APICallNode,
+    ShellNode,
     BrowserFetchNode,
     LLMNode,
     XPathExtractNode,
@@ -12,6 +13,7 @@ from .nodes import (
 
 __all__ = (
     "APICallNode",
+    "ShellNode",
     "BrowserFetchNode",
     "LLMNode",
     "XPathExtractNode",

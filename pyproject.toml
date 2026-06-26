@@ -48,6 +48,7 @@ ace-browser-setup = "aceteam_nodes.browser_setup:main"
 # names the optional-dependency a node needs.
 [project.entry-points."aceteam_workflow_engine.nodes"]
 APICall = "aceteam_nodes.nodes.api_call:APICallNode"
+Shell = "aceteam_nodes.nodes.shell:ShellNode"
 BrowserFetch = "aceteam_nodes.nodes.browser_fetch:BrowserFetchNode [browser-fetch]"
 LLM = "aceteam_nodes.nodes.llm:LLMNode [llm]"
 TelegramSendMessage = "aceteam_nodes.nodes.telegram_send:TelegramSendMessageNode [telegram-send]"

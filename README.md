@@ -69,6 +69,7 @@ uv add "aceteam-nodes[xpath-extract]" # + XPathExtract (lxml)
 | ------------------------------------------------------------------------------------- | --------------- | --------------------------------------------------------------------------- |
 | LLM                                                                                   | `llm`           | AI text generation via aceteam-aep (OpenAI, Anthropic, Google, xAI, Ollama) |
 | APICall                                                                               | —               | HTTP requests with Jinja templating                                         |
+| Shell                                                                                 | —               | Run shell commands and capture stdout/stderr (trusted engines only)         |
 | BrowserFetch                                                                          | `browser-fetch` | Authenticated web fetch via Playwright                                      |
 | XPathExtract                                                                          | `xpath-extract` | XPath extraction over HTML/XML                                              |
 
