@@ -4,8 +4,6 @@ The token is resolved through ``context.get_env`` and the Bot API call is
 mocked, so these exercise the node's logic without network access or secrets.
 """
 
-import os
-
 import pytest
 from telegram.error import BadRequest
 from workflow_engine import StringValue, WorkflowEngine, WorkflowException
@@ -15,14 +13,6 @@ from aceteam_nodes.nodes.telegram_send import (
     TelegramSendMessageInput,
     TelegramSendMessageNode,
 )
-
-
-class _EnvContext(InMemoryExecutionContext):
-    def get_env(self, name: str) -> str:
-        value = os.environ.get(name)
-        if value is None:
-            raise ValueError(f"Missing environment variable: {name}")
-        return value
 
 
 def _node(engine: WorkflowEngine) -> TelegramSendMessageNode:
@@ -72,7 +62,7 @@ async def test_sends_message_and_maps_output(
     monkeypatch.setenv("TELEGRAM_BOT_TOKEN", "secret-token")
     captured = _mock_bot(monkeypatch)
 
-    output = await _node(engine).run(context=_EnvContext(), input=_input())
+    output = await _node(engine).run(context=InMemoryExecutionContext(), input=_input())
 
     assert output.message_id.root == 99
     assert captured["token"] == "secret-token"
@@ -84,8 +74,8 @@ async def test_sends_message_and_maps_output(
 @pytest.mark.asyncio
 async def test_missing_token_raises(engine: WorkflowEngine, monkeypatch: pytest.MonkeyPatch):
     monkeypatch.delenv("TELEGRAM_BOT_TOKEN", raising=False)
-    with pytest.raises(ValueError, match="Missing environment variable"):
-        await _node(engine).run(context=_EnvContext(), input=_input())
+    with pytest.raises(ValueError, match="Environment variable TELEGRAM_BOT_TOKEN is not set"):
+        await _node(engine).run(context=InMemoryExecutionContext(), input=_input())
 
 
 @pytest.mark.asyncio
@@ -98,4 +88,4 @@ async def test_api_error_raises_workflow_exception(
     captured["error"] = BadRequest("chat not found")
 
     with pytest.raises(WorkflowException, match="chat not found"):
-        await _node(engine).run(context=_EnvContext(), input=_input())
+        await _node(engine).run(context=InMemoryExecutionContext(), input=_input())

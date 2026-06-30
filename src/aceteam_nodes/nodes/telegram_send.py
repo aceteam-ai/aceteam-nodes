@@ -82,7 +82,7 @@ class TelegramSendMessageNode(
         context: ExecutionContext,
         input: TelegramSendMessageInput,
     ) -> TelegramSendMessageOutput:
-        token = context.get_env(_TELEGRAM_TOKEN_ENV_VAR)
+        token = await context.get_env(_TELEGRAM_TOKEN_ENV_VAR)
         timeout = float(self.params.timeout.root)
 
         try:
