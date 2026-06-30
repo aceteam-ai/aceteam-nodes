@@ -192,7 +192,7 @@ class BrowserFetchNode(
         input: Data,
     ) -> BrowserFetchOutput:
         url = self.params.url.root
-        timeout_s = self.params.timeout.root
+        timeout_s = float(self.params.timeout.root)
 
         parsed = urlparse(url)
         if parsed.scheme.lower() not in {"http", "https"} or not parsed.netloc:

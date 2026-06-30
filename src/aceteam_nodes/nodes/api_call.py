@@ -210,9 +210,9 @@ class APICallNode(
         logger.info(f"Making {self.params.method} request to: {url}")
 
         # Make the HTTP request
+        timeout = float(self.params.timeout.root)
+        method = self.params.method.root
         try:
-            timeout = self.params.timeout.root
-            method = self.params.method.root
             async with httpx.AsyncClient(timeout=timeout) as client:
                 if isinstance(request_body, (dict, list)):
                     response = await client.request(
@@ -232,7 +232,7 @@ class APICallNode(
                     response = await client.request(method=method, url=url, headers=headers)
         except httpx.TimeoutException as e:
             raise WorkflowException(
-                f"Request timed out after {self.params.timeout} seconds.",
+                f"Request timed out after {timeout} seconds.",
                 level=StakeholderLevel.USER,
             ) from e
         except httpx.RequestError as e:
