@@ -1,6 +1,7 @@
 {
     "cSpell.words": [
         "aceteam",
+        "aiohttp",
         "asyncio",
         "httpx",
         "lxml",
