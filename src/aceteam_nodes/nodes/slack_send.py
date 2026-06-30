@@ -9,9 +9,10 @@ whatever the context chooses to back ``get_env`` with.
 import logging
 from typing import ClassVar, Type
 
-import httpx
 from overrides import override
 from pydantic import Field
+from slack_sdk.errors import SlackApiError, SlackClientError
+from slack_sdk.web.async_client import AsyncWebClient
 from workflow_engine import (
     BooleanValue,
     Data,
@@ -26,8 +27,6 @@ from workflow_engine import (
 from workflow_engine.core import StakeholderLevel
 
 logger = logging.getLogger(__name__)
-
-_SLACK_POST_MESSAGE_URL = "https://slack.com/api/chat.postMessage"
 
 
 class SlackSendMessageParams(Params):
@@ -103,40 +102,29 @@ class SlackSendMessageNode(
         self, context: ExecutionContext, input: SlackSendMessageInput
     ) -> SlackSendMessageOutput:
         token = await context.get_env(self.params.bot_token_env.root)
-        headers = {"Authorization": f"Bearer {token}"}
-        payload = {"channel": input.channel.root, "text": input.text.root}
+        timeout = self.params.timeout.root
+        client = AsyncWebClient(token=token, timeout=timeout)
 
         try:
-            async with httpx.AsyncClient(timeout=float(self.params.timeout.root)) as client:
-                response = await client.post(
-                    _SLACK_POST_MESSAGE_URL, headers=headers, json=payload
-                )
-        except httpx.RequestError as e:
+            response = await client.chat_postMessage(
+                channel=input.channel.root,
+                text=input.text.root,
+            )
+        except SlackApiError as e:
+            raise WorkflowException(
+                f"Slack rejected the message: {e.response['error']}",
+                level=StakeholderLevel.USER,
+            ) from e
+        except SlackClientError as e:
             raise WorkflowException(
                 f"Failed to reach Slack: {e}",
                 level=StakeholderLevel.USER,
             ) from e
 
-        try:
-            body = response.json()
-        except ValueError as e:
-            raise WorkflowException(
-                "Slack returned a non-JSON response.",
-                level=StakeholderLevel.USER,
-            ) from e
-
-        # Slack signals application errors via ok=false with a 200 status.
-        if not body.get("ok", False):
-            error = body.get("error", f"HTTP {response.status_code}")
-            raise WorkflowException(
-                f"Slack rejected the message: {error}",
-                level=StakeholderLevel.USER,
-            )
-
         return SlackSendMessageOutput(
             ok=BooleanValue(True),
-            channel=StringValue(body.get("channel", input.channel.root)),
-            ts=StringValue(body.get("ts", "")),
+            channel=StringValue(response.get("channel", input.channel.root)),
+            ts=StringValue(response.get("ts", "")),
         )
 
 

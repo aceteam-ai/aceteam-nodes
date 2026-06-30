@@ -4,8 +4,8 @@ The token is resolved through ``context.get_env`` and the Web API call is
 mocked, so these exercise the node's logic without network access or secrets.
 """
 
-import httpx
 import pytest
+from slack_sdk.errors import SlackApiError
 from workflow_engine import StringValue, WorkflowEngine, WorkflowException
 from workflow_engine.contexts import InMemoryExecutionContext
 
@@ -23,19 +23,27 @@ def _input(channel: str = "C0123", text: str = "hello") -> SlackSendMessageInput
     return SlackSendMessageInput(channel=StringValue(channel), text=StringValue(text))
 
 
-def _mock_post(monkeypatch: pytest.MonkeyPatch, status_code: int, body: dict) -> dict:
-    """Patch httpx.AsyncClient.post to return a canned response; capture the call."""
+def _mock_client(monkeypatch: pytest.MonkeyPatch) -> dict:
+    """Patch AsyncWebClient to capture chat_postMessage calls without network access."""
     captured: dict = {}
 
-    async def fake_post(self, url, *, headers, json):
-        captured["url"] = url
-        captured["headers"] = headers
-        captured["json"] = json
-        return httpx.Response(
-            status_code, json=body, request=httpx.Request("POST", url)
-        )
+    class FakeAsyncWebClient:
+        def __init__(self, token: str | None = None, timeout: int = 30, **kwargs):
+            captured["token"] = token
+            captured["timeout"] = timeout
 
-    monkeypatch.setattr(httpx.AsyncClient, "post", fake_post)
+        async def chat_postMessage(self, *, channel: str, text: str, **kwargs):
+            captured["channel"] = channel
+            captured["text"] = text
+            captured["kwargs"] = kwargs
+            if "error" in captured:
+                raise captured["error"]
+            return captured.get(
+                "response",
+                {"ok": True, "channel": channel, "ts": "1700000000.000100"},
+            )
+
+    monkeypatch.setattr("aceteam_nodes.nodes.slack_send.AsyncWebClient", FakeAsyncWebClient)
     return captured
 
 
@@ -45,18 +53,22 @@ async def test_posts_message_and_maps_output(
     monkeypatch: pytest.MonkeyPatch,
 ):
     monkeypatch.setenv("SLACK_BOT_TOKEN", "xoxb-secret")
-    captured = _mock_post(
-        monkeypatch, 200, {"ok": True, "channel": "C0123", "ts": "1700000000.000100"}
-    )
+    captured = _mock_client(monkeypatch)
+    captured["response"] = {
+        "ok": True,
+        "channel": "C0123",
+        "ts": "1700000000.000100",
+    }
 
     output = await _node(engine).run(context=InMemoryExecutionContext(), input=_input())
 
     assert output.ok.root is True
     assert output.channel.root == "C0123"
     assert output.ts.root == "1700000000.000100"
-    # token from get_env goes in the Authorization header, never in params
-    assert captured["headers"]["Authorization"] == "Bearer xoxb-secret"
-    assert captured["json"] == {"channel": "C0123", "text": "hello"}
+    assert captured["token"] == "xoxb-secret"
+    assert captured["timeout"] == 30
+    assert captured["channel"] == "C0123"
+    assert captured["text"] == "hello"
 
 
 @pytest.mark.asyncio
@@ -72,8 +84,11 @@ async def test_api_error_raises_workflow_exception(
     monkeypatch: pytest.MonkeyPatch,
 ):
     monkeypatch.setenv("SLACK_BOT_TOKEN", "xoxb-secret")
-    # Slack reports app-level failures as ok=false with a 200 status.
-    _mock_post(monkeypatch, 200, {"ok": False, "error": "channel_not_found"})
+    captured = _mock_client(monkeypatch)
+    captured["error"] = SlackApiError(
+        "The request to the Slack API failed.",
+        {"ok": False, "error": "channel_not_found"},
+    )
 
     with pytest.raises(WorkflowException, match="channel_not_found"):
         await _node(engine).run(context=InMemoryExecutionContext(), input=_input())
