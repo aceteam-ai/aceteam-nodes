@@ -5,6 +5,7 @@ from workflow_engine import WorkflowEngine
 from workflow_engine.contexts import InMemoryExecutionContext
 
 # Import node classes so they register on NodeRegistry.DEFAULT at import time.
+from aceteam_nodes.nodes.shell import ShellNode  # noqa: F401
 from aceteam_nodes.nodes.telegram_send import TelegramSendMessageNode  # noqa: F401
 from aceteam_nodes.nodes.xpath_extract import XPathExtractNode  # noqa: F401
 

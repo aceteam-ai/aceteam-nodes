@@ -67,7 +67,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "aceteam-aep", marker = "extra == 'llm'", specifier = ">=0.2.0" },
-    { name = "aceteam-workflow-engine", specifier = ">=2.0.0rc12" },
+    { name = "aceteam-workflow-engine", specifier = ">=2.0.0rc13" },
     { name = "httpx", specifier = ">=0.28.0" },
     { name = "jinja2", specifier = ">=3.1.0" },
     { name = "lxml", marker = "extra == 'xpath-extract'", specifier = ">=6.1.0" },
@@ -96,7 +96,7 @@ dev = [
 
 [[package]]
 name = "aceteam-workflow-engine"
-version = "2.0.0rc12"
+version = "2.0.0rc13"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "click" },
@@ -108,9 +108,9 @@ dependencies = [
     { name = "ruamel-yaml" },
     { name = "tomli-w" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/46/b4/937240ede7dd3c627a2ccd8c7346ac73d7dbfa47ac230ece97b859954567/aceteam_workflow_engine-2.0.0rc12.tar.gz", hash = "sha256:6c6d089f782f4fb4966add0e9060f165a491bf79ccc11d836ad6f3a54d04b545", size = 261267, upload-time = "2026-05-29T08:10:52.838Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/4a/4f/ef8b97e4d5d1070ecb14b59aef8ba6dbe75c5f794afec22b9f213caae60e/aceteam_workflow_engine-2.0.0rc13.tar.gz", hash = "sha256:5cdb561b897adb7db79f324f583843f08b4225f52e0fdb5f5ff8e13a8eca32b9", size = 278097, upload-time = "2026-06-29T14:40:20.59Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/e5/2c/6570236278938ecd51b682c4f85d9abcaede40ed7e20729aec519fc4a7d2/aceteam_workflow_engine-2.0.0rc12-py3-none-any.whl", hash = "sha256:620ebc57bbd4f06d3b226c0634e0717236273059137355b968044124965664de", size = 123527, upload-time = "2026-05-29T08:10:51.409Z" },
+    { url = "https://files.pythonhosted.org/packages/7b/02/c097a8d846e65e8619469db12f8ff6af1ab2d7bd1eb3c1f54789d475c6e2/aceteam_workflow_engine-2.0.0rc13-py3-none-any.whl", hash = "sha256:7d2735ee353f5dd1ce1ccca737a0ab924c1ec42dd41a1df18730a1f9cc4cdb58", size = 135408, upload-time = "2026-06-29T14:40:18.17Z" },
 ]
 
 [[package]]
