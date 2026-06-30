@@ -25,6 +25,7 @@ browser-fetch = ["playwright>=1.47.0", "playwright-stealth>=2.0.3"]
 xpath-extract = ["lxml>=6.1.0"]
 telegram-send = ["python-telegram-bot>=21.0"]
 slack-send = ["aiohttp>=3.14.1", "slack-sdk>=3.42.0"]
+discord-send = ["discord.py>=2.4.0"]
 
 [dependency-groups]
 dev = [
@@ -38,6 +39,7 @@ dev = [
     "python-telegram-bot>=21.0",
     "aiohttp>=3.14.1",
     "slack-sdk>=3.42.0",
+    "discord.py>=2.4.0",
     "ruff>=0.8",
 ]
 
@@ -53,7 +55,7 @@ ace-browser-setup = "aceteam_nodes.browser_setup:main"
 APICall = "aceteam_nodes.nodes.api_call:APICallNode"
 Shell = "aceteam_nodes.nodes.shell:ShellNode"
 BrowserFetch = "aceteam_nodes.nodes.browser_fetch:BrowserFetchNode [browser-fetch]"
-DiscordSendMessage = "aceteam_nodes.nodes.discord_send:DiscordSendMessageNode"
+DiscordSendMessage = "aceteam_nodes.nodes.discord_send:DiscordSendMessageNode [discord-send]"
 LLM = "aceteam_nodes.nodes.llm:LLMNode [llm]"
 SlackSendMessage = "aceteam_nodes.nodes.slack_send:SlackSendMessageNode [slack-send]"
 TelegramSendMessage = "aceteam_nodes.nodes.telegram_send:TelegramSendMessageNode [telegram-send]"

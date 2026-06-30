@@ -9,7 +9,8 @@ whatever the context chooses to back ``get_env`` with.
 import logging
 from typing import ClassVar, Type
 
-import httpx
+import discord
+from discord.errors import DiscordException, HTTPException
 from overrides import override
 from pydantic import Field
 from workflow_engine import (
@@ -26,7 +27,6 @@ from workflow_engine.core import StakeholderLevel
 
 logger = logging.getLogger(__name__)
 
-_DISCORD_API_BASE = "https://discord.com/api/v10"
 _DISCORD_TOKEN_ENV_VAR = "DISCORD_BOT_TOKEN"
 
 
@@ -89,37 +89,33 @@ class DiscordSendMessageNode(
         input: DiscordSendMessageInput,
     ) -> DiscordSendMessageOutput:
         token = await context.get_env(_DISCORD_TOKEN_ENV_VAR)
-        url = f"{_DISCORD_API_BASE}/channels/{input.channel_id.root}/messages"
-        headers = {"Authorization": f"Bot {token}"}
-        payload = {"content": input.content.root}
-        timeout = float(self.params.timeout.root)
+        client = discord.Client(intents=discord.Intents.none())
 
+        await client.login(token)
         try:
-            async with httpx.AsyncClient(timeout=timeout) as client:
-                response = await client.post(url, headers=headers, json=payload)
-        except httpx.RequestError as e:
-            raise WorkflowException(
-                f"Failed to reach Discord: {e}",
-                level=StakeholderLevel.USER,
-            ) from e
-
-        try:
-            body = response.json()
-        except ValueError as e:
-            raise WorkflowException(
-                "Discord returned a non-JSON response.",
-                level=StakeholderLevel.USER,
-            ) from e
-
-        if not response.is_success:
-            message = body.get("message", f"HTTP {response.status_code}")
-            raise WorkflowException(
-                f"Discord rejected the message: {message}",
-                level=StakeholderLevel.USER,
-            ) from e
+            try:
+                channel = await client.fetch_channel(int(input.channel_id.root))
+                if not isinstance(channel, discord.abc.Messageable):
+                    raise WorkflowException(
+                        f"Channel {input.channel_id.root} cannot receive messages.",
+                        level=StakeholderLevel.USER,
+                    )
+                message = await channel.send(input.content.root)
+            except HTTPException as e:
+                raise WorkflowException(
+                    f"Discord rejected the message: {e.text}",
+                    level=StakeholderLevel.USER,
+                ) from e
+            except DiscordException as e:
+                raise WorkflowException(
+                    f"Failed to reach Discord: {e}",
+                    level=StakeholderLevel.USER,
+                ) from e
+        finally:
+            await client.close()
 
         return DiscordSendMessageOutput(
-            message_id=StringValue(body.get("id", "")),
+            message_id=StringValue(str(message.id)),
         )
 
 

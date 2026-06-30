@@ -4,8 +4,8 @@ The token is resolved through ``context.get_env`` and the REST call is mocked,
 so these exercise the node's logic without network access or secrets.
 """
 
-import httpx
 import pytest
+from discord.errors import Forbidden
 from workflow_engine import StringValue, WorkflowEngine, WorkflowException
 from workflow_engine.contexts import InMemoryExecutionContext
 
@@ -25,19 +25,37 @@ def _input(channel_id: str = "987", content: str = "hello") -> DiscordSendMessag
     )
 
 
-def _mock_post(monkeypatch: pytest.MonkeyPatch, status_code: int, body: dict) -> dict:
-    """Patch httpx.AsyncClient.post to return a canned response; capture the call."""
+class _FakeMessage:
+    id = 112233
+
+
+def _mock_discord(monkeypatch: pytest.MonkeyPatch) -> dict:
+    """Patch discord.Client without network access."""
     captured: dict = {}
 
-    async def fake_post(self, url, *, headers, json):
-        captured["url"] = url
-        captured["headers"] = headers
-        captured["json"] = json
-        return httpx.Response(
-            status_code, json=body, request=httpx.Request("POST", url)
-        )
+    class FakeChannel:
+        async def send(self, content: str | None = None, **kwargs):
+            captured["content"] = content
+            captured["kwargs"] = kwargs
+            if "error" in captured:
+                raise captured["error"]
+            return _FakeMessage()
 
-    monkeypatch.setattr(httpx.AsyncClient, "post", fake_post)
+    class FakeClient:
+        def __init__(self, *, intents, **kwargs):
+            captured["intents"] = intents
+
+        async def login(self, token: str):
+            captured["token"] = token
+
+        async def fetch_channel(self, channel_id: int):
+            captured["channel_id"] = channel_id
+            return FakeChannel()
+
+        async def close(self):
+            pass
+
+    monkeypatch.setattr("aceteam_nodes.nodes.discord_send.discord.Client", FakeClient)
     return captured
 
 
@@ -47,14 +65,14 @@ async def test_sends_message_and_maps_output(
     monkeypatch: pytest.MonkeyPatch,
 ):
     monkeypatch.setenv("DISCORD_BOT_TOKEN", "bot-secret")
-    captured = _mock_post(monkeypatch, 200, {"id": "112233", "content": "hello"})
+    captured = _mock_discord(monkeypatch)
 
     output = await _node(engine).run(context=InMemoryExecutionContext(), input=_input())
 
     assert output.message_id.root == "112233"
-    assert captured["headers"]["Authorization"] == "Bot bot-secret"
-    assert captured["url"].endswith("/channels/987/messages")
-    assert captured["json"] == {"content": "hello"}
+    assert captured["token"] == "bot-secret"
+    assert captured["channel_id"] == 987
+    assert captured["content"] == "hello"
 
 
 @pytest.mark.asyncio
@@ -70,7 +88,11 @@ async def test_api_error_raises_workflow_exception(
     monkeypatch: pytest.MonkeyPatch,
 ):
     monkeypatch.setenv("DISCORD_BOT_TOKEN", "bot-secret")
-    _mock_post(monkeypatch, 403, {"message": "Missing Access", "code": 50001})
+    captured = _mock_discord(monkeypatch)
+    captured["error"] = Forbidden(
+        type("Response", (), {"status": 403, "reason": "Forbidden"})(),
+        {"message": "Missing Access"},
+    )
 
     with pytest.raises(WorkflowException, match="Missing Access"):
         await _node(engine).run(context=InMemoryExecutionContext(), input=_input())
