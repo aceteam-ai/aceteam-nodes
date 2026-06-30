@@ -1,9 +1,6 @@
 """Slack Send Message node - posts a message via the Slack Web API.
 
-Mirrors the AceTeam ``slack_send_message`` MCP tool as a self-contained
-workflow node. The bot token is resolved at runtime via ``context.get_env``
-(never baked into the workflow definition), so the only platform coupling is
-whatever the context chooses to back ``get_env`` with.
+The bot token is resolved at runtime via ``context.get_env``.
 """
 
 import logging
