@@ -62,9 +62,8 @@ async def test_posts_message_and_maps_output(
 
     output = await _node(engine).run(context=InMemoryExecutionContext(), input=_input())
 
-    assert output.ok.root is True
     assert output.channel.root == "C0123"
-    assert output.ts.root == "1700000000.000100"
+    assert output.timestamp.root == "1700000000.000100"
     assert captured["token"] == "xoxb-secret"
     assert captured["timeout"] == 30
     assert captured["channel"] == "C0123"
@@ -92,3 +91,26 @@ async def test_api_error_raises_workflow_exception(
 
     with pytest.raises(WorkflowException, match="channel_not_found"):
         await _node(engine).run(context=InMemoryExecutionContext(), input=_input())
+
+
+@pytest.mark.asyncio
+async def test_resolves_channel_name_to_id(
+    engine: WorkflowEngine,
+    monkeypatch: pytest.MonkeyPatch,
+):
+    monkeypatch.setenv("SLACK_BOT_TOKEN", "xoxb-secret")
+    captured = _mock_client(monkeypatch)
+    captured["response"] = {
+        "ok": True,
+        "channel": "C0999RESOLVED",
+        "ts": "1700000000.000200",
+    }
+
+    output = await _node(engine).run(
+        context=InMemoryExecutionContext(),
+        input=_input(channel="#general"),
+    )
+
+    assert captured["channel"] == "#general"
+    assert output.channel.root == "C0999RESOLVED"
+    assert output.timestamp.root == "1700000000.000200"

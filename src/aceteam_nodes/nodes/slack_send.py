@@ -14,7 +14,6 @@ from pydantic import Field
 from slack_sdk.errors import SlackApiError, SlackClientError
 from slack_sdk.web.async_client import AsyncWebClient
 from workflow_engine import (
-    BooleanValue,
     Data,
     ExecutionContext,
     IntegerValue,
@@ -29,15 +28,10 @@ from workflow_engine.core import StakeholderLevel
 logger = logging.getLogger(__name__)
 
 
+_SLACK_TOKEN_ENV_VAR = "SLACK_BOT_TOKEN"
+
+
 class SlackSendMessageParams(Params):
-    bot_token_env: StringValue = Field(
-        title="Bot Token Env Var",
-        description=(
-            "Name of the environment variable holding the Slack bot token. "
-            "The token itself is resolved at runtime, not stored in the workflow."
-        ),
-        default=StringValue("SLACK_BOT_TOKEN"),
-    )
     timeout: IntegerValue = Field(
         title="Timeout",
         description="Request timeout in seconds.",
@@ -57,15 +51,11 @@ class SlackSendMessageInput(Data):
 
 
 class SlackSendMessageOutput(Data):
-    ok: BooleanValue = Field(
-        title="OK",
-        description="Whether Slack accepted the message.",
-    )
     channel: StringValue = Field(
         title="Channel",
         description="The channel the message was posted to.",
     )
-    ts: StringValue = Field(
+    timestamp: StringValue = Field(
         title="Timestamp",
         description="The message timestamp, used to reference it later.",
     )
@@ -99,9 +89,11 @@ class SlackSendMessageNode(
 
     @override
     async def run(
-        self, context: ExecutionContext, input: SlackSendMessageInput
+        self,
+        context: ExecutionContext,
+        input: SlackSendMessageInput,
     ) -> SlackSendMessageOutput:
-        token = await context.get_env(self.params.bot_token_env.root)
+        token = await context.get_env(_SLACK_TOKEN_ENV_VAR)
         timeout = self.params.timeout.root
         client = AsyncWebClient(token=token, timeout=timeout)
 
@@ -122,9 +114,8 @@ class SlackSendMessageNode(
             ) from e
 
         return SlackSendMessageOutput(
-            ok=BooleanValue(True),
             channel=StringValue(response.get("channel", input.channel.root)),
-            ts=StringValue(response.get("ts", "")),
+            timestamp=StringValue(response.get("ts", "")),
         )
 
 
