@@ -24,10 +24,7 @@ llm = ["aceteam-aep>=0.2.0"]
 browser-fetch = ["playwright>=1.47.0", "playwright-stealth>=2.0.3"]
 xpath-extract = ["lxml>=6.1.0"]
 telegram-send = ["python-telegram-bot>=21.0"]
-slack-send = [
-    "aiohttp>=3.14.1",
-    "slack-sdk>=3.42.0",
-]
+slack-send = ["aiohttp>=3.14.1", "slack-sdk>=3.42.0"]
 
 [dependency-groups]
 dev = [
