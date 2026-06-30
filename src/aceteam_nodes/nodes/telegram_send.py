@@ -1,4 +1,7 @@
-"""Telegram Send Message node - sends a message via the Telegram Bot API."""
+"""Telegram Send Message node - sends a message via the Telegram Bot API.
+
+The bot token is resolved at runtime via ``context.get_env``.
+"""
 
 import logging
 from typing import ClassVar, Type
