@@ -4,6 +4,7 @@ The token is resolved through ``context.get_env`` and the REST call is mocked,
 so these exercise the node's logic without network access or secrets.
 """
 
+import discord
 import pytest
 from discord.errors import Forbidden
 from workflow_engine import StringValue, WorkflowEngine, WorkflowException
@@ -29,11 +30,19 @@ class _FakeMessage:
     id = 112233
 
 
+def _forbidden(message: str) -> Forbidden:
+    error = Forbidden.__new__(Forbidden)
+    error.text = message
+    error.status = 403
+    assert error.text == message
+    return error
+
+
 def _mock_discord(monkeypatch: pytest.MonkeyPatch) -> dict:
     """Patch discord.Client without network access."""
     captured: dict = {}
 
-    class FakeChannel:
+    class FakeChannel(discord.abc.Messageable):
         async def send(self, content: str | None = None, **kwargs):
             captured["content"] = content
             captured["kwargs"] = kwargs
@@ -45,6 +54,12 @@ def _mock_discord(monkeypatch: pytest.MonkeyPatch) -> dict:
         def __init__(self, *, intents, **kwargs):
             captured["intents"] = intents
 
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, *args):
+            await self.close()
+
         async def login(self, token: str):
             captured["token"] = token
 
@@ -53,7 +68,7 @@ def _mock_discord(monkeypatch: pytest.MonkeyPatch) -> dict:
             return FakeChannel()
 
         async def close(self):
-            pass
+            captured["closed"] = True
 
     monkeypatch.setattr("aceteam_nodes.nodes.discord_send.discord.Client", FakeClient)
     return captured
@@ -69,10 +84,11 @@ async def test_sends_message_and_maps_output(
 
     output = await _node(engine).run(context=InMemoryExecutionContext(), input=_input())
 
-    assert output.message_id.root == "112233"
+    assert output.message_id.root == 112233
     assert captured["token"] == "bot-secret"
     assert captured["channel_id"] == 987
     assert captured["content"] == "hello"
+    assert captured["closed"] is True
 
 
 @pytest.mark.asyncio
@@ -89,10 +105,7 @@ async def test_api_error_raises_workflow_exception(
 ):
     monkeypatch.setenv("DISCORD_BOT_TOKEN", "bot-secret")
     captured = _mock_discord(monkeypatch)
-    captured["error"] = Forbidden(
-        type("Response", (), {"status": 403, "reason": "Forbidden"})(),
-        {"message": "Missing Access"},
-    )
+    captured["error"] = _forbidden("Missing Access")
 
     with pytest.raises(WorkflowException, match="Missing Access"):
         await _node(engine).run(context=InMemoryExecutionContext(), input=_input())

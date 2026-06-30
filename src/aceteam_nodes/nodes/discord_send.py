@@ -18,12 +18,11 @@ from workflow_engine import (
     ExecutionContext,
     IntegerValue,
     Node,
+    NodeException,
     NodeTypeInfo,
     Params,
     StringValue,
-    WorkflowException,
 )
-from workflow_engine.core import StakeholderLevel
 
 logger = logging.getLogger(__name__)
 
@@ -50,7 +49,7 @@ class DiscordSendMessageInput(Data):
 
 
 class DiscordSendMessageOutput(Data):
-    message_id: StringValue = Field(
+    message_id: IntegerValue = Field(
         title="Message ID",
         description="The snowflake ID of the sent message.",
     )
@@ -91,31 +90,29 @@ class DiscordSendMessageNode(
         token = await context.get_env(_DISCORD_TOKEN_ENV_VAR)
         client = discord.Client(intents=discord.Intents.none())
 
-        await client.login(token)
-        try:
+        async with client:
+            await client.login(token)
             try:
                 channel = await client.fetch_channel(int(input.channel_id.root))
                 if not isinstance(channel, discord.abc.Messageable):
-                    raise WorkflowException(
-                        f"Channel {input.channel_id.root} cannot receive messages.",
-                        level=StakeholderLevel.USER,
+                    raise NodeException.for_user(
+                        f"Channel {input.channel_id.root} does not support sending messages.",
+                        node=self,
                     )
                 message = await channel.send(input.content.root)
             except HTTPException as e:
-                raise WorkflowException(
+                raise NodeException.for_user(
                     f"Discord rejected the message: {e.text}",
-                    level=StakeholderLevel.USER,
+                    node=self,
                 ) from e
             except DiscordException as e:
-                raise WorkflowException(
+                raise NodeException.for_user(
                     f"Failed to reach Discord: {e}",
-                    level=StakeholderLevel.USER,
+                    node=self,
                 ) from e
-        finally:
-            await client.close()
 
         return DiscordSendMessageOutput(
-            message_id=StringValue(str(message.id)),
+            message_id=IntegerValue(message.id),
         )
 
 
