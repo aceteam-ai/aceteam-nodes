@@ -27,6 +27,9 @@ discord-read-messages = ["discord.py>=2.4.0"]
 discord-send = ["discord.py>=2.4.0"]
 llm = ["aceteam-aep>=0.2.0"]
 slack-send = ["aiohttp>=3.14.1", "slack-sdk>=3.42.0"]
+telegram-health = ["python-telegram-bot>=21.0"]
+telegram-list-chats = ["python-telegram-bot>=21.0"]
+telegram-read-messages = ["python-telegram-bot>=21.0"]
 telegram-send = ["python-telegram-bot>=21.0"]
 xpath-extract = ["lxml>=6.1.0"]
 
@@ -64,7 +67,10 @@ DiscordSendMessage = "aceteam_nodes.nodes.discord.send:DiscordSendMessageNode [d
 LLM = "aceteam_nodes.nodes.llm:LLMNode [llm]"
 Shell = "aceteam_nodes.nodes.shell:ShellNode"
 SlackSendMessage = "aceteam_nodes.nodes.slack_send:SlackSendMessageNode [slack-send]"
-TelegramSendMessage = "aceteam_nodes.nodes.telegram_send:TelegramSendMessageNode [telegram-send]"
+TelegramHealth = "aceteam_nodes.nodes.telegram.health:TelegramHealthNode [telegram-health]"
+TelegramListChats = "aceteam_nodes.nodes.telegram.list_chats:TelegramListChatsNode [telegram-list-chats]"
+TelegramReadMessages = "aceteam_nodes.nodes.telegram.read_messages:TelegramReadMessagesNode [telegram-read-messages]"
+TelegramSendMessage = "aceteam_nodes.nodes.telegram.send:TelegramSendMessageNode [telegram-send]"
 XPathExtract = "aceteam_nodes.nodes.xpath_extract:XPathExtractNode [xpath-extract]"
 
 [build-system]

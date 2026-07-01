@@ -1,7 +1,4 @@
-"""Telegram Send Message node - sends a message via the Telegram Bot API.
-
-The bot token is resolved at runtime via ``context.get_env``.
-"""
+"""Telegram Send Message node - sends a message via the Telegram Bot API."""
 
 import logging
 from typing import ClassVar, Type
@@ -9,7 +6,7 @@ from typing import ClassVar, Type
 from overrides import override
 from pydantic import Field
 from telegram import Bot
-from telegram.error import BadRequest, NetworkError, TelegramError
+from telegram.error import TelegramError
 from workflow_engine import (
     Data,
     ExecutionContext,
@@ -18,13 +15,11 @@ from workflow_engine import (
     NodeTypeInfo,
     Params,
     StringValue,
-    WorkflowException,
 )
-from workflow_engine.core import StakeholderLevel
+
+from .common import TELEGRAM_TOKEN_ENV_VAR, raise_telegram_api_error
 
 logger = logging.getLogger(__name__)
-
-_TELEGRAM_TOKEN_ENV_VAR = "TELEGRAM_BOT_TOKEN"
 
 
 class TelegramSendMessageParams(Params):
@@ -88,7 +83,7 @@ class TelegramSendMessageNode(
         output_type: Type[TelegramSendMessageOutput],
         input: TelegramSendMessageInput,
     ) -> TelegramSendMessageOutput:
-        token = await context.get_env(_TELEGRAM_TOKEN_ENV_VAR)
+        token = await context.get_env(TELEGRAM_TOKEN_ENV_VAR)
         timeout = float(self.params.timeout.root)
 
         try:
@@ -100,21 +95,8 @@ class TelegramSendMessageNode(
                     write_timeout=timeout,
                     connect_timeout=timeout,
                 )
-        except BadRequest as e:
-            raise WorkflowException(
-                f"Telegram rejected the message: {e.message}",
-                level=StakeholderLevel.USER,
-            ) from e
-        except NetworkError as e:
-            raise WorkflowException(
-                f"Failed to reach Telegram: {e.message}",
-                level=StakeholderLevel.USER,
-            ) from e
         except TelegramError as e:
-            raise WorkflowException(
-                f"Telegram rejected the message: {e.message}",
-                level=StakeholderLevel.USER,
-            ) from e
+            raise_telegram_api_error(e)
 
         return output_type(
             message_id=IntegerValue(message.message_id),

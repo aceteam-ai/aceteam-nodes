@@ -76,6 +76,9 @@ uv add "aceteam-nodes[xpath-extract]" # + XPathExtract (lxml)
 | DiscordReadMessages | `discord-read-messages` | Fetch recent messages from a channel (Message Content intent required)      |
 | DiscordSendMessage  | `discord-send`          | Send a message to a Discord channel                                         |
 | SlackSendMessage    | `slack-send`            | Send a message via Slack Web API                                            |
+| TelegramHealth      | `telegram-health`       | Verify the bot token via ``getMe``                                            |
+| TelegramListChats   | `telegram-list-chats`   | Look up metadata for a single chat via ``getChat``                            |
+| TelegramReadMessages | `telegram-read-messages` | Fetch recent updates via ``getUpdates`` (incompatible with webhooks)       |
 | TelegramSendMessage | `telegram-send`         | Send a message via Telegram Bot API                                         |
 | XPathExtract        | `xpath-extract`         | XPath extraction over HTML/XML                                              |
 
@@ -104,6 +107,7 @@ export OPENAI_API_KEY=sk-...
 # or
 export ANTHROPIC_API_KEY=sk-ant-...
 export DISCORD_BOT_TOKEN=...   # Discord send/read nodes
+export TELEGRAM_BOT_TOKEN=...  # Telegram send/read nodes
 ```
 
 ## Development
