@@ -13,7 +13,12 @@ from aceteam_nodes.nodes.discord import (  # noqa: F401
 )
 from aceteam_nodes.nodes.shell import ShellNode  # noqa: F401
 from aceteam_nodes.nodes.slack_send import SlackSendMessageNode  # noqa: F401
-from aceteam_nodes.nodes.telegram_send import TelegramSendMessageNode  # noqa: F401
+from aceteam_nodes.nodes.telegram import (  # noqa: F401
+    TelegramBotInfoNode,
+    TelegramListChatsNode,
+    TelegramReadMessagesNode,
+    TelegramSendMessageNode,
+)
 from aceteam_nodes.nodes.xpath_extract import XPathExtractNode  # noqa: F401
 
 

@@ -13,6 +13,9 @@ from .nodes import (
     LLMNode,
     ShellNode,
     SlackSendMessageNode,
+    TelegramBotInfoNode,
+    TelegramListChatsNode,
+    TelegramReadMessagesNode,
     TelegramSendMessageNode,
     XPathExtractNode,
 )
@@ -27,6 +30,9 @@ __all__ = (
     "LLMNode",
     "ShellNode",
     "SlackSendMessageNode",
+    "TelegramBotInfoNode",
+    "TelegramListChatsNode",
+    "TelegramReadMessagesNode",
     "TelegramSendMessageNode",
     "XPathExtractNode",
 )

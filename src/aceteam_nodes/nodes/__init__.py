@@ -11,7 +11,12 @@ from .discord import (
 from .llm import LLMNode
 from .shell import ShellNode
 from .slack_send import SlackSendMessageNode
-from .telegram_send import TelegramSendMessageNode
+from .telegram import (
+    TelegramBotInfoNode,
+    TelegramListChatsNode,
+    TelegramReadMessagesNode,
+    TelegramSendMessageNode,
+)
 from .xpath_extract import XPathExtractNode
 
 __all__ = (
@@ -24,6 +29,9 @@ __all__ = (
     "LLMNode",
     "ShellNode",
     "SlackSendMessageNode",
+    "TelegramBotInfoNode",
+    "TelegramListChatsNode",
+    "TelegramReadMessagesNode",
     "TelegramSendMessageNode",
     "XPathExtractNode",
 )

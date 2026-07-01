@@ -1,8 +1,6 @@
-"""Tests for DiscordSendMessageNode."""
+"""Tests for DiscordBotInfoNode."""
 
-import discord
 import pytest
-from discord_mocks import forbidden
 from workflow_engine import (
     ExecutionContext,
     IntegerValue,
@@ -10,32 +8,25 @@ from workflow_engine import (
     WorkflowEngine,
     WorkflowExecutionResultStatus,
 )
-from workflow_helpers import error_messages, execute_single_node
 
-from aceteam_nodes.nodes.discord.send import DiscordSendMessageNode
+from aceteam_nodes.nodes.discord.bot_info import DiscordBotInfoNode
+from tests.discord.mocks import forbidden
+from tests.workflow_helpers import error_messages, execute_single_node
 
-_INPUT_FIELDS = {"channel_id": IntegerValue, "content": StringValue}
-_OUTPUT_FIELDS = {"message_id": IntegerValue}
-
-
-class _FakeMessage:
-    id = 112233
+_OUTPUT_FIELDS = {"bot_id": IntegerValue, "bot_username": StringValue}
 
 
 def _mock_discord(monkeypatch: pytest.MonkeyPatch) -> dict:
     captured: dict = {}
 
-    class FakeChannel(discord.abc.Messageable):
-        async def send(self, content: str | None = None, **kwargs):
-            captured["content"] = content
-            captured["kwargs"] = kwargs
-            if "error" in captured:
-                raise captured["error"]
-            return _FakeMessage()
+    class FakeUser:
+        id = 4242
+        name = "aceteam-bot"
 
     class FakeClient:
         def __init__(self, *, intents, **kwargs):
             captured["intents"] = intents
+            self.user = FakeUser()
 
         async def __aenter__(self):
             return self
@@ -45,10 +36,12 @@ def _mock_discord(monkeypatch: pytest.MonkeyPatch) -> dict:
 
         async def login(self, token: str):
             captured["token"] = token
+            if "error" in captured:
+                raise captured["error"]
 
-        async def fetch_channel(self, channel_id: int):
-            captured["channel_id"] = channel_id
-            return FakeChannel()
+        async def application_info(self):
+            if "app_error" in captured:
+                raise captured["app_error"]
 
         async def close(self):
             captured["closed"] = True
@@ -61,7 +54,7 @@ def _mock_discord(monkeypatch: pytest.MonkeyPatch) -> dict:
 
 
 @pytest.mark.asyncio
-async def test_sends_message_and_maps_output(
+async def test_returns_bot_identity(
     engine: WorkflowEngine,
     context: ExecutionContext,
     monkeypatch: pytest.MonkeyPatch,
@@ -72,21 +65,16 @@ async def test_sends_message_and_maps_output(
     result = await execute_single_node(
         engine,
         context,
-        DiscordSendMessageNode,
-        input_fields=_INPUT_FIELDS,
+        DiscordBotInfoNode,
+        input_fields={},
         output_fields=_OUTPUT_FIELDS,
-        input={
-            "channel_id": IntegerValue(987),
-            "content": StringValue("hello"),
-        },
+        input={},
     )
 
     assert result.status is WorkflowExecutionResultStatus.SUCCESS
-    assert result.output["message_id"].root == 112233
+    assert result.output["bot_id"].root == 4242
+    assert result.output["bot_username"].root == "aceteam-bot"
     assert captured["token"] == "bot-secret"
-    assert captured["channel_id"] == 987
-    assert captured["content"] == "hello"
-    assert captured["closed"] is True
 
 
 @pytest.mark.asyncio
@@ -100,13 +88,10 @@ async def test_missing_token_raises(
     result = await execute_single_node(
         engine,
         context,
-        DiscordSendMessageNode,
-        input_fields=_INPUT_FIELDS,
+        DiscordBotInfoNode,
+        input_fields={},
         output_fields=_OUTPUT_FIELDS,
-        input={
-            "channel_id": IntegerValue(987),
-            "content": StringValue("hello"),
-        },
+        input={},
     )
 
     assert result.status is WorkflowExecutionResultStatus.ERROR
@@ -121,19 +106,16 @@ async def test_api_error_raises_workflow_exception(
 ):
     monkeypatch.setenv("DISCORD_BOT_TOKEN", "bot-secret")
     captured = _mock_discord(monkeypatch)
-    captured["error"] = forbidden("Missing Access")
+    captured["error"] = forbidden("Improper token")
 
     result = await execute_single_node(
         engine,
         context,
-        DiscordSendMessageNode,
-        input_fields=_INPUT_FIELDS,
+        DiscordBotInfoNode,
+        input_fields={},
         output_fields=_OUTPUT_FIELDS,
-        input={
-            "channel_id": IntegerValue(987),
-            "content": StringValue("hello"),
-        },
+        input={},
     )
 
     assert result.status is WorkflowExecutionResultStatus.ERROR
-    assert any("Missing Access" in message for message in error_messages(result))
+    assert any("Improper token" in message for message in error_messages(result))
