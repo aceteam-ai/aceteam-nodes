@@ -193,6 +193,4 @@ class CLIContext(LocalContext):
         return result
 
 
-__all__ = (
-    "CLIContext",
-)
+__all__ = ("CLIContext",)

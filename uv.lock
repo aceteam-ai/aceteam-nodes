@@ -42,6 +42,15 @@ browser-fetch = [
     { name = "playwright" },
     { name = "playwright-stealth" },
 ]
+discord-bot-info = [
+    { name = "discord-py" },
+]
+discord-list-channels = [
+    { name = "discord-py" },
+]
+discord-read-messages = [
+    { name = "discord-py" },
+]
 discord-send = [
     { name = "discord-py" },
 ]
@@ -80,6 +89,9 @@ requires-dist = [
     { name = "aceteam-aep", marker = "extra == 'llm'", specifier = ">=0.2.0" },
     { name = "aceteam-workflow-engine", specifier = ">=2.0.0rc13" },
     { name = "aiohttp", marker = "extra == 'slack-send'", specifier = ">=3.14.1" },
+    { name = "discord-py", marker = "extra == 'discord-bot-info'", specifier = ">=2.4.0" },
+    { name = "discord-py", marker = "extra == 'discord-list-channels'", specifier = ">=2.4.0" },
+    { name = "discord-py", marker = "extra == 'discord-read-messages'", specifier = ">=2.4.0" },
     { name = "discord-py", marker = "extra == 'discord-send'", specifier = ">=2.4.0" },
     { name = "httpx", specifier = ">=0.28.0" },
     { name = "jinja2", specifier = ">=3.1.0" },
@@ -93,7 +105,7 @@ requires-dist = [
     { name = "pyyaml", specifier = ">=6.0" },
     { name = "slack-sdk", marker = "extra == 'slack-send'", specifier = ">=3.42.0" },
 ]
-provides-extras = ["llm", "browser-fetch", "xpath-extract", "telegram-send", "slack-send", "discord-send"]
+provides-extras = ["browser-fetch", "discord-bot-info", "discord-list-channels", "discord-read-messages", "discord-send", "llm", "slack-send", "telegram-send", "xpath-extract"]
 
 [package.metadata.requires-dev]
 dev = [

@@ -64,8 +64,7 @@ class ShellCombinedOutput(Data):
     output: TextFileValue = Field(
         title="Output",
         description=(
-            "The combined text written to standard output and standard error "
-            "by the command."
+            "The combined text written to standard output and standard error by the command."
         ),
     )
     exit_code: IntegerValue = Field(
@@ -143,9 +142,7 @@ class ShellNode(Node[ShellInput, Data, ShellNodeParams]):
             stderr=(asyncio.subprocess.STDOUT if combine else asyncio.subprocess.PIPE),
         )
         stdout_bytes, stderr_bytes = await process.communicate()
-        assert process.returncode is not None, (
-            "process.returncode was None after communicate()"
-        )
+        assert process.returncode is not None, "process.returncode was None after communicate()"
 
         exit_code = IntegerValue(process.returncode)
 

@@ -1,26 +1,20 @@
-"""Tests for TelegramSendMessageNode.
-
-The token is resolved through ``context.get_env`` and the Bot API call is
-mocked, so these exercise the node's logic without network access or secrets.
-"""
+"""Tests for TelegramSendMessageNode."""
 
 import pytest
 from telegram.error import BadRequest
-from workflow_engine import StringValue, WorkflowEngine, WorkflowException
-from workflow_engine.contexts import InMemoryExecutionContext
-
-from aceteam_nodes.nodes.telegram_send import (
-    TelegramSendMessageInput,
-    TelegramSendMessageNode,
+from workflow_engine import (
+    ExecutionContext,
+    IntegerValue,
+    StringValue,
+    WorkflowEngine,
+    WorkflowExecutionResultStatus,
 )
+from workflow_helpers import error_messages, execute_single_node
 
+from aceteam_nodes.nodes.telegram_send import TelegramSendMessageNode
 
-def _node(engine: WorkflowEngine) -> TelegramSendMessageNode:
-    return engine.create_node(TelegramSendMessageNode, id="test")
-
-
-def _input(chat_id: str = "12345", text: str = "hello") -> TelegramSendMessageInput:
-    return TelegramSendMessageInput(chat_id=StringValue(chat_id), text=StringValue(text))
+_INPUT_FIELDS = {"chat_id": StringValue, "text": StringValue}
+_OUTPUT_FIELDS = {"message_id": IntegerValue}
 
 
 class _FakeMessage:
@@ -28,7 +22,6 @@ class _FakeMessage:
 
 
 def _mock_bot(monkeypatch: pytest.MonkeyPatch) -> dict:
-    """Patch Bot to capture send_message calls without network access."""
     captured: dict = {}
 
     class FakeBot:
@@ -57,14 +50,23 @@ def _mock_bot(monkeypatch: pytest.MonkeyPatch) -> dict:
 @pytest.mark.asyncio
 async def test_sends_message_and_maps_output(
     engine: WorkflowEngine,
+    context: ExecutionContext,
     monkeypatch: pytest.MonkeyPatch,
 ):
     monkeypatch.setenv("TELEGRAM_BOT_TOKEN", "secret-token")
     captured = _mock_bot(monkeypatch)
 
-    output = await _node(engine).run(context=InMemoryExecutionContext(), input=_input())
+    result = await execute_single_node(
+        engine,
+        context,
+        TelegramSendMessageNode,
+        input_fields=_INPUT_FIELDS,
+        output_fields=_OUTPUT_FIELDS,
+        input={"chat_id": StringValue("12345"), "text": StringValue("hello")},
+    )
 
-    assert output.message_id.root == 99
+    assert result.status is WorkflowExecutionResultStatus.SUCCESS
+    assert result.output["message_id"].root == 99
     assert captured["token"] == "secret-token"
     assert captured["chat_id"] == "12345"
     assert captured["text"] == "hello"
@@ -72,20 +74,44 @@ async def test_sends_message_and_maps_output(
 
 
 @pytest.mark.asyncio
-async def test_missing_token_raises(engine: WorkflowEngine, monkeypatch: pytest.MonkeyPatch):
+async def test_missing_token_raises(
+    engine: WorkflowEngine,
+    context: ExecutionContext,
+    monkeypatch: pytest.MonkeyPatch,
+):
     monkeypatch.delenv("TELEGRAM_BOT_TOKEN", raising=False)
-    with pytest.raises(ValueError, match="Environment variable TELEGRAM_BOT_TOKEN is not set"):
-        await _node(engine).run(context=InMemoryExecutionContext(), input=_input())
+
+    result = await execute_single_node(
+        engine,
+        context,
+        TelegramSendMessageNode,
+        input_fields=_INPUT_FIELDS,
+        output_fields=_OUTPUT_FIELDS,
+        input={"chat_id": StringValue("12345"), "text": StringValue("hello")},
+    )
+
+    assert result.status is WorkflowExecutionResultStatus.ERROR
+    assert any("TELEGRAM_BOT_TOKEN" in message for message in error_messages(result))
 
 
 @pytest.mark.asyncio
 async def test_api_error_raises_workflow_exception(
     engine: WorkflowEngine,
+    context: ExecutionContext,
     monkeypatch: pytest.MonkeyPatch,
 ):
     monkeypatch.setenv("TELEGRAM_BOT_TOKEN", "secret-token")
     captured = _mock_bot(monkeypatch)
     captured["error"] = BadRequest("chat not found")
 
-    with pytest.raises(WorkflowException, match="chat not found"):
-        await _node(engine).run(context=InMemoryExecutionContext(), input=_input())
+    result = await execute_single_node(
+        engine,
+        context,
+        TelegramSendMessageNode,
+        input_fields=_INPUT_FIELDS,
+        output_fields=_OUTPUT_FIELDS,
+        input={"chat_id": StringValue("12345"), "text": StringValue("hello")},
+    )
+
+    assert result.status is WorkflowExecutionResultStatus.ERROR
+    assert any("chat not found" in message for message in error_messages(result))

@@ -164,7 +164,14 @@ class APICallNode(
             return str(response.content)
 
     @override
-    async def run(self, context: ExecutionContext, input: Data) -> APICallOutput:
+    async def run(
+        self,
+        *,
+        context: ExecutionContext,
+        input_type: type[Data],
+        output_type: type[APICallOutput],
+        input: Data,
+    ) -> APICallOutput:
         # Prepare template parameters
         parameters: dict[str, Any] = {}
         if len(self.params.parameters) > 0:
@@ -253,7 +260,7 @@ class APICallNode(
             {k: StringValue(v) for k, v in response.headers.items()}
         )
 
-        return APICallOutput(
+        return output_type(
             status_code=status_code,
             response=response_data,
             headers=response_headers,

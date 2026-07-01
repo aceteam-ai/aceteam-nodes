@@ -20,12 +20,15 @@ dependencies = [
 # convention the engine's entry-point extras syntax expects (see the
 # `[extra]` suffixes in the node entry points below).
 [project.optional-dependencies]
-llm = ["aceteam-aep>=0.2.0"]
 browser-fetch = ["playwright>=1.47.0", "playwright-stealth>=2.0.3"]
-xpath-extract = ["lxml>=6.1.0"]
-telegram-send = ["python-telegram-bot>=21.0"]
-slack-send = ["aiohttp>=3.14.1", "slack-sdk>=3.42.0"]
+discord-bot-info = ["discord.py>=2.4.0"]
+discord-list-channels = ["discord.py>=2.4.0"]
+discord-read-messages = ["discord.py>=2.4.0"]
 discord-send = ["discord.py>=2.4.0"]
+llm = ["aceteam-aep>=0.2.0"]
+slack-send = ["aiohttp>=3.14.1", "slack-sdk>=3.42.0"]
+telegram-send = ["python-telegram-bot>=21.0"]
+xpath-extract = ["lxml>=6.1.0"]
 
 [dependency-groups]
 dev = [
@@ -54,7 +57,10 @@ ace-browser-setup = "aceteam_nodes.browser_setup:main"
 [project.entry-points."aceteam_workflow_engine.nodes"]
 APICall = "aceteam_nodes.nodes.api_call:APICallNode"
 BrowserFetch = "aceteam_nodes.nodes.browser_fetch:BrowserFetchNode [browser-fetch]"
-DiscordSendMessage = "aceteam_nodes.nodes.discord_send:DiscordSendMessageNode [discord-send]"
+DiscordBotInfo = "aceteam_nodes.nodes.discord.bot_info:DiscordBotInfoNode [discord-bot-info]"
+DiscordListChannels = "aceteam_nodes.nodes.discord.list_channels:DiscordListChannelsNode [discord-list-channels]"
+DiscordReadMessages = "aceteam_nodes.nodes.discord.read_messages:DiscordReadMessagesNode [discord-read-messages]"
+DiscordSendMessage = "aceteam_nodes.nodes.discord.send:DiscordSendMessageNode [discord-send]"
 LLM = "aceteam_nodes.nodes.llm:LLMNode [llm]"
 Shell = "aceteam_nodes.nodes.shell:ShellNode"
 SlackSendMessage = "aceteam_nodes.nodes.slack_send:SlackSendMessageNode [slack-send]"
