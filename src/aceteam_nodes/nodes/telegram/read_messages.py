@@ -20,7 +20,12 @@ from workflow_engine import (
     UnionValue,
 )
 
-from .common import TELEGRAM_TOKEN_ENV_VAR, raise_telegram_api_error
+from .common import (
+    TELEGRAM_TOKEN_ENV_VAR,
+    optional_integer,
+    optional_string,
+    raise_telegram_api_error,
+)
 
 OptionalOffset = UnionValue[IntegerValue, NullValue]
 OptionalString = UnionValue[StringValue, NullValue]
@@ -51,7 +56,7 @@ class TelegramMessageItem(Data):
         title="Message ID",
         description="The message id within the chat.",
     )
-    chat_id: StringValue = Field(
+    chat_id: IntegerValue = Field(
         title="Chat ID",
         description="The chat the message was sent in.",
     )
@@ -65,7 +70,9 @@ class TelegramMessageItem(Data):
     )
     text: OptionalString = Field(
         title="Text",
-        description="The message text body; null for stickers, photos, and other non-text messages.",
+        description=(
+            "The message text body; null for stickers, photos, and other non-text messages."
+        ),
     )
     date: StringValue = Field(
         title="Date",
@@ -149,22 +156,14 @@ class TelegramReadMessagesNode(
                             DataValue[TelegramMessageItem](
                                 root=TelegramMessageItem(
                                     message_id=IntegerValue(message.message_id),
-                                    chat_id=StringValue(str(message.chat_id)),
-                                    sender_id=(
-                                        IntegerValue(sender.id)
-                                        if sender is not None
-                                        else NullValue(None)
+                                    chat_id=IntegerValue(message.chat_id),
+                                    sender_id=optional_integer(
+                                        None if sender is None else sender.id
                                     ),
-                                    sender_username=(
-                                        StringValue(sender.username)
-                                        if sender is not None and sender.username is not None
-                                        else NullValue(None)
+                                    sender_username=optional_string(
+                                        None if sender is None else sender.username
                                     ),
-                                    text=(
-                                        StringValue(message.text)
-                                        if message.text is not None
-                                        else NullValue(None)
-                                    ),
+                                    text=optional_string(message.text),
                                     date=StringValue(message.date.isoformat()),
                                 ),
                             ),

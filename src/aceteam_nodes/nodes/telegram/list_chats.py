@@ -12,11 +12,19 @@ from workflow_engine import (
     IntegerValue,
     Node,
     NodeTypeInfo,
+    NullValue,
     Params,
     StringValue,
+    UnionValue,
 )
 
-from .common import TELEGRAM_TOKEN_ENV_VAR, raise_telegram_api_error
+from .common import (
+    TELEGRAM_TOKEN_ENV_VAR,
+    optional_string,
+    raise_telegram_api_error,
+)
+
+OptionalString = UnionValue[StringValue, NullValue]
 
 
 class TelegramListChatsParams(Params):
@@ -35,7 +43,7 @@ class TelegramListChatsInput(Data):
 
 
 class TelegramListChatsOutput(Data):
-    chat_id: StringValue = Field(
+    chat_id: IntegerValue = Field(
         title="Chat ID",
         description="The chat's numeric id.",
     )
@@ -43,15 +51,15 @@ class TelegramListChatsOutput(Data):
         title="Type",
         description="The chat type (e.g. private, group, supergroup, channel).",
     )
-    title: StringValue = Field(
+    title: OptionalString = Field(
         title="Title",
         description="The chat title, when present.",
     )
-    username: StringValue = Field(
+    username: OptionalString = Field(
         title="Username",
         description="The chat @username, when present.",
     )
-    description: StringValue = Field(
+    description: OptionalString = Field(
         title="Description",
         description="The chat description, when present.",
     )
@@ -114,11 +122,11 @@ class TelegramListChatsNode(
             raise_telegram_api_error(e)
 
         return output_type(
-            chat_id=StringValue(str(chat.id)),
+            chat_id=IntegerValue(chat.id),
             type=StringValue(chat.type),
-            title=StringValue(chat.title or ""),
-            username=StringValue(chat.username or ""),
-            description=StringValue(chat.description or ""),
+            title=optional_string(chat.title),
+            username=optional_string(chat.username),
+            description=optional_string(chat.description),
         )
 
 

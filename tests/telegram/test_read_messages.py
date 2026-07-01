@@ -50,7 +50,7 @@ async def test_reads_messages_and_maps_output(
     assert len(messages) == 2
     first = messages[0].root
     assert first.message_id.root == 99
-    assert first.chat_id.root == "12345"
+    assert first.chat_id.root == 12345
     assert first.sender_id.root == 555
     assert first.sender_username.root == "tester"
     assert first.text.root == "hello"

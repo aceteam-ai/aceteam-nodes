@@ -3,7 +3,10 @@
 import pytest
 from workflow_engine import (
     ExecutionContext,
+    IntegerValue,
+    NullValue,
     StringValue,
+    UnionValue,
     WorkflowEngine,
     WorkflowExecutionResultStatus,
 )
@@ -12,13 +15,14 @@ from aceteam_nodes.nodes.telegram.list_chats import TelegramListChatsNode
 from tests.telegram.mocks import FakeChat, bad_request, mock_bot
 from tests.workflow_helpers import error_messages, execute_single_node
 
+OptionalString = UnionValue[StringValue, NullValue]
 _INPUT_FIELDS = {"chat_id": StringValue}
 _OUTPUT_FIELDS = {
-    "chat_id": StringValue,
+    "chat_id": IntegerValue,
     "type": StringValue,
-    "title": StringValue,
-    "username": StringValue,
-    "description": StringValue,
+    "title": OptionalString,
+    "username": OptionalString,
+    "description": OptionalString,
 }
 
 
@@ -48,12 +52,45 @@ async def test_looks_up_chat_and_maps_output(
     )
 
     assert result.status is WorkflowExecutionResultStatus.SUCCESS
-    assert result.output["chat_id"].root == "999"
+    assert result.output["chat_id"].root == 999
     assert result.output["type"].root == "channel"
     assert result.output["title"].root == "Announcements"
     assert result.output["username"].root == "news"
     assert result.output["description"].root == "Official news"
     assert captured["get_chat"]["chat_id"] == "@news"
+
+
+@pytest.mark.asyncio
+async def test_nullable_fields_when_metadata_absent(
+    engine: WorkflowEngine,
+    context: ExecutionContext,
+    monkeypatch: pytest.MonkeyPatch,
+):
+    monkeypatch.setenv("TELEGRAM_BOT_TOKEN", "secret-token")
+    captured = mock_bot(monkeypatch)
+    captured["chat"] = FakeChat(
+        12345,
+        type="private",
+        title=None,
+        username=None,
+        description=None,
+    )
+
+    result = await execute_single_node(
+        engine,
+        context,
+        TelegramListChatsNode,
+        input_fields=_INPUT_FIELDS,
+        output_fields=_OUTPUT_FIELDS,
+        input={"chat_id": StringValue("12345")},
+    )
+
+    assert result.status is WorkflowExecutionResultStatus.SUCCESS
+    assert result.output["chat_id"].root == 12345
+    assert result.output["type"].root == "private"
+    assert result.output["title"].root is None
+    assert result.output["username"].root is None
+    assert result.output["description"].root is None
 
 
 @pytest.mark.asyncio

@@ -22,9 +22,9 @@ class FakeChat:
         chat_id: int = 12345,
         *,
         type: str = "private",
-        title: str = "",
-        username: str = "testchat",
-        description: str = "",
+        title: str | None = "Test Group",
+        username: str | None = "testgroup",
+        description: str | None = "A test chat",
     ):
         self.id = chat_id
         self.type = type
