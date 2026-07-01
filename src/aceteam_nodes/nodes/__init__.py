@@ -10,7 +10,12 @@ from .discord import (
 )
 from .llm import LLMNode
 from .shell import ShellNode
-from .slack_send import SlackSendMessageNode
+from .slack import (
+    SlackListChannelsNode,
+    SlackReadMessagesNode,
+    SlackSearchMessagesNode,
+    SlackSendMessageNode,
+)
 from .telegram import (
     TelegramBotInfoNode,
     TelegramListChatsNode,
@@ -28,6 +33,9 @@ __all__ = (
     "DiscordSendMessageNode",
     "LLMNode",
     "ShellNode",
+    "SlackListChannelsNode",
+    "SlackReadMessagesNode",
+    "SlackSearchMessagesNode",
     "SlackSendMessageNode",
     "TelegramBotInfoNode",
     "TelegramListChatsNode",

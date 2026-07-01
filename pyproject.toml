@@ -26,6 +26,9 @@ discord-list-channels = ["discord.py>=2.4.0"]
 discord-read-messages = ["discord.py>=2.4.0"]
 discord-send = ["discord.py>=2.4.0"]
 llm = ["aceteam-aep>=0.2.0"]
+slack-list-channels = ["aiohttp>=3.14.1", "slack-sdk>=3.42.0"]
+slack-read-messages = ["aiohttp>=3.14.1", "slack-sdk>=3.42.0"]
+slack-search-messages = ["aiohttp>=3.14.1", "slack-sdk>=3.42.0"]
 slack-send = ["aiohttp>=3.14.1", "slack-sdk>=3.42.0"]
 telegram-bot-info = ["python-telegram-bot>=21.0"]
 telegram-list-chats = ["python-telegram-bot>=21.0"]
@@ -66,7 +69,10 @@ DiscordReadMessages = "aceteam_nodes.nodes.discord.read_messages:DiscordReadMess
 DiscordSendMessage = "aceteam_nodes.nodes.discord.send:DiscordSendMessageNode [discord-send]"
 LLM = "aceteam_nodes.nodes.llm:LLMNode [llm]"
 Shell = "aceteam_nodes.nodes.shell:ShellNode"
-SlackSendMessage = "aceteam_nodes.nodes.slack_send:SlackSendMessageNode [slack-send]"
+SlackListChannels = "aceteam_nodes.nodes.slack.list_channels:SlackListChannelsNode [slack-list-channels]"
+SlackReadMessages = "aceteam_nodes.nodes.slack.read_messages:SlackReadMessagesNode [slack-read-messages]"
+SlackSearchMessages = "aceteam_nodes.nodes.slack.search_messages:SlackSearchMessagesNode [slack-search-messages]"
+SlackSendMessage = "aceteam_nodes.nodes.slack.send:SlackSendMessageNode [slack-send]"
 TelegramBotInfo = "aceteam_nodes.nodes.telegram.bot_info:TelegramBotInfoNode [telegram-bot-info]"
 TelegramListChats = "aceteam_nodes.nodes.telegram.list_chats:TelegramListChatsNode [telegram-list-chats]"
 TelegramReadMessages = "aceteam_nodes.nodes.telegram.read_messages:TelegramReadMessagesNode [telegram-read-messages]"

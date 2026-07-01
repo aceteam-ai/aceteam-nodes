@@ -1,7 +1,6 @@
 """Tests for SlackSendMessageNode."""
 
 import pytest
-from slack_sdk.errors import SlackApiError
 from workflow_engine import (
     ExecutionContext,
     StringValue,
@@ -9,34 +8,12 @@ from workflow_engine import (
     WorkflowExecutionResultStatus,
 )
 
-from aceteam_nodes.nodes.slack_send import SlackSendMessageNode
+from aceteam_nodes.nodes.slack.send import SlackSendMessageNode
+from tests.slack.mocks import mock_client, slack_api_error
 from tests.workflow_helpers import error_messages, execute_single_node
 
 _INPUT_FIELDS = {"channel": StringValue, "text": StringValue}
 _OUTPUT_FIELDS = {"channel": StringValue, "timestamp": StringValue}
-
-
-def _mock_client(monkeypatch: pytest.MonkeyPatch) -> dict:
-    captured: dict = {}
-
-    class FakeAsyncWebClient:
-        def __init__(self, token: str | None = None, timeout: int = 30, **kwargs):
-            captured["token"] = token
-            captured["timeout"] = timeout
-
-        async def chat_postMessage(self, *, channel: str, text: str, **kwargs):
-            captured["channel"] = channel
-            captured["text"] = text
-            captured["kwargs"] = kwargs
-            if "error" in captured:
-                raise captured["error"]
-            return captured.get(
-                "response",
-                {"ok": True, "channel": channel, "ts": "1700000000.000100"},
-            )
-
-    monkeypatch.setattr("aceteam_nodes.nodes.slack_send.AsyncWebClient", FakeAsyncWebClient)
-    return captured
 
 
 @pytest.mark.asyncio
@@ -46,8 +23,8 @@ async def test_posts_message_and_maps_output(
     monkeypatch: pytest.MonkeyPatch,
 ):
     monkeypatch.setenv("SLACK_BOT_TOKEN", "xoxb-secret")
-    captured = _mock_client(monkeypatch)
-    captured["response"] = {
+    captured = mock_client(monkeypatch)
+    captured["chat_postMessage_response"] = {
         "ok": True,
         "channel": "C0123",
         "ts": "1700000000.000100",
@@ -67,8 +44,8 @@ async def test_posts_message_and_maps_output(
     assert result.output["timestamp"].root == "1700000000.000100"
     assert captured["token"] == "xoxb-secret"
     assert captured["timeout"] == 30
-    assert captured["channel"] == "C0123"
-    assert captured["text"] == "hello"
+    assert captured["chat_postMessage"]["channel"] == "C0123"
+    assert captured["chat_postMessage"]["text"] == "hello"
 
 
 @pytest.mark.asyncio
@@ -99,11 +76,8 @@ async def test_api_error_raises_workflow_exception(
     monkeypatch: pytest.MonkeyPatch,
 ):
     monkeypatch.setenv("SLACK_BOT_TOKEN", "xoxb-secret")
-    captured = _mock_client(monkeypatch)
-    captured["error"] = SlackApiError(
-        "The request to the Slack API failed.",
-        {"ok": False, "error": "channel_not_found"},
-    )
+    captured = mock_client(monkeypatch)
+    captured["error"] = slack_api_error("channel_not_found")
 
     result = await execute_single_node(
         engine,
@@ -125,8 +99,8 @@ async def test_resolves_channel_name_to_id(
     monkeypatch: pytest.MonkeyPatch,
 ):
     monkeypatch.setenv("SLACK_BOT_TOKEN", "xoxb-secret")
-    captured = _mock_client(monkeypatch)
-    captured["response"] = {
+    captured = mock_client(monkeypatch)
+    captured["chat_postMessage_response"] = {
         "ok": True,
         "channel": "C0999RESOLVED",
         "ts": "1700000000.000200",
@@ -142,6 +116,6 @@ async def test_resolves_channel_name_to_id(
     )
 
     assert result.status is WorkflowExecutionResultStatus.SUCCESS
-    assert captured["channel"] == "#general"
+    assert captured["chat_postMessage"]["channel"] == "#general"
     assert result.output["channel"].root == "C0999RESOLVED"
     assert result.output["timestamp"].root == "1700000000.000200"

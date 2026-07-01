@@ -1,9 +1,5 @@
-"""Slack Send Message node - posts a message via the Slack Web API.
+"""Slack Send Message node - posts a message via the Slack Web API."""
 
-The bot token is resolved at runtime via ``context.get_env``.
-"""
-
-import logging
 from typing import ClassVar, Type
 
 from overrides import override
@@ -18,14 +14,13 @@ from workflow_engine import (
     NodeTypeInfo,
     Params,
     StringValue,
-    WorkflowException,
 )
-from workflow_engine.core import StakeholderLevel
 
-logger = logging.getLogger(__name__)
-
-
-_SLACK_TOKEN_ENV_VAR = "SLACK_BOT_TOKEN"
+from .common import (
+    SLACK_BOT_TOKEN_ENV_VAR,
+    raise_slack_api_error,
+    raise_slack_client_error,
+)
 
 
 class SlackSendMessageParams(Params):
@@ -93,7 +88,7 @@ class SlackSendMessageNode(
         output_type: Type[SlackSendMessageOutput],
         input: SlackSendMessageInput,
     ) -> SlackSendMessageOutput:
-        token = await context.get_env(_SLACK_TOKEN_ENV_VAR)
+        token = await context.get_env(SLACK_BOT_TOKEN_ENV_VAR)
         timeout = self.params.timeout.root
         client = AsyncWebClient(token=token, timeout=timeout)
 
@@ -103,15 +98,9 @@ class SlackSendMessageNode(
                 text=input.text.root,
             )
         except SlackApiError as e:
-            raise WorkflowException(
-                f"Slack rejected the message: {e.response['error']}",
-                level=StakeholderLevel.USER,
-            ) from e
+            raise_slack_api_error(e)
         except SlackClientError as e:
-            raise WorkflowException(
-                f"Failed to reach Slack: {e}",
-                level=StakeholderLevel.USER,
-            ) from e
+            raise_slack_client_error(e)
 
         return output_type(
             channel=StringValue(response.get("channel", input.channel.root)),
