@@ -5,7 +5,12 @@ from workflow_engine import WorkflowEngine
 from workflow_engine.contexts import InMemoryExecutionContext
 
 # Import node classes so they register on NodeRegistry.DEFAULT at import time.
-from aceteam_nodes.nodes.discord_send import DiscordSendMessageNode  # noqa: F401
+from aceteam_nodes.nodes.discord import (  # noqa: F401
+    DiscordBotInfoNode,
+    DiscordListChannelsNode,
+    DiscordReadMessagesNode,
+    DiscordSendMessageNode,
+)
 from aceteam_nodes.nodes.shell import ShellNode  # noqa: F401
 from aceteam_nodes.nodes.slack_send import SlackSendMessageNode  # noqa: F401
 from aceteam_nodes.nodes.telegram_send import TelegramSendMessageNode  # noqa: F401

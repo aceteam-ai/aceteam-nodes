@@ -6,6 +6,9 @@ __version__ = "6.1.0"
 from .nodes import (
     APICallNode,
     BrowserFetchNode,
+    DiscordBotInfoNode,
+    DiscordListChannelsNode,
+    DiscordReadMessagesNode,
     DiscordSendMessageNode,
     LLMNode,
     ShellNode,
@@ -17,6 +20,9 @@ from .nodes import (
 __all__ = (
     "APICallNode",
     "BrowserFetchNode",
+    "DiscordBotInfoNode",
+    "DiscordListChannelsNode",
+    "DiscordReadMessagesNode",
     "DiscordSendMessageNode",
     "LLMNode",
     "ShellNode",

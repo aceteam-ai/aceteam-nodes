@@ -65,13 +65,19 @@ uv add "aceteam-nodes[xpath-extract]" # + XPathExtract (lxml)
 
 ## Available Nodes
 
-| Node                                                                                  | Extra           | Description                                                                 |
-| ------------------------------------------------------------------------------------- | --------------- | --------------------------------------------------------------------------- |
-| LLM                                                                                   | `llm`           | AI text generation via aceteam-aep (OpenAI, Anthropic, Google, xAI, Ollama) |
-| APICall                                                                               | —               | HTTP requests with Jinja templating                                         |
-| Shell                                                                                 | —               | Run shell commands and capture stdout/stderr (trusted engines only)         |
-| BrowserFetch                                                                          | `browser-fetch` | Authenticated web fetch via Playwright                                      |
-| XPathExtract                                                                          | `xpath-extract` | XPath extraction over HTML/XML                                              |
+| Node                | Extra                   | Description                                                                 |
+| ------------------- | ----------------------- | --------------------------------------------------------------------------- |
+| LLM                 | `llm`                   | AI text generation via aceteam-aep (OpenAI, Anthropic, Google, xAI, Ollama) |
+| APICall             | —                       | HTTP requests with Jinja templating                                         |
+| Shell               | —                       | Run shell commands and capture stdout/stderr (trusted engines only)         |
+| BrowserFetch        | `browser-fetch`         | Authenticated web fetch via Playwright                                      |
+| DiscordBotInfo      | `discord-bot-info`      | Return the authenticated Discord bot's ID and username                      |
+| DiscordListChannels | `discord-list-channels` | List channels in a Discord server                                           |
+| DiscordReadMessages | `discord-read-messages` | Fetch recent messages from a channel (Message Content intent required)      |
+| DiscordSendMessage  | `discord-send`          | Send a message to a Discord channel                                         |
+| SlackSendMessage    | `slack-send`            | Send a message via Slack Web API                                            |
+| TelegramSendMessage | `telegram-send`         | Send a message via Telegram Bot API                                         |
+| XPathExtract        | `xpath-extract`         | XPath extraction over HTML/XML                                              |
 
 Each node needing a heavy/optional dependency has **one extra named after the
 node** (`llm`, `browser-fetch`, `xpath-extract`), so `aceteam-nodes[browser-fetch]`
@@ -97,6 +103,7 @@ LLM provider credentials are read from the environment:
 export OPENAI_API_KEY=sk-...
 # or
 export ANTHROPIC_API_KEY=sk-ant-...
+export DISCORD_BOT_TOKEN=...   # Discord send/read nodes
 ```
 
 ## Development

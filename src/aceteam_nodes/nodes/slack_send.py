@@ -87,7 +87,10 @@ class SlackSendMessageNode(
     @override
     async def run(
         self,
+        *,
         context: ExecutionContext,
+        input_type: Type[SlackSendMessageInput],
+        output_type: Type[SlackSendMessageOutput],
         input: SlackSendMessageInput,
     ) -> SlackSendMessageOutput:
         token = await context.get_env(_SLACK_TOKEN_ENV_VAR)
@@ -110,7 +113,7 @@ class SlackSendMessageNode(
                 level=StakeholderLevel.USER,
             ) from e
 
-        return SlackSendMessageOutput(
+        return output_type(
             channel=StringValue(response.get("channel", input.channel.root)),
             timestamp=StringValue(response.get("ts", "")),
         )

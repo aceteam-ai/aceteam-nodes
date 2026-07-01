@@ -1,41 +1,44 @@
 """Tests for XPathExtractNode."""
 
-import pytest
-from workflow_engine import StringValue, WorkflowEngine, WorkflowException
-from workflow_engine.contexts import InMemoryExecutionContext
-from workflow_engine.files import TextFileValue
-
-from aceteam_nodes.nodes.xpath_extract import (
-    XPathExtractInput,
-    XPathExtractNode,
-    XPathExtractOutput,
+from workflow_engine import (
+    ExecutionContext,
+    SequenceValue,
+    StringValue,
+    WorkflowEngine,
+    WorkflowExecutionResultStatus,
 )
+from workflow_engine.files import TextFileValue
+from workflow_helpers import error_messages, execute_single_node
+
+from aceteam_nodes.nodes.xpath_extract import XPathExtractNode
+
+_INPUT_FIELDS = {"html": TextFileValue}
+_OUTPUT_FIELDS = {"results": SequenceValue[StringValue]}
 
 
 async def _run(
     engine: WorkflowEngine,
-    context: InMemoryExecutionContext,
+    context: ExecutionContext,
     xpath: str,
     html: str,
 ) -> list[str]:
     html_file = await StringValue(html).cast_to(TextFileValue, context=context)
-    node = engine.create_node(
+    result = await execute_single_node(
+        engine,
+        context,
         XPathExtractNode,
-        id="test",
-        params=dict(xpath=xpath),
+        params={"xpath": xpath},
+        input_fields=_INPUT_FIELDS,
+        output_fields=_OUTPUT_FIELDS,
+        input={"html": html_file},
     )
-    output = await node.run(
-        context=context,
-        input_type=XPathExtractInput,
-        output_type=XPathExtractOutput,
-        input=XPathExtractInput(html=html_file),
-    )
-    return [s.root for s in output.results.root]
+    assert result.status is WorkflowExecutionResultStatus.SUCCESS
+    return [s.root for s in result.output["results"].root]
 
 
 async def test_extracts_element_text_content(
     engine: WorkflowEngine,
-    context: InMemoryExecutionContext,
+    context: ExecutionContext,
 ):
     html = """
     <html><body>
@@ -49,7 +52,7 @@ async def test_extracts_element_text_content(
 
 async def test_extracts_attributes(
     engine: WorkflowEngine,
-    context: InMemoryExecutionContext,
+    context: ExecutionContext,
 ):
     html = '<ul><li><a href="/x">x</a></li><li><a href="/y">y</a></li></ul>'
     results = await _run(engine, context, "//a/@href", html)
@@ -58,9 +61,8 @@ async def test_extracts_attributes(
 
 async def test_xpath_text_predicate(
     engine: WorkflowEngine,
-    context: InMemoryExecutionContext,
+    context: ExecutionContext,
 ):
-    """Use of XPath features that CSS cannot express: text-content matching."""
     html = """
     <div>
       <p>Posted by Alice</p>
@@ -74,7 +76,7 @@ async def test_xpath_text_predicate(
 
 async def test_no_matches_returns_empty(
     engine: WorkflowEngine,
-    context: InMemoryExecutionContext,
+    context: ExecutionContext,
 ):
     results = await _run(engine, context, "//nonexistent", "<div><p>hi</p></div>")
     assert results == []
@@ -82,7 +84,7 @@ async def test_no_matches_returns_empty(
 
 async def test_empty_html_returns_empty(
     engine: WorkflowEngine,
-    context: InMemoryExecutionContext,
+    context: ExecutionContext,
 ):
     results = await _run(engine, context, "//p", "")
     assert results == []
@@ -90,15 +92,25 @@ async def test_empty_html_returns_empty(
 
 async def test_invalid_xpath_raises(
     engine: WorkflowEngine,
-    context: InMemoryExecutionContext,
+    context: ExecutionContext,
 ):
-    with pytest.raises(WorkflowException, match="Invalid XPath"):
-        await _run(engine, context, "//[bogus", "<div/>")
+    html_file = await StringValue("<div/>").cast_to(TextFileValue, context=context)
+    result = await execute_single_node(
+        engine,
+        context,
+        XPathExtractNode,
+        params={"xpath": "//[bogus"},
+        input_fields=_INPUT_FIELDS,
+        output_fields=_OUTPUT_FIELDS,
+        input={"html": html_file},
+    )
+    assert result.status is WorkflowExecutionResultStatus.ERROR
+    assert any("Invalid XPath" in message for message in error_messages(result))
 
 
 async def test_results_in_document_order(
     engine: WorkflowEngine,
-    context: InMemoryExecutionContext,
+    context: ExecutionContext,
 ):
     html = "<root><x>1</x><y><x>2</x></y><x>3</x></root>"
     results = await _run(engine, context, "//x", html)

@@ -39,7 +39,10 @@ def _separate_workflow(engine: WorkflowEngine, command: str) -> Workflow:
         ],
         edges=[
             Edge.from_nodes(
-                source=shell, source_key=key, target=output_node, target_key=key
+                source=shell,
+                source_key=key,
+                target=output_node,
+                target_key=key,
             )
             for key in ("stdout", "stderr", "exit_code")
         ],
@@ -137,7 +140,10 @@ async def test_combined_output(engine: WorkflowEngine):
         ],
         edges=[
             Edge.from_nodes(
-                source=shell, source_key=key, target=output_node, target_key=key
+                source=shell,
+                source_key=key,
+                target=output_node,
+                target_key=key,
             )
             for key in ("output", "exit_code")
         ],

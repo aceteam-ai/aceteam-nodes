@@ -21,9 +21,9 @@ from workflow_engine import (
     StringValue,
 )
 
-logger = logging.getLogger(__name__)
+from .common import DISCORD_TOKEN_ENV_VAR, logged_in_discord_client, raise_discord_api_error
 
-_DISCORD_TOKEN_ENV_VAR = "DISCORD_BOT_TOKEN"
+logger = logging.getLogger(__name__)
 
 
 class DiscordSendMessageParams(Params):
@@ -35,7 +35,7 @@ class DiscordSendMessageParams(Params):
 
 
 class DiscordSendMessageInput(Data):
-    channel_id: StringValue = Field(
+    channel_id: IntegerValue = Field(
         title="Channel ID",
         description="The target channel's snowflake ID.",
     )
@@ -81,34 +81,29 @@ class DiscordSendMessageNode(
     @override
     async def run(
         self,
+        *,
         context: ExecutionContext,
+        input_type: Type[DiscordSendMessageInput],
+        output_type: Type[DiscordSendMessageOutput],
         input: DiscordSendMessageInput,
     ) -> DiscordSendMessageOutput:
-        token = await context.get_env(_DISCORD_TOKEN_ENV_VAR)
-        client = discord.Client(intents=discord.Intents.none())
+        token = await context.get_env(DISCORD_TOKEN_ENV_VAR)
 
-        async with client:
-            await client.login(token)
-            try:
-                channel = await client.fetch_channel(int(input.channel_id.root))
+        try:
+            async with logged_in_discord_client(token) as client:
+                channel = await client.fetch_channel(input.channel_id.root)
                 if not isinstance(channel, discord.abc.Messageable):
                     raise NodeException.for_user(
                         f"Channel {input.channel_id.root} does not support sending messages.",
                         node=self,
                     )
                 message = await channel.send(input.content.root)
-            except HTTPException as e:
-                raise NodeException.for_user(
-                    f"Discord rejected the message: {e.text}",
-                    node=self,
-                ) from e
-            except DiscordException as e:
-                raise NodeException.for_user(
-                    f"Failed to reach Discord: {e}",
-                    node=self,
-                ) from e
+        except HTTPException as e:
+            raise_discord_api_error(self, e)
+        except DiscordException as e:
+            raise_discord_api_error(self, e)
 
-        return DiscordSendMessageOutput(
+        return output_type(
             message_id=IntegerValue(message.id),
         )
 

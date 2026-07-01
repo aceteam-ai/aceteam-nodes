@@ -82,7 +82,10 @@ class TelegramSendMessageNode(
     @override
     async def run(
         self,
+        *,
         context: ExecutionContext,
+        input_type: Type[TelegramSendMessageInput],
+        output_type: Type[TelegramSendMessageOutput],
         input: TelegramSendMessageInput,
     ) -> TelegramSendMessageOutput:
         token = await context.get_env(_TELEGRAM_TOKEN_ENV_VAR)
@@ -113,7 +116,7 @@ class TelegramSendMessageNode(
                 level=StakeholderLevel.USER,
             ) from e
 
-        return TelegramSendMessageOutput(
+        return output_type(
             message_id=IntegerValue(message.message_id),
         )
 
