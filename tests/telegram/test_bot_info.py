@@ -1,21 +1,19 @@
-"""Tests for TelegramHealthNode."""
+"""Tests for TelegramBotInfoNode."""
 
 import pytest
-from telegram_mocks import FakeUser, bad_request, mock_bot
 from workflow_engine import (
-    BooleanValue,
     ExecutionContext,
     IntegerValue,
     StringValue,
     WorkflowEngine,
     WorkflowExecutionResultStatus,
 )
-from workflow_helpers import error_messages, execute_single_node
 
-from aceteam_nodes.nodes.telegram.health import TelegramHealthNode
+from aceteam_nodes.nodes.telegram.bot_info import TelegramBotInfoNode
+from tests.telegram.mocks import FakeUser, bad_request, mock_bot
+from tests.workflow_helpers import error_messages, execute_single_node
 
 _OUTPUT_FIELDS = {
-    "ok": BooleanValue,
     "bot_id": IntegerValue,
     "bot_username": StringValue,
 }
@@ -34,14 +32,13 @@ async def test_returns_bot_identity(
     result = await execute_single_node(
         engine,
         context,
-        TelegramHealthNode,
+        TelegramBotInfoNode,
         input_fields={},
         output_fields=_OUTPUT_FIELDS,
         input={},
     )
 
     assert result.status is WorkflowExecutionResultStatus.SUCCESS
-    assert result.output["ok"].root is True
     assert result.output["bot_id"].root == 4242
     assert result.output["bot_username"].root == "aceteam-bot"
     assert "read_timeout" in captured["get_me"]
@@ -58,7 +55,7 @@ async def test_missing_token_raises(
     result = await execute_single_node(
         engine,
         context,
-        TelegramHealthNode,
+        TelegramBotInfoNode,
         input_fields={},
         output_fields=_OUTPUT_FIELDS,
         input={},
@@ -81,7 +78,7 @@ async def test_api_error_raises_workflow_exception(
     result = await execute_single_node(
         engine,
         context,
-        TelegramHealthNode,
+        TelegramBotInfoNode,
         input_fields={},
         output_fields=_OUTPUT_FIELDS,
         input={},

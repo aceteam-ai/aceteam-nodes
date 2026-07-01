@@ -1,4 +1,4 @@
-"""Telegram Health node - verifies the bot token via ``getMe``."""
+"""Telegram Bot Info node - returns the authenticated bot's identity."""
 
 from typing import ClassVar, Type
 
@@ -7,7 +7,6 @@ from pydantic import Field
 from telegram import Bot
 from telegram.error import TelegramError
 from workflow_engine import (
-    BooleanValue,
     Data,
     Empty,
     ExecutionContext,
@@ -21,7 +20,7 @@ from workflow_engine import (
 from .common import TELEGRAM_TOKEN_ENV_VAR, raise_telegram_api_error
 
 
-class TelegramHealthParams(Params):
+class TelegramBotInfoParams(Params):
     timeout: IntegerValue = Field(
         title="Timeout",
         description="Request timeout in seconds.",
@@ -29,11 +28,7 @@ class TelegramHealthParams(Params):
     )
 
 
-class TelegramHealthOutput(Data):
-    ok: BooleanValue = Field(
-        title="OK",
-        description="Whether the token was accepted by ``getMe``.",
-    )
+class TelegramBotInfoOutput(Data):
     bot_id: IntegerValue = Field(
         title="Bot ID",
         description="The bot's Telegram user id.",
@@ -44,20 +39,20 @@ class TelegramHealthOutput(Data):
     )
 
 
-class TelegramHealthNode(
+class TelegramBotInfoNode(
     Node[
         Empty,
-        TelegramHealthOutput,
-        TelegramHealthParams,
+        TelegramBotInfoOutput,
+        TelegramBotInfoParams,
     ]
 ):
-    """Verify ``TELEGRAM_BOT_TOKEN`` via the Bot API ``getMe`` method."""
+    """Return the bot identity for ``TELEGRAM_BOT_TOKEN`` via ``getMe``."""
 
     TYPE_INFO: ClassVar[NodeTypeInfo] = NodeTypeInfo.from_parameter_type(
-        display_name="Telegram Health",
-        description="Verifies the configured bot token via ``getMe``.",
+        display_name="Telegram Bot Info",
+        description="Returns the authenticated Telegram bot's ID and username.",
         version="0.1.0",
-        parameter_type=TelegramHealthParams,
+        parameter_type=TelegramBotInfoParams,
     )
 
     @classmethod
@@ -67,8 +62,8 @@ class TelegramHealthNode(
 
     @classmethod
     @override
-    def static_output_type(cls) -> Type[TelegramHealthOutput]:
-        return TelegramHealthOutput
+    def static_output_type(cls) -> Type[TelegramBotInfoOutput]:
+        return TelegramBotInfoOutput
 
     @override
     async def run(
@@ -76,9 +71,9 @@ class TelegramHealthNode(
         *,
         context: ExecutionContext,
         input_type: Type[Empty],
-        output_type: Type[TelegramHealthOutput],
+        output_type: Type[TelegramBotInfoOutput],
         input: Empty,
-    ) -> TelegramHealthOutput:
+    ) -> TelegramBotInfoOutput:
         token = await context.get_env(TELEGRAM_TOKEN_ENV_VAR)
         timeout = float(self.params.timeout.root)
 
@@ -93,14 +88,13 @@ class TelegramHealthNode(
             raise_telegram_api_error(e)
 
         return output_type(
-            ok=BooleanValue(True),
             bot_id=IntegerValue(bot_user.id),
             bot_username=StringValue(bot_user.username or ""),
         )
 
 
 __all__ = (
-    "TelegramHealthNode",
-    "TelegramHealthOutput",
-    "TelegramHealthParams",
+    "TelegramBotInfoNode",
+    "TelegramBotInfoOutput",
+    "TelegramBotInfoParams",
 )

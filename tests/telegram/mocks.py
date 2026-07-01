@@ -7,7 +7,11 @@ from telegram.error import BadRequest
 
 
 class FakeUser:
-    def __init__(self, user_id: int = 555, username: str = "tester"):
+    def __init__(
+        self,
+        user_id: int = 555,
+        username: str | None = "tester",
+    ):
         self.id = user_id
         self.username = username
 
@@ -35,7 +39,7 @@ class FakeMessage:
         message_id: int = 99,
         *,
         chat_id: int = 12345,
-        text: str = "hello",
+        text: str | None = "hello",
         sender: FakeUser | None = None,
     ):
         self.message_id = message_id
@@ -46,8 +50,14 @@ class FakeMessage:
 
 
 class FakeUpdate:
-    def __init__(self, message: FakeMessage | None = None):
+    def __init__(
+        self,
+        message: FakeMessage | None = None,
+        *,
+        update_id: int | None = None,
+    ):
         self.message = message or FakeMessage()
+        self.update_id = update_id if update_id is not None else self.message.message_id
 
 
 class FakeSendMessage:
@@ -77,14 +87,22 @@ def mock_bot(monkeypatch: pytest.MonkeyPatch) -> dict:
             return FakeSendMessage()
 
         async def get_updates(self, *, offset=None, limit=None, timeout=None, **kwargs):
-            captured["get_updates"] = {
+            call = {
                 "offset": offset,
                 "limit": limit,
                 "timeout": timeout,
                 **kwargs,
             }
+            captured.setdefault("get_updates_calls", []).append(call)
+            captured["get_updates"] = call
             if "error" in captured:
                 raise captured["error"]
+            batches = captured.get("update_batches")
+            if batches is not None:
+                call_index = len(captured["get_updates_calls"]) - 1
+                if call_index < len(batches):
+                    return batches[call_index]
+                return ()
             return captured.get("updates", (FakeUpdate(),))
 
         async def get_chat(self, chat_id, **kwargs):
@@ -112,7 +130,7 @@ def mock_bot(monkeypatch: pytest.MonkeyPatch) -> dict:
         "aceteam_nodes.nodes.telegram.send.Bot",
         "aceteam_nodes.nodes.telegram.read_messages.Bot",
         "aceteam_nodes.nodes.telegram.list_chats.Bot",
-        "aceteam_nodes.nodes.telegram.health.Bot",
+        "aceteam_nodes.nodes.telegram.bot_info.Bot",
     ):
         monkeypatch.setattr(target, FakeBot)
     return captured

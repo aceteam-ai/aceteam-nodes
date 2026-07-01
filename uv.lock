@@ -61,7 +61,7 @@ slack-send = [
     { name = "aiohttp" },
     { name = "slack-sdk" },
 ]
-telegram-health = [
+telegram-bot-info = [
     { name = "python-telegram-bot" },
 ]
 telegram-list-chats = [
@@ -110,14 +110,14 @@ requires-dist = [
     { name = "playwright", marker = "extra == 'browser-fetch'", specifier = ">=1.47.0" },
     { name = "playwright-stealth", marker = "extra == 'browser-fetch'", specifier = ">=2.0.3" },
     { name = "pydantic", specifier = ">=2.11.0" },
-    { name = "python-telegram-bot", marker = "extra == 'telegram-health'", specifier = ">=21.0" },
+    { name = "python-telegram-bot", marker = "extra == 'telegram-bot-info'", specifier = ">=21.0" },
     { name = "python-telegram-bot", marker = "extra == 'telegram-list-chats'", specifier = ">=21.0" },
     { name = "python-telegram-bot", marker = "extra == 'telegram-read-messages'", specifier = ">=21.0" },
     { name = "python-telegram-bot", marker = "extra == 'telegram-send'", specifier = ">=21.0" },
     { name = "pyyaml", specifier = ">=6.0" },
     { name = "slack-sdk", marker = "extra == 'slack-send'", specifier = ">=3.42.0" },
 ]
-provides-extras = ["browser-fetch", "discord-bot-info", "discord-list-channels", "discord-read-messages", "discord-send", "llm", "slack-send", "telegram-health", "telegram-list-chats", "telegram-read-messages", "telegram-send", "xpath-extract"]
+provides-extras = ["browser-fetch", "discord-bot-info", "discord-list-channels", "discord-read-messages", "discord-send", "llm", "slack-send", "telegram-bot-info", "telegram-list-chats", "telegram-read-messages", "telegram-send", "xpath-extract"]
 
 [package.metadata.requires-dev]
 dev = [

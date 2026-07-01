@@ -2,7 +2,6 @@
 
 import pytest
 from telegram.error import BadRequest
-from telegram_mocks import mock_bot
 from workflow_engine import (
     ExecutionContext,
     IntegerValue,
@@ -10,9 +9,10 @@ from workflow_engine import (
     WorkflowEngine,
     WorkflowExecutionResultStatus,
 )
-from workflow_helpers import error_messages, execute_single_node
 
 from aceteam_nodes.nodes.telegram.send import TelegramSendMessageNode
+from tests.telegram.mocks import mock_bot
+from tests.workflow_helpers import error_messages, execute_single_node
 
 _INPUT_FIELDS = {"chat_id": StringValue, "text": StringValue}
 _OUTPUT_FIELDS = {"message_id": IntegerValue}

@@ -14,7 +14,7 @@ from aceteam_nodes.nodes.discord import (  # noqa: F401
 from aceteam_nodes.nodes.shell import ShellNode  # noqa: F401
 from aceteam_nodes.nodes.slack_send import SlackSendMessageNode  # noqa: F401
 from aceteam_nodes.nodes.telegram import (  # noqa: F401
-    TelegramHealthNode,
+    TelegramBotInfoNode,
     TelegramListChatsNode,
     TelegramReadMessagesNode,
     TelegramSendMessageNode,

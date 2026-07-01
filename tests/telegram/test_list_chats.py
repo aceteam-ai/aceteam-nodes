@@ -1,16 +1,16 @@
 """Tests for TelegramListChatsNode."""
 
 import pytest
-from telegram_mocks import FakeChat, bad_request, mock_bot
 from workflow_engine import (
     ExecutionContext,
     StringValue,
     WorkflowEngine,
     WorkflowExecutionResultStatus,
 )
-from workflow_helpers import error_messages, execute_single_node
 
 from aceteam_nodes.nodes.telegram.list_chats import TelegramListChatsNode
+from tests.telegram.mocks import FakeChat, bad_request, mock_bot
+from tests.workflow_helpers import error_messages, execute_single_node
 
 _INPUT_FIELDS = {"chat_id": StringValue}
 _OUTPUT_FIELDS = {

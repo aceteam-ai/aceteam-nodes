@@ -23,6 +23,11 @@ from workflow_engine import (
 from .common import TELEGRAM_TOKEN_ENV_VAR, raise_telegram_api_error
 
 OptionalOffset = UnionValue[IntegerValue, NullValue]
+OptionalString = UnionValue[StringValue, NullValue]
+OptionalInteger = UnionValue[IntegerValue, NullValue]
+
+# Telegram caps ``getUpdates`` at 100 updates per request; not exposed on workflow input.
+_GET_UPDATES_LIMIT = 100
 
 
 class TelegramReadMessagesParams(Params):
@@ -39,11 +44,6 @@ class TelegramReadMessagesInput(Data):
         description="Acknowledge and skip updates with an update id less than this value.",
         default=OptionalOffset(None),
     )
-    limit: IntegerValue = Field(
-        title="Limit",
-        description="Maximum number of updates to return (1-100).",
-        default=IntegerValue(100),
-    )
 
 
 class TelegramMessageItem(Data):
@@ -55,17 +55,17 @@ class TelegramMessageItem(Data):
         title="Chat ID",
         description="The chat the message was sent in.",
     )
-    sender_id: IntegerValue = Field(
+    sender_id: OptionalInteger = Field(
         title="Sender ID",
-        description="The sender's Telegram user id (``from`` in the Bot API).",
+        description="The sender's Telegram user id (``from`` in the Bot API), if present.",
     )
-    sender_username: StringValue = Field(
+    sender_username: OptionalString = Field(
         title="Sender Username",
-        description="The sender's @username, if available.",
+        description="The sender's @username, if set on their account.",
     )
-    text: StringValue = Field(
+    text: OptionalString = Field(
         title="Text",
-        description="The message text, if present.",
+        description="The message text body; null for stickers, photos, and other non-text messages.",
     )
     date: StringValue = Field(
         title="Date",
@@ -92,7 +92,8 @@ class TelegramReadMessagesNode(
     TYPE_INFO: ClassVar[NodeTypeInfo] = NodeTypeInfo.from_parameter_type(
         display_name="Telegram Read Messages",
         description=(
-            "Fetches recent updates via the Bot API ``getUpdates`` long poll. "
+            "Fetches pending updates via the Bot API ``getUpdates`` long poll, "
+            "paginating until the queue is exhausted. "
             "``getUpdates`` and webhook mode are mutually exclusive for a given bot."
         ),
         version="0.1.0",
@@ -121,41 +122,60 @@ class TelegramReadMessagesNode(
         token = await context.get_env(TELEGRAM_TOKEN_ENV_VAR)
         timeout = float(self.params.timeout.root)
         offset = input.offset.root
-        limit = input.limit.root
+        poll_timeout = 0 if timeout < 1 else int(timeout)
+
+        items: list[DataValue[TelegramMessageItem]] = []
 
         try:
             async with Bot(token=token) as bot:
-                updates = await bot.get_updates(
-                    offset=offset,
-                    limit=limit,
-                    timeout=int(timeout),
-                    read_timeout=timeout,
-                    write_timeout=timeout,
-                    connect_timeout=timeout,
-                )
+                while True:
+                    updates = await bot.get_updates(
+                        offset=offset,
+                        limit=_GET_UPDATES_LIMIT,
+                        timeout=poll_timeout,
+                        read_timeout=timeout,
+                        write_timeout=timeout,
+                        connect_timeout=timeout,
+                    )
+                    if not updates:
+                        break
+
+                    for update in updates:
+                        message = update.message
+                        if message is None:
+                            continue
+                        sender = message.from_user
+                        items.append(
+                            DataValue[TelegramMessageItem](
+                                root=TelegramMessageItem(
+                                    message_id=IntegerValue(message.message_id),
+                                    chat_id=StringValue(str(message.chat_id)),
+                                    sender_id=(
+                                        IntegerValue(sender.id)
+                                        if sender is not None
+                                        else NullValue(None)
+                                    ),
+                                    sender_username=(
+                                        StringValue(sender.username)
+                                        if sender is not None and sender.username is not None
+                                        else NullValue(None)
+                                    ),
+                                    text=(
+                                        StringValue(message.text)
+                                        if message.text is not None
+                                        else NullValue(None)
+                                    ),
+                                    date=StringValue(message.date.isoformat()),
+                                ),
+                            ),
+                        )
+
+                    offset = updates[-1].update_id + 1
+                    if len(updates) < _GET_UPDATES_LIMIT:
+                        break
+                    poll_timeout = 0
         except TelegramError as e:
             raise_telegram_api_error(e)
-
-        items: list[DataValue[TelegramMessageItem]] = []
-        for update in updates:
-            message = update.message
-            if message is None:
-                continue
-            sender = message.from_user
-            items.append(
-                DataValue[TelegramMessageItem](
-                    root=TelegramMessageItem(
-                        message_id=IntegerValue(message.message_id),
-                        chat_id=StringValue(str(message.chat_id)),
-                        sender_id=IntegerValue(sender.id if sender is not None else 0),
-                        sender_username=StringValue(
-                            sender.username if sender is not None and sender.username else ""
-                        ),
-                        text=StringValue(message.text or ""),
-                        date=StringValue(message.date.isoformat()),
-                    ),
-                ),
-            )
 
         return output_type(
             messages=SequenceValue[DataValue[TelegramMessageItem]](items),

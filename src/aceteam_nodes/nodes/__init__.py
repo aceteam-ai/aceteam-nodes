@@ -12,7 +12,7 @@ from .llm import LLMNode
 from .shell import ShellNode
 from .slack_send import SlackSendMessageNode
 from .telegram import (
-    TelegramHealthNode,
+    TelegramBotInfoNode,
     TelegramListChatsNode,
     TelegramReadMessagesNode,
     TelegramSendMessageNode,
@@ -29,7 +29,7 @@ __all__ = (
     "LLMNode",
     "ShellNode",
     "SlackSendMessageNode",
-    "TelegramHealthNode",
+    "TelegramBotInfoNode",
     "TelegramListChatsNode",
     "TelegramReadMessagesNode",
     "TelegramSendMessageNode",

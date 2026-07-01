@@ -8,9 +8,9 @@ from workflow_engine import (
     WorkflowExecutionResultStatus,
 )
 from workflow_engine.files import TextFileValue
-from workflow_helpers import error_messages, execute_single_node
 
 from aceteam_nodes.nodes.xpath_extract import XPathExtractNode
+from tests.workflow_helpers import error_messages, execute_single_node
 
 _INPUT_FIELDS = {"html": TextFileValue}
 _OUTPUT_FIELDS = {"results": SequenceValue[StringValue]}

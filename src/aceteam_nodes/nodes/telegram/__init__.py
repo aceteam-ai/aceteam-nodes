@@ -1,7 +1,7 @@
 """Telegram workflow nodes."""
 
+from .bot_info import TelegramBotInfoNode, TelegramBotInfoOutput, TelegramBotInfoParams
 from .common import TELEGRAM_TOKEN_ENV_VAR
-from .health import TelegramHealthNode, TelegramHealthOutput, TelegramHealthParams
 from .list_chats import (
     TelegramListChatsInput,
     TelegramListChatsNode,
@@ -24,9 +24,9 @@ from .send import (
 
 __all__ = (
     "TELEGRAM_TOKEN_ENV_VAR",
-    "TelegramHealthNode",
-    "TelegramHealthOutput",
-    "TelegramHealthParams",
+    "TelegramBotInfoNode",
+    "TelegramBotInfoOutput",
+    "TelegramBotInfoParams",
     "TelegramListChatsInput",
     "TelegramListChatsNode",
     "TelegramListChatsOutput",
