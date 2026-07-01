@@ -26,6 +26,15 @@ def optional_integer(value: int | None) -> OptionalIntegerValue:
     return cast(OptionalIntegerValue, member)
 
 
+def require_string(value: str | None, field: str) -> StringValue:
+    if value is None:
+        raise WorkflowException(
+            f"Slack response missing {field}.",
+            level=StakeholderLevel.USER,
+        )
+    return StringValue(value)
+
+
 def raise_slack_api_error(error: SlackApiError) -> Never:
     error_code = error.response.get("error", "unknown_error")
     raise WorkflowException(
@@ -55,5 +64,6 @@ __all__ = (
     "optional_string",
     "raise_slack_api_error",
     "raise_slack_client_error",
+    "require_string",
     "slack_error_code",
 )

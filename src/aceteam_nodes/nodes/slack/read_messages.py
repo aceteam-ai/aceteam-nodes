@@ -29,6 +29,7 @@ from .common import (
     optional_string,
     raise_slack_api_error,
     raise_slack_client_error,
+    require_string,
     slack_error_code,
 )
 
@@ -160,7 +161,7 @@ class SlackReadMessagesNode(
                     items.append(
                         DataValue[SlackMessageItem](
                             root=SlackMessageItem(
-                                ts=StringValue(message["ts"]),
+                                ts=require_string(message.get("ts"), "message timestamp"),
                                 user=optional_string(message.get("user")),
                                 text=optional_string(message.get("text")),
                                 thread_ts=optional_string(message.get("thread_ts")),

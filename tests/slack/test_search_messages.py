@@ -93,3 +93,29 @@ async def test_api_error_raises_workflow_exception(
 
     assert result.status is WorkflowExecutionResultStatus.ERROR
     assert any("missing_scope" in message for message in error_messages(result))
+
+
+@pytest.mark.asyncio
+async def test_incomplete_match_raises(
+    engine: WorkflowEngine,
+    context: ExecutionContext,
+    monkeypatch: pytest.MonkeyPatch,
+):
+    monkeypatch.setenv("SLACK_USER_TOKEN", "xoxp-secret")
+    captured = mock_client(monkeypatch)
+    captured["search_response"] = {
+        "ok": True,
+        "messages": {"matches": [{"ts": "1700000000.000200"}]},
+    }
+
+    result = await execute_single_node(
+        engine,
+        context,
+        SlackSearchMessagesNode,
+        input_fields=_INPUT_FIELDS,
+        output_fields=_OUTPUT_FIELDS,
+        input={"query": StringValue("hello")},
+    )
+
+    assert result.status is WorkflowExecutionResultStatus.ERROR
+    assert any("channel id" in message for message in error_messages(result))

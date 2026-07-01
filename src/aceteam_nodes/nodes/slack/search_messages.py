@@ -26,6 +26,7 @@ from .common import (
     optional_string,
     raise_slack_api_error,
     raise_slack_client_error,
+    require_string,
     slack_error_code,
 )
 
@@ -55,7 +56,7 @@ class SlackSearchMatchItem(Data):
         title="Timestamp",
         description="The message timestamp.",
     )
-    channel: OptionalStringValue = Field(
+    channel: StringValue = Field(
         title="Channel",
         description="The channel ID containing the match.",
     )
@@ -63,13 +64,13 @@ class SlackSearchMatchItem(Data):
         title="User",
         description="The posting user's ID, when present.",
     )
-    text: OptionalStringValue = Field(
+    text: StringValue = Field(
         title="Text",
         description="The matched message text.",
     )
-    permalink: OptionalStringValue = Field(
+    permalink: StringValue = Field(
         title="Permalink",
-        description="A permalink to the message, when present.",
+        description="A permalink to the message.",
     )
 
 
@@ -146,16 +147,17 @@ class SlackSearchMessagesNode(
         for match in response.get("messages", {}).get("matches", ()):
             channel = match.get("channel")
             channel_id = channel.get("id") if isinstance(channel, dict) else channel
-            if not isinstance(channel_id, str):
-                channel_id = None
             items.append(
                 DataValue[SlackSearchMatchItem](
                     root=SlackSearchMatchItem(
-                        ts=StringValue(match["ts"]),
-                        channel=optional_string(channel_id),
+                        ts=require_string(match.get("ts"), "message timestamp"),
+                        channel=require_string(
+                            channel_id if isinstance(channel_id, str) else None,
+                            "channel id",
+                        ),
                         user=optional_string(match.get("user")),
-                        text=optional_string(match.get("text")),
-                        permalink=optional_string(match.get("permalink")),
+                        text=require_string(match.get("text"), "message text"),
+                        permalink=require_string(match.get("permalink"), "permalink"),
                     ),
                 ),
             )

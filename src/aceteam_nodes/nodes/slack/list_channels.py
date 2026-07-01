@@ -27,11 +27,10 @@ from .common import (
     _CONVERSATIONS_PAGE_LIMIT,
     SLACK_BOT_TOKEN_ENV_VAR,
     OptionalIntegerValue,
-    OptionalStringValue,
     optional_integer,
-    optional_string,
     raise_slack_api_error,
     raise_slack_client_error,
+    require_string,
     slack_error_code,
 )
 
@@ -61,9 +60,9 @@ class SlackChannelItem(Data):
         title="Channel ID",
         description="The channel ID (e.g. C0123).",
     )
-    name: OptionalStringValue = Field(
+    name: StringValue = Field(
         title="Name",
-        description="The channel name without the leading #, when present.",
+        description="The channel name without the leading #.",
     )
     is_private: BooleanValue = Field(
         title="Is Private",
@@ -149,8 +148,8 @@ class SlackListChannelsNode(
                     items.append(
                         DataValue[SlackChannelItem](
                             root=SlackChannelItem(
-                                channel_id=StringValue(channel["id"]),
-                                name=optional_string(channel.get("name")),
+                                channel_id=require_string(channel.get("id"), "channel id"),
+                                name=require_string(channel.get("name"), "channel name"),
                                 is_private=BooleanValue(bool(channel.get("is_private", False))),
                                 num_members=optional_integer(channel.get("num_members")),
                             ),

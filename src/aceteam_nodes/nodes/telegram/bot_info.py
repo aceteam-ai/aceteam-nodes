@@ -14,10 +14,14 @@ from workflow_engine import (
     Node,
     NodeTypeInfo,
     Params,
-    StringValue,
 )
 
-from .common import TELEGRAM_TOKEN_ENV_VAR, raise_telegram_api_error
+from .common import (
+    TELEGRAM_TOKEN_ENV_VAR,
+    OptionalStringValue,
+    optional_string,
+    raise_telegram_api_error,
+)
 
 
 class TelegramBotInfoParams(Params):
@@ -33,7 +37,7 @@ class TelegramBotInfoOutput(Data):
         title="Bot ID",
         description="The bot's Telegram user id.",
     )
-    bot_username: StringValue = Field(
+    bot_username: OptionalStringValue = Field(
         title="Bot Username",
         description="The bot's @username, if set.",
     )
@@ -89,7 +93,7 @@ class TelegramBotInfoNode(
 
         return output_type(
             bot_id=IntegerValue(bot_user.id),
-            bot_username=StringValue(bot_user.username or ""),
+            bot_username=optional_string(bot_user.username),
         )
 
 
