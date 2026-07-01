@@ -12,9 +12,7 @@ OptionalStringValue = UnionValue[StringValue, NullValue]
 
 
 def optional_integer(value: int | None) -> OptionalIntegerValue:
-    member: IntegerValue | NullValue = (
-        NullValue(None) if value is None else IntegerValue(value)
-    )
+    member: IntegerValue | NullValue = NullValue(None) if value is None else IntegerValue(value)
     return cast(OptionalIntegerValue, member)
 
 
