@@ -26,6 +26,10 @@ from workflow_engine.core import StakeholderLevel
 from .common import (
     _CONVERSATIONS_PAGE_LIMIT,
     SLACK_BOT_TOKEN_ENV_VAR,
+    OptionalIntegerValue,
+    OptionalStringValue,
+    optional_integer,
+    optional_string,
     raise_slack_api_error,
     raise_slack_client_error,
     slack_error_code,
@@ -57,17 +61,17 @@ class SlackChannelItem(Data):
         title="Channel ID",
         description="The channel ID (e.g. C0123).",
     )
-    name: StringValue = Field(
+    name: OptionalStringValue = Field(
         title="Name",
-        description="The channel name without the leading #.",
+        description="The channel name without the leading #, when present.",
     )
     is_private: BooleanValue = Field(
         title="Is Private",
         description="Whether the channel is private.",
     )
-    num_members: IntegerValue = Field(
+    num_members: OptionalIntegerValue = Field(
         title="Member Count",
-        description="The number of members in the channel.",
+        description="The number of members in the channel, when reported by Slack.",
     )
 
 
@@ -146,9 +150,9 @@ class SlackListChannelsNode(
                         DataValue[SlackChannelItem](
                             root=SlackChannelItem(
                                 channel_id=StringValue(channel["id"]),
-                                name=StringValue(channel.get("name", "")),
+                                name=optional_string(channel.get("name")),
                                 is_private=BooleanValue(bool(channel.get("is_private", False))),
-                                num_members=IntegerValue(int(channel.get("num_members", 0))),
+                                num_members=optional_integer(channel.get("num_members")),
                             ),
                         ),
                     )

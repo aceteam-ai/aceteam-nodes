@@ -52,6 +52,36 @@ async def test_lists_channels_and_maps_output(
 
 
 @pytest.mark.asyncio
+async def test_nullable_fields_when_metadata_absent(
+    engine: WorkflowEngine,
+    context: ExecutionContext,
+    monkeypatch: pytest.MonkeyPatch,
+):
+    monkeypatch.setenv("SLACK_BOT_TOKEN", "xoxb-secret")
+    captured = mock_client(monkeypatch)
+    captured["list_response"] = {
+        "ok": True,
+        "channels": [{"id": "C9999", "is_private": True}],
+    }
+
+    result = await execute_single_node(
+        engine,
+        context,
+        SlackListChannelsNode,
+        input_fields={},
+        output_fields=_OUTPUT_FIELDS,
+        input={},
+    )
+
+    assert result.status is WorkflowExecutionResultStatus.SUCCESS
+    channel = result.output["channels"].root[0].root
+    assert channel.channel_id.root == "C9999"
+    assert channel.name.root is None
+    assert channel.is_private.root is True
+    assert channel.num_members.root is None
+
+
+@pytest.mark.asyncio
 async def test_paginates_channel_list(
     engine: WorkflowEngine,
     context: ExecutionContext,

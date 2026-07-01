@@ -14,7 +14,9 @@ from workflow_engine import (
     NodeTypeInfo,
     Params,
     StringValue,
+    WorkflowException,
 )
+from workflow_engine.core import StakeholderLevel
 
 from .common import (
     SLACK_BOT_TOKEN_ENV_VAR,
@@ -102,9 +104,17 @@ class SlackSendMessageNode(
         except SlackClientError as e:
             raise_slack_client_error(e)
 
+        channel = response.get("channel") or input.channel.root
+        timestamp = response.get("ts")
+        if timestamp is None:
+            raise WorkflowException(
+                "Slack accepted the message but returned no timestamp.",
+                level=StakeholderLevel.USER,
+            )
+
         return output_type(
-            channel=StringValue(response.get("channel", input.channel.root)),
-            timestamp=StringValue(response.get("ts", "")),
+            channel=StringValue(channel),
+            timestamp=StringValue(timestamp),
         )
 
 
