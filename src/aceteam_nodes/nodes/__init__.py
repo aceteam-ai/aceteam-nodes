@@ -1,45 +1,7 @@
-"""AceTeam workflow nodes."""
+"""AceTeam workflow nodes.
 
-from .api_call import APICallNode
-from .browser_fetch import BrowserFetchNode
-from .discord import (
-    DiscordBotInfoNode,
-    DiscordListChannelsNode,
-    DiscordReadMessagesNode,
-    DiscordSendMessageNode,
-)
-from .llm import LLMNode
-from .shell import ShellNode
-from .slack import (
-    SlackListChannelsNode,
-    SlackReadMessagesNode,
-    SlackSearchMessagesNode,
-    SlackSendMessageNode,
-)
-from .telegram import (
-    TelegramBotInfoNode,
-    TelegramListChatsNode,
-    TelegramReadMessagesNode,
-    TelegramSendMessageNode,
-)
-from .xpath_extract import XPathExtractNode
-
-__all__ = (
-    "APICallNode",
-    "BrowserFetchNode",
-    "DiscordBotInfoNode",
-    "DiscordListChannelsNode",
-    "DiscordReadMessagesNode",
-    "DiscordSendMessageNode",
-    "LLMNode",
-    "ShellNode",
-    "SlackListChannelsNode",
-    "SlackReadMessagesNode",
-    "SlackSearchMessagesNode",
-    "SlackSendMessageNode",
-    "TelegramBotInfoNode",
-    "TelegramListChatsNode",
-    "TelegramReadMessagesNode",
-    "TelegramSendMessageNode",
-    "XPathExtractNode",
-)
+Import nodes from their leaf modules (e.g. ``from aceteam_nodes.nodes.api_call
+import APICallNode``). This package intentionally re-exports nothing: each
+node's dependencies are gated behind its own optional extra, and an eager
+import here would require every extra to be installed.
+"""

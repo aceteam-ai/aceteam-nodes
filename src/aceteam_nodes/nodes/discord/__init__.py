@@ -1,45 +1,15 @@
 """Discord workflow nodes."""
 
-from .bot_info import DiscordBotInfoNode, DiscordBotInfoOutput, DiscordBotInfoParams
+from .bot_info import DiscordBotInfoNode
 from .common import DISCORD_TOKEN_ENV_VAR
-from .list_channels import (
-    DiscordChannelItem,
-    DiscordListChannelsInput,
-    DiscordListChannelsNode,
-    DiscordListChannelsOutput,
-    DiscordListChannelsParams,
-)
-from .read_messages import (
-    DiscordMessageItem,
-    DiscordReadMessagesInput,
-    DiscordReadMessagesNode,
-    DiscordReadMessagesOutput,
-    DiscordReadMessagesParams,
-)
-from .send import (
-    DiscordSendMessageInput,
-    DiscordSendMessageNode,
-    DiscordSendMessageOutput,
-    DiscordSendMessageParams,
-)
+from .list_channels import DiscordListChannelsNode
+from .read_messages import DiscordReadMessagesNode
+from .send import DiscordSendMessageNode
 
 __all__ = (
     "DISCORD_TOKEN_ENV_VAR",
     "DiscordBotInfoNode",
-    "DiscordBotInfoOutput",
-    "DiscordBotInfoParams",
-    "DiscordChannelItem",
-    "DiscordListChannelsInput",
     "DiscordListChannelsNode",
-    "DiscordListChannelsOutput",
-    "DiscordListChannelsParams",
-    "DiscordMessageItem",
-    "DiscordReadMessagesInput",
     "DiscordReadMessagesNode",
-    "DiscordReadMessagesOutput",
-    "DiscordReadMessagesParams",
-    "DiscordSendMessageInput",
     "DiscordSendMessageNode",
-    "DiscordSendMessageOutput",
-    "DiscordSendMessageParams",
 )
