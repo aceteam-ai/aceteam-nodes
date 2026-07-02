@@ -1,6 +1,6 @@
 [project]
 name = "aceteam-nodes"
-version = "6.2.0"
+version = "0.7.0"
 description = "Workflow node types for aceteam-workflow-engine"
 readme = "README.md"
 license = "MIT"
