@@ -1,4 +1,5 @@
 """Slack List Channels node - enumerates channels via ``conversations.list``."""
+
 from __future__ import annotations
 
 from typing import Any, ClassVar, Type

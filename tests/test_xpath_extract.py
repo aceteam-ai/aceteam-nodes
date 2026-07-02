@@ -2,7 +2,6 @@
 
 from workflow_engine import (
     ExecutionContext,
-    SequenceValue,
     StringValue,
     WorkflowEngine,
     WorkflowExecutionResultStatus,
