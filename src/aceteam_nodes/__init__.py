@@ -7,4 +7,4 @@ never re-exported from package ``__init__`` files. The entry points in
 ``pyproject.toml`` are the canonical map of node names to modules.
 """
 
-__version__ = "0.7.0"
+__version__ = "0.7.1"
