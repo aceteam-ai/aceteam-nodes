@@ -13,27 +13,23 @@ from workflow_engine import (
     IntegerValue,
     Node,
     NodeTypeInfo,
-    NullValue,
     Params,
     SequenceValue,
     StringValue,
-    UnionValue,
     WorkflowException,
 )
 from workflow_engine.core import StakeholderLevel
 
+from aceteam_nodes.utils import OptionalString, optional_string
+
 from .common import (
     _CONVERSATIONS_PAGE_LIMIT,
     SLACK_BOT_TOKEN_ENV_VAR,
-    OptionalStringValue,
-    optional_string,
     raise_slack_api_error,
     raise_slack_client_error,
     require_string,
     slack_error_code,
 )
-
-OptionalString = UnionValue[StringValue, NullValue]
 
 
 class SlackReadMessagesParams(Params):
@@ -52,12 +48,12 @@ class SlackReadMessagesInput(Data):
     oldest: OptionalString = Field(
         title="Oldest",
         description="Only messages after this Unix timestamp (exclusive).",
-        default=OptionalString(None),
+        default=None,
     )
     latest: OptionalString = Field(
         title="Latest",
         description="Only messages before this Unix timestamp (inclusive).",
-        default=OptionalString(None),
+        default=None,
     )
 
 
@@ -66,15 +62,15 @@ class SlackMessageItem(Data):
         title="Timestamp",
         description="The message timestamp.",
     )
-    user: OptionalStringValue = Field(
+    user: OptionalString = Field(
         title="User",
         description="The posting user's ID, when present.",
     )
-    text: OptionalStringValue = Field(
+    text: OptionalString = Field(
         title="Text",
         description="The message text, when present.",
     )
-    thread_ts: OptionalStringValue = Field(
+    thread_ts: OptionalString = Field(
         title="Thread Timestamp",
         description="The parent thread timestamp, when this message is a reply.",
     )

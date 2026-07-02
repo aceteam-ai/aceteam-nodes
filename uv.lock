@@ -108,7 +108,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "aceteam-aep", marker = "extra == 'llm'", specifier = ">=0.2.0" },
-    { name = "aceteam-workflow-engine", specifier = ">=2.0.0rc13" },
+    { name = "aceteam-workflow-engine", specifier = ">=2.0.0rc14" },
     { name = "aiohttp", marker = "extra == 'slack-list-channels'", specifier = ">=3.14.1" },
     { name = "aiohttp", marker = "extra == 'slack-read-messages'", specifier = ">=3.14.1" },
     { name = "aiohttp", marker = "extra == 'slack-search-messages'", specifier = ">=3.14.1" },
@@ -155,7 +155,7 @@ dev = [
 
 [[package]]
 name = "aceteam-workflow-engine"
-version = "2.0.0rc13"
+version = "2.0.0rc14"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "click" },
@@ -167,9 +167,9 @@ dependencies = [
     { name = "ruamel-yaml" },
     { name = "tomli-w" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/4a/4f/ef8b97e4d5d1070ecb14b59aef8ba6dbe75c5f794afec22b9f213caae60e/aceteam_workflow_engine-2.0.0rc13.tar.gz", hash = "sha256:5cdb561b897adb7db79f324f583843f08b4225f52e0fdb5f5ff8e13a8eca32b9", size = 278097, upload-time = "2026-06-29T14:40:20.59Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/3e/fc/4374d3fd61fbff7cb248c37a6ac04e89ce9ea4c1cd8dd3613e146d845c77/aceteam_workflow_engine-2.0.0rc14.tar.gz", hash = "sha256:d071d2e25f049912bd4e260c7de2126e3ab20d9b282445f846a79f4ac198956f", size = 286271, upload-time = "2026-07-02T16:58:42.62Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/7b/02/c097a8d846e65e8619469db12f8ff6af1ab2d7bd1eb3c1f54789d475c6e2/aceteam_workflow_engine-2.0.0rc13-py3-none-any.whl", hash = "sha256:7d2735ee353f5dd1ce1ccca737a0ab924c1ec42dd41a1df18730a1f9cc4cdb58", size = 135408, upload-time = "2026-06-29T14:40:18.17Z" },
+    { url = "https://files.pythonhosted.org/packages/e8/eb/75617357bbf4440a683f411807d7e57c94c0ce58a8ff915031b45fe307b8/aceteam_workflow_engine-2.0.0rc14-py3-none-any.whl", hash = "sha256:a3f5ef5e842aef7a77cf308c6f727270e19633e7aa8251ba044f8bbdf61e09b0", size = 142833, upload-time = "2026-07-02T16:58:41.363Z" },
 ]
 
 [[package]]

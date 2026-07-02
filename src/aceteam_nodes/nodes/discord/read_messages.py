@@ -9,21 +9,20 @@ from pydantic import Field
 from workflow_engine import (
     Data,
     DataValue,
+    DateValue,
     ExecutionContext,
     IntegerValue,
     Node,
     NodeException,
     NodeTypeInfo,
-    NullValue,
     Params,
     SequenceValue,
     StringValue,
-    UnionValue,
 )
 
-from .common import DISCORD_TOKEN_ENV_VAR, logged_in_discord_client, raise_discord_api_error
+from aceteam_nodes.utils import OptionalInteger
 
-OptionalSnowflake = UnionValue[IntegerValue, NullValue]
+from .common import DISCORD_TOKEN_ENV_VAR, logged_in_discord_client, raise_discord_api_error
 
 
 class DiscordReadMessagesParams(Params):
@@ -35,15 +34,15 @@ class DiscordReadMessagesInput(Data):
         title="Channel ID",
         description="The target channel's snowflake ID.",
     )
-    before: OptionalSnowflake = Field(
+    before: OptionalInteger = Field(
         title="Before",
         description="Return messages before this message snowflake ID.",
-        default=OptionalSnowflake(None),
+        default=None,
     )
-    after: OptionalSnowflake = Field(
+    after: OptionalInteger = Field(
         title="After",
         description="Return messages after this message snowflake ID.",
-        default=OptionalSnowflake(None),
+        default=None,
     )
 
 
@@ -67,7 +66,7 @@ class DiscordMessageItem(Data):
             "in the Discord Developer Portal; otherwise this is often empty."
         ),
     )
-    created_at: StringValue = Field(
+    created_at: DateValue = Field(
         title="Created At",
         description="When the message was created (ISO 8601 UTC).",
     )
@@ -149,7 +148,7 @@ class DiscordReadMessagesNode(
                                 author_id=IntegerValue(message.author.id),
                                 author_name=StringValue(message.author.display_name),
                                 content=StringValue(message.content),
-                                created_at=StringValue(message.created_at.isoformat()),
+                                created_at=DateValue(message.created_at),
                             ),
                         ),
                     )

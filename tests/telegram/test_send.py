@@ -4,18 +4,12 @@ import pytest
 from telegram.error import BadRequest
 from workflow_engine import (
     ExecutionContext,
-    IntegerValue,
-    StringValue,
     WorkflowEngine,
     WorkflowExecutionResultStatus,
 )
 
 from aceteam_nodes.nodes.telegram.send import TelegramSendMessageNode
 from tests.telegram.mocks import mock_bot
-from tests.workflow_helpers import error_messages, execute_single_node
-
-_INPUT_FIELDS = {"chat_id": StringValue, "text": StringValue}
-_OUTPUT_FIELDS = {"message_id": IntegerValue}
 
 
 @pytest.mark.asyncio
@@ -27,13 +21,10 @@ async def test_sends_message_and_maps_output(
     monkeypatch.setenv("TELEGRAM_BOT_TOKEN", "secret-token")
     captured = mock_bot(monkeypatch)
 
-    result = await execute_single_node(
-        engine,
-        context,
-        TelegramSendMessageNode,
-        input_fields=_INPUT_FIELDS,
-        output_fields=_OUTPUT_FIELDS,
-        input={"chat_id": StringValue("12345"), "text": StringValue("hello")},
+    result = await engine.execute_node(
+        context=context,
+        node=TelegramSendMessageNode,
+        input={"chat_id": "12345", "text": "hello"},
     )
 
     assert result.status is WorkflowExecutionResultStatus.SUCCESS
@@ -52,17 +43,14 @@ async def test_missing_token_raises(
 ):
     monkeypatch.delenv("TELEGRAM_BOT_TOKEN", raising=False)
 
-    result = await execute_single_node(
-        engine,
-        context,
-        TelegramSendMessageNode,
-        input_fields=_INPUT_FIELDS,
-        output_fields=_OUTPUT_FIELDS,
-        input={"chat_id": StringValue("12345"), "text": StringValue("hello")},
+    result = await engine.execute_node(
+        context=context,
+        node=TelegramSendMessageNode,
+        input={"chat_id": "12345", "text": "hello"},
     )
 
     assert result.status is WorkflowExecutionResultStatus.ERROR
-    assert any("TELEGRAM_BOT_TOKEN" in message for message in error_messages(result))
+    assert any("TELEGRAM_BOT_TOKEN" in message for message in result.errors.messages())
 
 
 @pytest.mark.asyncio
@@ -75,14 +63,11 @@ async def test_api_error_raises_workflow_exception(
     captured = mock_bot(monkeypatch)
     captured["error"] = BadRequest("chat not found")
 
-    result = await execute_single_node(
-        engine,
-        context,
-        TelegramSendMessageNode,
-        input_fields=_INPUT_FIELDS,
-        output_fields=_OUTPUT_FIELDS,
-        input={"chat_id": StringValue("12345"), "text": StringValue("hello")},
+    result = await engine.execute_node(
+        context=context,
+        node=TelegramSendMessageNode,
+        input={"chat_id": "12345", "text": "hello"},
     )
 
     assert result.status is WorkflowExecutionResultStatus.ERROR
-    assert any("chat not found" in message for message in error_messages(result))
+    assert any("chat not found" in message for message in result.errors.messages())

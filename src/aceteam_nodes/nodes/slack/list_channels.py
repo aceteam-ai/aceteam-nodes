@@ -1,4 +1,5 @@
 """Slack List Channels node - enumerates channels via ``conversations.list``."""
+from __future__ import annotations
 
 from typing import Any, ClassVar, Type
 
@@ -10,31 +11,51 @@ from workflow_engine import (
     BooleanValue,
     Data,
     DataValue,
+    Empty,
     ExecutionContext,
     IntegerValue,
     Node,
     NodeTypeInfo,
-    NullValue,
     Params,
     SequenceValue,
     StringValue,
-    UnionValue,
     WorkflowException,
 )
 from workflow_engine.core import StakeholderLevel
 
+from aceteam_nodes.utils import OptionalInteger, optional_integer
+
 from .common import (
     _CONVERSATIONS_PAGE_LIMIT,
     SLACK_BOT_TOKEN_ENV_VAR,
-    OptionalIntegerValue,
-    optional_integer,
     raise_slack_api_error,
     raise_slack_client_error,
     require_string,
     slack_error_code,
 )
 
-OptionalString = UnionValue[StringValue, NullValue]
+_CHANNEL_TYPE_PUBLIC = "public_channel"
+_CHANNEL_TYPE_PRIVATE = "private_channel"
+_CHANNEL_TYPE_MPIM = "mpim"
+_CHANNEL_TYPE_IM = "im"
+
+
+def _channel_types_argument(params: SlackListChannelsParams) -> str:
+    types: list[str] = []
+    if params.include_public_channels.root:
+        types.append(_CHANNEL_TYPE_PUBLIC)
+    if params.include_private_channels.root:
+        types.append(_CHANNEL_TYPE_PRIVATE)
+    if params.include_multi_person_direct_messages.root:
+        types.append(_CHANNEL_TYPE_MPIM)
+    if params.include_one_to_one_direct_messages.root:
+        types.append(_CHANNEL_TYPE_IM)
+    if not types:
+        raise WorkflowException(
+            "At least one channel type must be enabled.",
+            level=StakeholderLevel.USER,
+        )
+    return ",".join(types)
 
 
 class SlackListChannelsParams(Params):
@@ -43,15 +64,25 @@ class SlackListChannelsParams(Params):
         description="Request timeout in seconds.",
         default=IntegerValue(30),
     )
-
-
-class SlackListChannelsInput(Data):
-    types: OptionalString = Field(
-        title="Types",
-        description=(
-            "Comma-separated channel types to include (e.g. ``public_channel,private_channel``)."
-        ),
-        default=OptionalString("public_channel,private_channel"),
+    include_public_channels: BooleanValue = Field(
+        title="Public Channels",
+        description="Include public channels in the listing.",
+        default=BooleanValue(True),
+    )
+    include_private_channels: BooleanValue = Field(
+        title="Private Channels",
+        description="Include private channels in the listing.",
+        default=BooleanValue(True),
+    )
+    include_multi_person_direct_messages: BooleanValue = Field(
+        title="Multi-Person DMs",
+        description="Include multi-person direct messages in the listing.",
+        default=BooleanValue(False),
+    )
+    include_one_to_one_direct_messages: BooleanValue = Field(
+        title="Direct Messages",
+        description="Include one-to-one direct messages in the listing.",
+        default=BooleanValue(False),
     )
 
 
@@ -68,7 +99,7 @@ class SlackChannelItem(Data):
         title="Is Private",
         description="Whether the channel is private.",
     )
-    num_members: OptionalIntegerValue = Field(
+    num_members: OptionalInteger = Field(
         title="Member Count",
         description="The number of members in the channel, when reported by Slack.",
     )
@@ -83,7 +114,7 @@ class SlackListChannelsOutput(Data):
 
 class SlackListChannelsNode(
     Node[
-        SlackListChannelsInput,
+        Empty,
         SlackListChannelsOutput,
         SlackListChannelsParams,
     ]
@@ -96,14 +127,14 @@ class SlackListChannelsNode(
             "Lists channels the bot can access via ``conversations.list``, "
             "paginating until the result set is exhausted."
         ),
-        version="0.1.0",
+        version="0.2.0",
         parameter_type=SlackListChannelsParams,
     )
 
     @classmethod
     @override
-    def static_input_type(cls) -> Type[SlackListChannelsInput]:
-        return SlackListChannelsInput
+    def static_input_type(cls) -> Type[Empty]:
+        return Empty
 
     @classmethod
     @override
@@ -115,18 +146,16 @@ class SlackListChannelsNode(
         self,
         *,
         context: ExecutionContext,
-        input_type: Type[SlackListChannelsInput],
+        input_type: Type[Empty],
         output_type: Type[SlackListChannelsOutput],
-        input: SlackListChannelsInput,
+        input: Empty,
     ) -> SlackListChannelsOutput:
         token = await context.get_env(SLACK_BOT_TOKEN_ENV_VAR)
         timeout = self.params.timeout.root
         client = AsyncWebClient(token=token, timeout=timeout)
 
-        types = input.types.root
-        list_kwargs: dict[str, Any] = {}
-        if types is not None:
-            list_kwargs["types"] = types
+        types = _channel_types_argument(self.params)
+        list_kwargs: dict[str, Any] = {"types": types}
 
         items: list[DataValue[SlackChannelItem]] = []
         cursor: str | None = None
@@ -171,7 +200,6 @@ class SlackListChannelsNode(
 
 __all__ = (
     "SlackChannelItem",
-    "SlackListChannelsInput",
     "SlackListChannelsNode",
     "SlackListChannelsOutput",
     "SlackListChannelsParams",

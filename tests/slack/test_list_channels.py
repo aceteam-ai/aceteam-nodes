@@ -2,25 +2,13 @@
 
 import pytest
 from workflow_engine import (
-    DataValue,
     ExecutionContext,
-    NullValue,
-    SequenceValue,
-    StringValue,
-    UnionValue,
     WorkflowEngine,
     WorkflowExecutionResultStatus,
 )
 
-from aceteam_nodes.nodes.slack.list_channels import (
-    SlackChannelItem,
-    SlackListChannelsNode,
-)
+from aceteam_nodes.nodes.slack.list_channels import SlackListChannelsNode
 from tests.slack.mocks import mock_client, slack_api_error
-from tests.workflow_helpers import error_messages, execute_single_node
-
-OptionalString = UnionValue[StringValue, NullValue]
-_OUTPUT_FIELDS = {"channels": SequenceValue[DataValue[SlackChannelItem]]}
 
 
 @pytest.mark.asyncio
@@ -32,12 +20,9 @@ async def test_lists_channels_and_maps_output(
     monkeypatch.setenv("SLACK_BOT_TOKEN", "xoxb-secret")
     captured = mock_client(monkeypatch)
 
-    result = await execute_single_node(
-        engine,
-        context,
-        SlackListChannelsNode,
-        input_fields={},
-        output_fields=_OUTPUT_FIELDS,
+    result = await engine.execute_node(
+        context=context,
+        node=SlackListChannelsNode,
         input={},
     )
 
@@ -64,12 +49,9 @@ async def test_missing_member_count_is_null(
         "channels": [{"id": "C9999", "name": "alerts", "is_private": True}],
     }
 
-    result = await execute_single_node(
-        engine,
-        context,
-        SlackListChannelsNode,
-        input_fields={},
-        output_fields=_OUTPUT_FIELDS,
+    result = await engine.execute_node(
+        context=context,
+        node=SlackListChannelsNode,
         input={},
     )
 
@@ -94,17 +76,14 @@ async def test_missing_channel_name_raises(
         "channels": [{"id": "C9999", "is_private": True}],
     }
 
-    result = await execute_single_node(
-        engine,
-        context,
-        SlackListChannelsNode,
-        input_fields={},
-        output_fields=_OUTPUT_FIELDS,
+    result = await engine.execute_node(
+        context=context,
+        node=SlackListChannelsNode,
         input={},
     )
 
     assert result.status is WorkflowExecutionResultStatus.ERROR
-    assert any("channel name" in message for message in error_messages(result))
+    assert any("channel name" in message for message in result.errors.messages())
 
 
 @pytest.mark.asyncio
@@ -127,12 +106,9 @@ async def test_paginates_channel_list(
         },
     )
 
-    result = await execute_single_node(
-        engine,
-        context,
-        SlackListChannelsNode,
-        input_fields={},
-        output_fields=_OUTPUT_FIELDS,
+    result = await engine.execute_node(
+        context=context,
+        node=SlackListChannelsNode,
         input={},
     )
 
@@ -151,17 +127,14 @@ async def test_missing_token_raises(
 ):
     monkeypatch.delenv("SLACK_BOT_TOKEN", raising=False)
 
-    result = await execute_single_node(
-        engine,
-        context,
-        SlackListChannelsNode,
-        input_fields={},
-        output_fields=_OUTPUT_FIELDS,
+    result = await engine.execute_node(
+        context=context,
+        node=SlackListChannelsNode,
         input={},
     )
 
     assert result.status is WorkflowExecutionResultStatus.ERROR
-    assert any("SLACK_BOT_TOKEN" in message for message in error_messages(result))
+    assert any("SLACK_BOT_TOKEN" in message for message in result.errors.messages())
 
 
 @pytest.mark.asyncio
@@ -174,14 +147,61 @@ async def test_api_error_raises_workflow_exception(
     captured = mock_client(monkeypatch)
     captured["error"] = slack_api_error("missing_scope")
 
-    result = await execute_single_node(
-        engine,
-        context,
-        SlackListChannelsNode,
-        input_fields={},
-        output_fields=_OUTPUT_FIELDS,
+    result = await engine.execute_node(
+        context=context,
+        node=SlackListChannelsNode,
         input={},
     )
 
     assert result.status is WorkflowExecutionResultStatus.ERROR
-    assert any("missing_scope" in message for message in error_messages(result))
+    assert any("missing_scope" in message for message in result.errors.messages())
+
+
+@pytest.mark.asyncio
+async def test_assembles_types_from_booleans(
+    engine: WorkflowEngine,
+    context: ExecutionContext,
+    monkeypatch: pytest.MonkeyPatch,
+):
+    monkeypatch.setenv("SLACK_BOT_TOKEN", "xoxb-secret")
+    captured = mock_client(monkeypatch)
+
+    result = await engine.execute_node(
+        context=context,
+        node=SlackListChannelsNode,
+        params={
+            "include_public_channels": False,
+            "include_private_channels": True,
+            "include_multi_person_direct_messages": True,
+            "include_one_to_one_direct_messages": False,
+        },
+        input={},
+    )
+
+    assert result.status is WorkflowExecutionResultStatus.SUCCESS
+    assert captured["conversations_list"]["types"] == "private_channel,mpim"
+
+
+@pytest.mark.asyncio
+async def test_no_channel_types_selected_raises(
+    engine: WorkflowEngine,
+    context: ExecutionContext,
+    monkeypatch: pytest.MonkeyPatch,
+):
+    monkeypatch.setenv("SLACK_BOT_TOKEN", "xoxb-secret")
+    mock_client(monkeypatch)
+
+    result = await engine.execute_node(
+        context=context,
+        node=SlackListChannelsNode,
+        params={
+            "include_public_channels": False,
+            "include_private_channels": False,
+            "include_multi_person_direct_messages": False,
+            "include_one_to_one_direct_messages": False,
+        },
+        input={},
+    )
+
+    assert result.status is WorkflowExecutionResultStatus.ERROR
+    assert any("At least one channel type" in message for message in result.errors.messages())

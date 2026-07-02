@@ -9,27 +9,21 @@ from telegram.error import TelegramError
 from workflow_engine import (
     Data,
     DataValue,
+    DateValue,
     ExecutionContext,
     IntegerValue,
     Node,
     NodeTypeInfo,
-    NullValue,
     Params,
     SequenceValue,
-    StringValue,
-    UnionValue,
 )
+
+from aceteam_nodes.utils import OptionalInteger, OptionalString, optional_integer, optional_string
 
 from .common import (
     TELEGRAM_TOKEN_ENV_VAR,
-    optional_integer,
-    optional_string,
     raise_telegram_api_error,
 )
-
-OptionalOffset = UnionValue[IntegerValue, NullValue]
-OptionalString = UnionValue[StringValue, NullValue]
-OptionalInteger = UnionValue[IntegerValue, NullValue]
 
 # Telegram caps ``getUpdates`` at 100 updates per request; not exposed on workflow input.
 _GET_UPDATES_LIMIT = 100
@@ -44,10 +38,10 @@ class TelegramReadMessagesParams(Params):
 
 
 class TelegramReadMessagesInput(Data):
-    offset: OptionalOffset = Field(
+    offset: OptionalInteger = Field(
         title="Offset",
         description="Acknowledge and skip updates with an update id less than this value.",
-        default=OptionalOffset(None),
+        default=None,
     )
 
 
@@ -74,7 +68,7 @@ class TelegramMessageItem(Data):
             "The message text body; null for stickers, photos, and other non-text messages."
         ),
     )
-    date: StringValue = Field(
+    date: DateValue = Field(
         title="Date",
         description="When the message was sent (ISO 8601 UTC).",
     )
@@ -164,7 +158,7 @@ class TelegramReadMessagesNode(
                                         None if sender is None else sender.username
                                     ),
                                     text=optional_string(message.text),
-                                    date=StringValue(message.date.isoformat()),
+                                    date=DateValue(message.date),
                                 ),
                             ),
                         )

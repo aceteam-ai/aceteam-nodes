@@ -2,23 +2,13 @@
 
 import pytest
 from workflow_engine import (
-    DataValue,
     ExecutionContext,
-    IntegerValue,
-    SequenceValue,
     WorkflowEngine,
     WorkflowExecutionResultStatus,
 )
 
-from aceteam_nodes.nodes.discord.list_channels import (
-    DiscordChannelItem,
-    DiscordListChannelsNode,
-)
+from aceteam_nodes.nodes.discord.list_channels import DiscordListChannelsNode
 from tests.discord.mocks import forbidden
-from tests.workflow_helpers import error_messages, execute_single_node
-
-_INPUT_FIELDS = {"guild_id": IntegerValue}
-_OUTPUT_FIELDS = {"channels": SequenceValue[DataValue[DiscordChannelItem]]}
 
 
 def _mock_discord(monkeypatch: pytest.MonkeyPatch) -> dict:
@@ -79,13 +69,10 @@ async def test_lists_channels_and_maps_output(
     monkeypatch.setenv("DISCORD_BOT_TOKEN", "bot-secret")
     captured = _mock_discord(monkeypatch)
 
-    result = await execute_single_node(
-        engine,
-        context,
-        DiscordListChannelsNode,
-        input_fields=_INPUT_FIELDS,
-        output_fields=_OUTPUT_FIELDS,
-        input={"guild_id": IntegerValue(111)},
+    result = await engine.execute_node(
+        context=context,
+        node=DiscordListChannelsNode,
+        input={"guild_id": 111},
     )
 
     assert result.status is WorkflowExecutionResultStatus.SUCCESS
@@ -108,17 +95,14 @@ async def test_missing_token_raises(
 ):
     monkeypatch.delenv("DISCORD_BOT_TOKEN", raising=False)
 
-    result = await execute_single_node(
-        engine,
-        context,
-        DiscordListChannelsNode,
-        input_fields=_INPUT_FIELDS,
-        output_fields=_OUTPUT_FIELDS,
-        input={"guild_id": IntegerValue(111)},
+    result = await engine.execute_node(
+        context=context,
+        node=DiscordListChannelsNode,
+        input={"guild_id": 111},
     )
 
     assert result.status is WorkflowExecutionResultStatus.ERROR
-    assert any("DISCORD_BOT_TOKEN" in message for message in error_messages(result))
+    assert any("DISCORD_BOT_TOKEN" in message for message in result.errors.messages())
 
 
 @pytest.mark.asyncio
@@ -131,14 +115,11 @@ async def test_api_error_raises_workflow_exception(
     captured = _mock_discord(monkeypatch)
     captured["error"] = forbidden("Missing Access")
 
-    result = await execute_single_node(
-        engine,
-        context,
-        DiscordListChannelsNode,
-        input_fields=_INPUT_FIELDS,
-        output_fields=_OUTPUT_FIELDS,
-        input={"guild_id": IntegerValue(111)},
+    result = await engine.execute_node(
+        context=context,
+        node=DiscordListChannelsNode,
+        input={"guild_id": 111},
     )
 
     assert result.status is WorkflowExecutionResultStatus.ERROR
-    assert any("Missing Access" in message for message in error_messages(result))
+    assert any("Missing Access" in message for message in result.errors.messages())

@@ -10,10 +10,6 @@ from workflow_engine import (
 from workflow_engine.files import TextFileValue
 
 from aceteam_nodes.nodes.xpath_extract import XPathExtractNode
-from tests.workflow_helpers import error_messages, execute_single_node
-
-_INPUT_FIELDS = {"html": TextFileValue}
-_OUTPUT_FIELDS = {"results": SequenceValue[StringValue]}
 
 
 async def _run(
@@ -23,13 +19,10 @@ async def _run(
     html: str,
 ) -> list[str]:
     html_file = await StringValue(html).cast_to(TextFileValue, context=context)
-    result = await execute_single_node(
-        engine,
-        context,
-        XPathExtractNode,
+    result = await engine.execute_node(
+        context=context,
+        node=XPathExtractNode,
         params={"xpath": xpath},
-        input_fields=_INPUT_FIELDS,
-        output_fields=_OUTPUT_FIELDS,
         input={"html": html_file},
     )
     assert result.status is WorkflowExecutionResultStatus.SUCCESS
@@ -95,17 +88,14 @@ async def test_invalid_xpath_raises(
     context: ExecutionContext,
 ):
     html_file = await StringValue("<div/>").cast_to(TextFileValue, context=context)
-    result = await execute_single_node(
-        engine,
-        context,
-        XPathExtractNode,
+    result = await engine.execute_node(
+        context=context,
+        node=XPathExtractNode,
         params={"xpath": "//[bogus"},
-        input_fields=_INPUT_FIELDS,
-        output_fields=_OUTPUT_FIELDS,
         input={"html": html_file},
     )
     assert result.status is WorkflowExecutionResultStatus.ERROR
-    assert any("Invalid XPath" in message for message in error_messages(result))
+    assert any("Invalid XPath" in message for message in result.errors.messages())
 
 
 async def test_results_in_document_order(

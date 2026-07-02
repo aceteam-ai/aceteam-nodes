@@ -3,27 +3,12 @@
 import pytest
 from workflow_engine import (
     ExecutionContext,
-    IntegerValue,
-    NullValue,
-    StringValue,
-    UnionValue,
     WorkflowEngine,
     WorkflowExecutionResultStatus,
 )
 
 from aceteam_nodes.nodes.telegram.list_chats import TelegramListChatsNode
 from tests.telegram.mocks import FakeChat, bad_request, mock_bot
-from tests.workflow_helpers import error_messages, execute_single_node
-
-OptionalString = UnionValue[StringValue, NullValue]
-_INPUT_FIELDS = {"chat_id": StringValue}
-_OUTPUT_FIELDS = {
-    "chat_id": IntegerValue,
-    "type": StringValue,
-    "title": OptionalString,
-    "username": OptionalString,
-    "description": OptionalString,
-}
 
 
 @pytest.mark.asyncio
@@ -42,13 +27,10 @@ async def test_looks_up_chat_and_maps_output(
         description="Official news",
     )
 
-    result = await execute_single_node(
-        engine,
-        context,
-        TelegramListChatsNode,
-        input_fields=_INPUT_FIELDS,
-        output_fields=_OUTPUT_FIELDS,
-        input={"chat_id": StringValue("@news")},
+    result = await engine.execute_node(
+        context=context,
+        node=TelegramListChatsNode,
+        input={"chat_id": "@news"},
     )
 
     assert result.status is WorkflowExecutionResultStatus.SUCCESS
@@ -76,13 +58,10 @@ async def test_nullable_fields_when_metadata_absent(
         description=None,
     )
 
-    result = await execute_single_node(
-        engine,
-        context,
-        TelegramListChatsNode,
-        input_fields=_INPUT_FIELDS,
-        output_fields=_OUTPUT_FIELDS,
-        input={"chat_id": StringValue("12345")},
+    result = await engine.execute_node(
+        context=context,
+        node=TelegramListChatsNode,
+        input={"chat_id": "12345"},
     )
 
     assert result.status is WorkflowExecutionResultStatus.SUCCESS
@@ -101,17 +80,14 @@ async def test_missing_token_raises(
 ):
     monkeypatch.delenv("TELEGRAM_BOT_TOKEN", raising=False)
 
-    result = await execute_single_node(
-        engine,
-        context,
-        TelegramListChatsNode,
-        input_fields=_INPUT_FIELDS,
-        output_fields=_OUTPUT_FIELDS,
-        input={"chat_id": StringValue("12345")},
+    result = await engine.execute_node(
+        context=context,
+        node=TelegramListChatsNode,
+        input={"chat_id": "12345"},
     )
 
     assert result.status is WorkflowExecutionResultStatus.ERROR
-    assert any("TELEGRAM_BOT_TOKEN" in message for message in error_messages(result))
+    assert any("TELEGRAM_BOT_TOKEN" in message for message in result.errors.messages())
 
 
 @pytest.mark.asyncio
@@ -124,14 +100,11 @@ async def test_api_error_raises_workflow_exception(
     captured = mock_bot(monkeypatch)
     captured["error"] = bad_request("chat not found")
 
-    result = await execute_single_node(
-        engine,
-        context,
-        TelegramListChatsNode,
-        input_fields=_INPUT_FIELDS,
-        output_fields=_OUTPUT_FIELDS,
-        input={"chat_id": StringValue("12345")},
+    result = await engine.execute_node(
+        context=context,
+        node=TelegramListChatsNode,
+        input={"chat_id": "12345"},
     )
 
     assert result.status is WorkflowExecutionResultStatus.ERROR
-    assert any("chat not found" in message for message in error_messages(result))
+    assert any("chat not found" in message for message in result.errors.messages())

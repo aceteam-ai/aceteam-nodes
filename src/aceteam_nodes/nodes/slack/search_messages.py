@@ -20,10 +20,10 @@ from workflow_engine import (
 )
 from workflow_engine.core import StakeholderLevel
 
+from aceteam_nodes.utils import OptionalString, optional_string
+
 from .common import (
     SLACK_USER_TOKEN_ENV_VAR,
-    OptionalStringValue,
-    optional_string,
     raise_slack_api_error,
     raise_slack_client_error,
     require_string,
@@ -60,7 +60,7 @@ class SlackSearchMatchItem(Data):
         title="Channel",
         description="The channel ID containing the match.",
     )
-    user: OptionalStringValue = Field(
+    user: OptionalString = Field(
         title="User",
         description="The posting user's ID, when present.",
     )
