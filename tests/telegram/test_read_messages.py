@@ -120,12 +120,10 @@ async def test_paginates_until_queue_is_exhausted(
     captured = mock_bot(monkeypatch)
     captured["update_batches"] = (
         tuple(
-            FakeUpdate(FakeMessage(update_id), update_id=update_id)
-            for update_id in range(1, 101)
+            FakeUpdate(FakeMessage(update_id), update_id=update_id) for update_id in range(1, 101)
         ),
         tuple(
-            FakeUpdate(FakeMessage(update_id), update_id=update_id)
-            for update_id in range(101, 151)
+            FakeUpdate(FakeMessage(update_id), update_id=update_id) for update_id in range(101, 151)
         ),
     )
 

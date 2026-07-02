@@ -57,6 +57,18 @@ discord-send = [
 llm = [
     { name = "aceteam-aep" },
 ]
+slack-list-channels = [
+    { name = "aiohttp" },
+    { name = "slack-sdk" },
+]
+slack-read-messages = [
+    { name = "aiohttp" },
+    { name = "slack-sdk" },
+]
+slack-search-messages = [
+    { name = "aiohttp" },
+    { name = "slack-sdk" },
+]
 slack-send = [
     { name = "aiohttp" },
     { name = "slack-sdk" },
@@ -97,6 +109,9 @@ dev = [
 requires-dist = [
     { name = "aceteam-aep", marker = "extra == 'llm'", specifier = ">=0.2.0" },
     { name = "aceteam-workflow-engine", specifier = ">=2.0.0rc13" },
+    { name = "aiohttp", marker = "extra == 'slack-list-channels'", specifier = ">=3.14.1" },
+    { name = "aiohttp", marker = "extra == 'slack-read-messages'", specifier = ">=3.14.1" },
+    { name = "aiohttp", marker = "extra == 'slack-search-messages'", specifier = ">=3.14.1" },
     { name = "aiohttp", marker = "extra == 'slack-send'", specifier = ">=3.14.1" },
     { name = "discord-py", marker = "extra == 'discord-bot-info'", specifier = ">=2.4.0" },
     { name = "discord-py", marker = "extra == 'discord-list-channels'", specifier = ">=2.4.0" },
@@ -115,9 +130,12 @@ requires-dist = [
     { name = "python-telegram-bot", marker = "extra == 'telegram-read-messages'", specifier = ">=21.0" },
     { name = "python-telegram-bot", marker = "extra == 'telegram-send'", specifier = ">=21.0" },
     { name = "pyyaml", specifier = ">=6.0" },
+    { name = "slack-sdk", marker = "extra == 'slack-list-channels'", specifier = ">=3.42.0" },
+    { name = "slack-sdk", marker = "extra == 'slack-read-messages'", specifier = ">=3.42.0" },
+    { name = "slack-sdk", marker = "extra == 'slack-search-messages'", specifier = ">=3.42.0" },
     { name = "slack-sdk", marker = "extra == 'slack-send'", specifier = ">=3.42.0" },
 ]
-provides-extras = ["browser-fetch", "discord-bot-info", "discord-list-channels", "discord-read-messages", "discord-send", "llm", "slack-send", "telegram-bot-info", "telegram-list-chats", "telegram-read-messages", "telegram-send", "xpath-extract"]
+provides-extras = ["browser-fetch", "discord-bot-info", "discord-list-channels", "discord-read-messages", "discord-send", "llm", "slack-list-channels", "slack-read-messages", "slack-search-messages", "slack-send", "telegram-bot-info", "telegram-list-chats", "telegram-read-messages", "telegram-send", "xpath-extract"]
 
 [package.metadata.requires-dev]
 dev = [

@@ -75,7 +75,10 @@ uv add "aceteam-nodes[xpath-extract]" # + XPathExtract (lxml)
 | DiscordListChannels | `discord-list-channels` | List channels in a Discord server                                           |
 | DiscordReadMessages | `discord-read-messages` | Fetch recent messages from a channel (Message Content intent required)      |
 | DiscordSendMessage  | `discord-send`          | Send a message to a Discord channel                                         |
-| SlackSendMessage    | `slack-send`            | Send a message via Slack Web API                                            |
+| SlackListChannels   | `slack-list-channels`   | List workspace channels via ``conversations.list``                            |
+| SlackReadMessages   | `slack-read-messages`   | Fetch channel history via ``conversations.history``                           |
+| SlackSearchMessages | `slack-search-messages` | Search workspace messages (requires ``SLACK_USER_TOKEN``)                     |
+| SlackSendMessage    | `slack-send`            | Send a message via Slack Web API                                              |
 | TelegramBotInfo     | `telegram-bot-info`     | Return the authenticated Telegram bot's ID and username                       |
 | TelegramListChats   | `telegram-list-chats`   | Look up metadata for a single chat via ``getChat``                            |
 | TelegramReadMessages | `telegram-read-messages` | Fetch recent updates via ``getUpdates`` (incompatible with webhooks)       |
@@ -107,6 +110,8 @@ export OPENAI_API_KEY=sk-...
 # or
 export ANTHROPIC_API_KEY=sk-ant-...
 export DISCORD_BOT_TOKEN=...   # Discord send/read nodes
+export SLACK_BOT_TOKEN=...     # Slack send/read/list nodes
+export SLACK_USER_TOKEN=...    # Slack search node (user token, xoxp-...)
 export TELEGRAM_BOT_TOKEN=...  # Telegram send/read nodes
 ```
 
