@@ -42,7 +42,9 @@ def format_string(
             f"Variable name must not contain curly braces: {key}"
         )
 
-    pattern = re.compile("|".join(re.escape("{" + key + "}") for key in variables.keys()))
+    pattern = re.compile(
+        "|".join(re.escape("{" + key + "}") for key in variables.keys())
+    )
 
     for _ in range(iterations):
         next_text = pattern.sub(lambda match: variables[match.group(0)[1:-1]], text)

@@ -36,7 +36,9 @@ _SCROLL_DOM_QUIET_MS = 1_000
 
 # Pixels from max scroll extent; larger means more document below (feed not fully scrolled).
 _SCROLL_REMAINING_EPS_PX = 1.0
-_SCROLL_MIN_SCROLL_RANGE_PX = 24  # Ignore tiny scrollbar hosts when gathering containers.
+_SCROLL_MIN_SCROLL_RANGE_PX = (
+    24  # Ignore tiny scrollbar hosts when gathering containers.
+)
 _SCROLL_MIN_CONTAINER_HEIGHT_PX = 32
 
 # Long-lived HTTP (SSE, some XHR) may never fire requestfinished; ignore after this age.

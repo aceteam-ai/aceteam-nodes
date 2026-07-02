@@ -38,7 +38,9 @@ async def _install_strip_headless_chrome_user_agent(context: "BrowserContext") -
         if user_agent is None:
             raw = await page.evaluate("navigator.userAgent")
             if not isinstance(raw, str):
-                raise ValueError(f"User agent is not a string, got {type(raw).__name__} instead.")
+                raise ValueError(
+                    f"User agent is not a string, got {type(raw).__name__} instead."
+                )
             user_agent = raw.replace("HeadlessChrome", "Chrome")
         session = await page.context.new_cdp_session(page)
         await session.send("Network.enable", {})

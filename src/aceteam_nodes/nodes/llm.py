@@ -4,7 +4,14 @@ from typing import ClassVar, Type
 
 from overrides import override
 from pydantic import Field
-from workflow_engine import Data, ExecutionContext, Node, NodeTypeInfo, Params, StringValue
+from workflow_engine import (
+    Data,
+    ExecutionContext,
+    Node,
+    NodeTypeInfo,
+    Params,
+    StringValue,
+)
 
 from ..context import CLIContext
 

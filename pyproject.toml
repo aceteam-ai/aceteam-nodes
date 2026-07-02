@@ -44,11 +44,12 @@ dev = [
     "lxml>=6.1.0",
     "playwright-stealth>=2.0.3",
     "playwright>=1.47.0",
-    "pyright>=1.1",
-    "pytest-asyncio>=0.24",
-    "pytest>=8.0",
+    "pre-commit>=4.0.0",
+    "pyright>=1.1.411",
+    "pytest-asyncio>=0.26.0",
+    "pytest>=8.3.5",
     "python-telegram-bot>=21.0",
-    "ruff>=0.8",
+    "ruff>=0.11.8",
     "slack-sdk>=3.42.0",
 ]
 
@@ -92,13 +93,8 @@ testpaths = ["tests"]
 pythonpath = ["."]
 addopts = ["--import-mode=importlib"]
 
-[tool.ruff]
-target-version = "py312"
-line-length = 100
-
 [tool.ruff.lint]
-select = ["E", "F", "I", "RUF", "W"]
+extend-select = ["I", "RUF"]
 
-[tool.pyright]
-pythonVersion = "3.12"
-typeCheckingMode = "basic"
+[tool.ruff.lint.isort]
+known-first-party = ["aceteam_nodes"]

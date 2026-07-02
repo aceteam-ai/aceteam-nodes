@@ -22,7 +22,11 @@ from workflow_engine import (
 
 from aceteam_nodes.utils import OptionalInteger
 
-from .common import DISCORD_TOKEN_ENV_VAR, logged_in_discord_client, raise_discord_api_error
+from .common import (
+    DISCORD_TOKEN_ENV_VAR,
+    logged_in_discord_client,
+    raise_discord_api_error,
+)
 
 
 class DiscordReadMessagesParams(Params):

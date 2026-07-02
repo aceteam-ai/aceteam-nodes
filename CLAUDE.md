@@ -12,7 +12,8 @@ The package uses `aceteam-aep` for multi-provider LLM support (OpenAI, Anthropic
 
 ```bash
 # Setup
-uv sync --group dev               # Install project + dev group (pyright, pytest, ruff, aceteam-aep, playwright, lxml)
+uv sync                           # Install project + dev deps (pyright, pytest, ruff, pre-commit, …)
+uv run pre-commit install         # Install git hooks (ruff lint + format)
 
 # Browser profile (Playwright; for BrowserFetch)
 ace-browser-setup                 # console script
@@ -24,9 +25,9 @@ uv run pytest tests/test_nodes.py  # Run specific test file
 uv run pytest -x                   # Stop on first failure
 
 # Lint & Format
-uv run ruff check                  # Lint
-uv run ruff format                 # Format
-uv run pyright                     # Type checking
+uv run ruff check                 # Check for lint errors
+uv run ruff format                # Auto-format code
+uv run pyright                    # Type checking
 
 # Build
 uv build                           # Creates sdist + wheel in dist/
@@ -78,8 +79,9 @@ Each node needing a heavy/optional dependency gets **one extra named after the n
 ## Conventions
 
 - Python 3.12+ required
-- Ruff for linting and formatting (line length 100)
-- Pyright for type checking (basic mode)
+- Ruff for linting and formatting (default 88-character line length; config in `pyproject.toml`)
+- Pre-commit runs `ruff` and `ruff-format` on commit
+- Pyright for type checking
 - pytest with asyncio auto mode
 - All node types go in `nodes/` and extend `workflow_engine.Node`
 - Version is tracked in both `pyproject.toml` and `__init__.py`

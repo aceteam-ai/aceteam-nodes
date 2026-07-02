@@ -1,6 +1,7 @@
 """Tests for DiscordReadMessagesNode."""
 
 from datetime import datetime, timezone
+from typing import cast
 
 import discord
 import pytest
@@ -43,7 +44,7 @@ def _mock_discord(monkeypatch: pytest.MonkeyPatch) -> dict:
                 "messages",
                 [(111, "first"), (222, "second")],
             ):
-                yield _FakeMessage(message_id, content)
+                yield cast(discord.Message, _FakeMessage(message_id, content))
 
     class FakeClient:
         def __init__(self, *, intents, **kwargs):

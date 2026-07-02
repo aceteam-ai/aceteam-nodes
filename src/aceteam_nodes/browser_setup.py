@@ -33,9 +33,8 @@ async def run_browser_setup() -> dict[str, Any]:
         return {
             "success": False,
             "error": (
-                "Playwright is not installed. Install the playwright dependency group "
-                "(`uv sync --group dev` or `uv sync --group playwright`) and run "
-                "`playwright install chromium`."
+                "Playwright is not installed. Install dev dependencies "
+                "(`uv sync`) and run `playwright install chromium`."
             ),
             "detail": str(e),
         }

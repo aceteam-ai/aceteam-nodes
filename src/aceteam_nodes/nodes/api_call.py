@@ -114,7 +114,9 @@ class APICallNode(
     def static_output_type(cls) -> Type[APICallOutput]:
         return APICallOutput
 
-    async def _expand_parameter_value(self, context: ExecutionContext, value: Value) -> Any:
+    async def _expand_parameter_value(
+        self, context: ExecutionContext, value: Value
+    ) -> Any:
         """Expand data files into their content for templating."""
         assert isinstance(value, Value)
         if isinstance(value, JSONFileValue):
@@ -236,7 +238,9 @@ class APICallNode(
                         content=request_body,
                     )
                 else:
-                    response = await client.request(method=method, url=url, headers=headers)
+                    response = await client.request(
+                        method=method, url=url, headers=headers
+                    )
         except httpx.TimeoutException as e:
             raise WorkflowException(
                 f"Request timed out after {timeout} seconds.",

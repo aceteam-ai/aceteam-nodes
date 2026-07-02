@@ -55,7 +55,9 @@ class CLIContext(LocalContext):
         if m.startswith("claude") or "anthropic" in m:
             return os.environ.get("ANTHROPIC_API_KEY", "")
         if m.startswith("gemini") or "google" in m:
-            return os.environ.get("GOOGLE_API_KEY", "") or os.environ.get("GEMINI_API_KEY", "")
+            return os.environ.get("GOOGLE_API_KEY", "") or os.environ.get(
+                "GEMINI_API_KEY", ""
+            )
         if m.startswith("ollama"):
             return ""
         # Default: OpenAI

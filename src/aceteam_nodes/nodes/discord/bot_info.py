@@ -16,7 +16,11 @@ from workflow_engine import (
     StringValue,
 )
 
-from .common import DISCORD_TOKEN_ENV_VAR, logged_in_discord_client, raise_discord_api_error
+from .common import (
+    DISCORD_TOKEN_ENV_VAR,
+    logged_in_discord_client,
+    raise_discord_api_error,
+)
 
 
 class DiscordBotInfoParams(Params):
@@ -76,7 +80,9 @@ class DiscordBotInfoNode(
                 await client.application_info()
                 bot_user = client.user
                 if bot_user is None:
-                    raise DiscordException("Login succeeded but bot user is unavailable.")
+                    raise DiscordException(
+                        "Login succeeded but bot user is unavailable."
+                    )
 
             return output_type(
                 bot_id=IntegerValue(bot_user.id),

@@ -18,7 +18,12 @@ from workflow_engine import (
     SequenceValue,
 )
 
-from aceteam_nodes.utils import OptionalInteger, OptionalString, optional_integer, optional_string
+from aceteam_nodes.utils import (
+    OptionalInteger,
+    OptionalString,
+    optional_integer,
+    optional_string,
+)
 
 from .common import (
     TELEGRAM_TOKEN_ENV_VAR,
