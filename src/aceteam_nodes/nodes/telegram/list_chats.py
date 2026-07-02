@@ -12,19 +12,13 @@ from workflow_engine import (
     IntegerValue,
     Node,
     NodeTypeInfo,
-    NullValue,
     Params,
     StringValue,
-    UnionValue,
 )
 
-from .common import (
-    TELEGRAM_TOKEN_ENV_VAR,
-    optional_string,
-    raise_telegram_api_error,
-)
+from aceteam_nodes.utils import OptionalString, optional_string
 
-OptionalString = UnionValue[StringValue, NullValue]
+from .common import TELEGRAM_TOKEN_ENV_VAR, raise_telegram_api_error
 
 
 class TelegramListChatsParams(Params):

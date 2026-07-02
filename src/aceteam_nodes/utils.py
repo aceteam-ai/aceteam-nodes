@@ -5,7 +5,25 @@ from collections.abc import Mapping
 from typing import Any
 
 from jinja2 import BaseLoader, Environment, select_autoescape
-from workflow_engine import DataMapping, ValueType
+from workflow_engine import (
+    DataMapping,
+    IntegerValue,
+    NullValue,
+    OptionalValue,
+    StringValue,
+    ValueType,
+)
+
+OptionalString = OptionalValue[StringValue]
+OptionalInteger = OptionalValue[IntegerValue]
+
+
+def optional_string(value: str | None) -> StringValue | NullValue:
+    return NullValue(None) if value is None else StringValue(value)
+
+
+def optional_integer(value: int | None) -> IntegerValue | NullValue:
+    return NullValue(None) if value is None else IntegerValue(value)
 
 
 def format_string(
@@ -71,7 +89,11 @@ def dump_data_mapping(mapping: DataMapping) -> Mapping[str, Any]:
 
 
 __all__ = (
+    "OptionalInteger",
+    "OptionalString",
     "dump_data_mapping",
     "format_jinja",
     "format_string",
+    "optional_integer",
+    "optional_string",
 )

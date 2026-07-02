@@ -16,10 +16,10 @@ from workflow_engine import (
     Params,
 )
 
+from aceteam_nodes.utils import OptionalString, optional_string
+
 from .common import (
     TELEGRAM_TOKEN_ENV_VAR,
-    OptionalStringValue,
-    optional_string,
     raise_telegram_api_error,
 )
 
@@ -37,7 +37,7 @@ class TelegramBotInfoOutput(Data):
         title="Bot ID",
         description="The bot's Telegram user id.",
     )
-    bot_username: OptionalStringValue = Field(
+    bot_username: OptionalString = Field(
         title="Bot Username",
         description="The bot's @username, if set.",
     )

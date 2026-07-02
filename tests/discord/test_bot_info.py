@@ -3,17 +3,12 @@
 import pytest
 from workflow_engine import (
     ExecutionContext,
-    IntegerValue,
-    StringValue,
     WorkflowEngine,
     WorkflowExecutionResultStatus,
 )
 
 from aceteam_nodes.nodes.discord.bot_info import DiscordBotInfoNode
 from tests.discord.mocks import forbidden
-from tests.workflow_helpers import error_messages, execute_single_node
-
-_OUTPUT_FIELDS = {"bot_id": IntegerValue, "bot_username": StringValue}
 
 
 def _mock_discord(monkeypatch: pytest.MonkeyPatch) -> dict:
@@ -62,12 +57,9 @@ async def test_returns_bot_identity(
     monkeypatch.setenv("DISCORD_BOT_TOKEN", "bot-secret")
     captured = _mock_discord(monkeypatch)
 
-    result = await execute_single_node(
-        engine,
-        context,
-        DiscordBotInfoNode,
-        input_fields={},
-        output_fields=_OUTPUT_FIELDS,
+    result = await engine.execute_node(
+        context=context,
+        node=DiscordBotInfoNode,
         input={},
     )
 
@@ -85,17 +77,14 @@ async def test_missing_token_raises(
 ):
     monkeypatch.delenv("DISCORD_BOT_TOKEN", raising=False)
 
-    result = await execute_single_node(
-        engine,
-        context,
-        DiscordBotInfoNode,
-        input_fields={},
-        output_fields=_OUTPUT_FIELDS,
+    result = await engine.execute_node(
+        context=context,
+        node=DiscordBotInfoNode,
         input={},
     )
 
     assert result.status is WorkflowExecutionResultStatus.ERROR
-    assert any("DISCORD_BOT_TOKEN" in message for message in error_messages(result))
+    assert any("DISCORD_BOT_TOKEN" in message for message in result.errors.messages())
 
 
 @pytest.mark.asyncio
@@ -108,14 +97,11 @@ async def test_api_error_raises_workflow_exception(
     captured = _mock_discord(monkeypatch)
     captured["error"] = forbidden("Improper token")
 
-    result = await execute_single_node(
-        engine,
-        context,
-        DiscordBotInfoNode,
-        input_fields={},
-        output_fields=_OUTPUT_FIELDS,
+    result = await engine.execute_node(
+        context=context,
+        node=DiscordBotInfoNode,
         input={},
     )
 
     assert result.status is WorkflowExecutionResultStatus.ERROR
-    assert any("Improper token" in message for message in error_messages(result))
+    assert any("Improper token" in message for message in result.errors.messages())

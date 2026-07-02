@@ -3,17 +3,12 @@
 import pytest
 from workflow_engine import (
     ExecutionContext,
-    StringValue,
     WorkflowEngine,
     WorkflowExecutionResultStatus,
 )
 
 from aceteam_nodes.nodes.slack.send import SlackSendMessageNode
 from tests.slack.mocks import mock_client, slack_api_error
-from tests.workflow_helpers import error_messages, execute_single_node
-
-_INPUT_FIELDS = {"channel": StringValue, "text": StringValue}
-_OUTPUT_FIELDS = {"channel": StringValue, "timestamp": StringValue}
 
 
 @pytest.mark.asyncio
@@ -30,13 +25,10 @@ async def test_posts_message_and_maps_output(
         "ts": "1700000000.000100",
     }
 
-    result = await execute_single_node(
-        engine,
-        context,
-        SlackSendMessageNode,
-        input_fields=_INPUT_FIELDS,
-        output_fields=_OUTPUT_FIELDS,
-        input={"channel": StringValue("C0123"), "text": StringValue("hello")},
+    result = await engine.execute_node(
+        context=context,
+        node=SlackSendMessageNode,
+        input={"channel": "C0123", "text": "hello"},
     )
 
     assert result.status is WorkflowExecutionResultStatus.SUCCESS
@@ -56,17 +48,14 @@ async def test_missing_token_raises(
 ):
     monkeypatch.delenv("SLACK_BOT_TOKEN", raising=False)
 
-    result = await execute_single_node(
-        engine,
-        context,
-        SlackSendMessageNode,
-        input_fields=_INPUT_FIELDS,
-        output_fields=_OUTPUT_FIELDS,
-        input={"channel": StringValue("C0123"), "text": StringValue("hello")},
+    result = await engine.execute_node(
+        context=context,
+        node=SlackSendMessageNode,
+        input={"channel": "C0123", "text": "hello"},
     )
 
     assert result.status is WorkflowExecutionResultStatus.ERROR
-    assert any("SLACK_BOT_TOKEN" in message for message in error_messages(result))
+    assert any("SLACK_BOT_TOKEN" in message for message in result.errors.messages())
 
 
 @pytest.mark.asyncio
@@ -79,17 +68,14 @@ async def test_api_error_raises_workflow_exception(
     captured = mock_client(monkeypatch)
     captured["error"] = slack_api_error("channel_not_found")
 
-    result = await execute_single_node(
-        engine,
-        context,
-        SlackSendMessageNode,
-        input_fields=_INPUT_FIELDS,
-        output_fields=_OUTPUT_FIELDS,
-        input={"channel": StringValue("C0123"), "text": StringValue("hello")},
+    result = await engine.execute_node(
+        context=context,
+        node=SlackSendMessageNode,
+        input={"channel": "C0123", "text": "hello"},
     )
 
     assert result.status is WorkflowExecutionResultStatus.ERROR
-    assert any("channel_not_found" in message for message in error_messages(result))
+    assert any("channel_not_found" in message for message in result.errors.messages())
 
 
 @pytest.mark.asyncio
@@ -106,13 +92,10 @@ async def test_resolves_channel_name_to_id(
         "ts": "1700000000.000200",
     }
 
-    result = await execute_single_node(
-        engine,
-        context,
-        SlackSendMessageNode,
-        input_fields=_INPUT_FIELDS,
-        output_fields=_OUTPUT_FIELDS,
-        input={"channel": StringValue("#general"), "text": StringValue("hello")},
+    result = await engine.execute_node(
+        context=context,
+        node=SlackSendMessageNode,
+        input={"channel": "#general", "text": "hello"},
     )
 
     assert result.status is WorkflowExecutionResultStatus.SUCCESS

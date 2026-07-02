@@ -3,7 +3,6 @@
 from .common import SLACK_BOT_TOKEN_ENV_VAR, SLACK_USER_TOKEN_ENV_VAR
 from .list_channels import (
     SlackChannelItem,
-    SlackListChannelsInput,
     SlackListChannelsNode,
     SlackListChannelsOutput,
     SlackListChannelsParams,
@@ -33,7 +32,6 @@ __all__ = (
     "SLACK_BOT_TOKEN_ENV_VAR",
     "SLACK_USER_TOKEN_ENV_VAR",
     "SlackChannelItem",
-    "SlackListChannelsInput",
     "SlackListChannelsNode",
     "SlackListChannelsOutput",
     "SlackListChannelsParams",

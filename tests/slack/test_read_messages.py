@@ -2,30 +2,13 @@
 
 import pytest
 from workflow_engine import (
-    DataValue,
     ExecutionContext,
-    NullValue,
-    SequenceValue,
-    StringValue,
-    UnionValue,
     WorkflowEngine,
     WorkflowExecutionResultStatus,
 )
 
-from aceteam_nodes.nodes.slack.read_messages import (
-    SlackMessageItem,
-    SlackReadMessagesNode,
-)
+from aceteam_nodes.nodes.slack.read_messages import SlackReadMessagesNode
 from tests.slack.mocks import mock_client, slack_api_error
-from tests.workflow_helpers import error_messages, execute_single_node
-
-OptionalString = UnionValue[StringValue, NullValue]
-_INPUT_FIELDS = {
-    "channel_id": StringValue,
-    "oldest": OptionalString,
-    "latest": OptionalString,
-}
-_OUTPUT_FIELDS = {"messages": SequenceValue[DataValue[SlackMessageItem]]}
 
 
 @pytest.mark.asyncio
@@ -48,13 +31,10 @@ async def test_reads_messages_and_maps_output(
         ],
     }
 
-    result = await execute_single_node(
-        engine,
-        context,
-        SlackReadMessagesNode,
-        input_fields={"channel_id": StringValue},
-        output_fields=_OUTPUT_FIELDS,
-        input={"channel_id": StringValue("C0123")},
+    result = await engine.execute_node(
+        context=context,
+        node=SlackReadMessagesNode,
+        input={"channel_id": "C0123"},
     )
 
     assert result.status is WorkflowExecutionResultStatus.SUCCESS
@@ -87,13 +67,10 @@ async def test_paginates_history(
         },
     )
 
-    result = await execute_single_node(
-        engine,
-        context,
-        SlackReadMessagesNode,
-        input_fields={"channel_id": StringValue},
-        output_fields=_OUTPUT_FIELDS,
-        input={"channel_id": StringValue("C0123")},
+    result = await engine.execute_node(
+        context=context,
+        node=SlackReadMessagesNode,
+        input={"channel_id": "C0123"},
     )
 
     assert result.status is WorkflowExecutionResultStatus.SUCCESS
@@ -112,16 +89,13 @@ async def test_passes_oldest_and_latest(
     monkeypatch.setenv("SLACK_BOT_TOKEN", "xoxb-secret")
     captured = mock_client(monkeypatch)
 
-    result = await execute_single_node(
-        engine,
-        context,
-        SlackReadMessagesNode,
-        input_fields=_INPUT_FIELDS,
-        output_fields=_OUTPUT_FIELDS,
+    result = await engine.execute_node(
+        context=context,
+        node=SlackReadMessagesNode,
         input={
-            "channel_id": StringValue("C0123"),
-            "oldest": StringValue("100.000000"),
-            "latest": StringValue("200.000000"),
+            "channel_id": "C0123",
+            "oldest": "100.000000",
+            "latest": "200.000000",
         },
     )
 
@@ -138,17 +112,14 @@ async def test_missing_token_raises(
 ):
     monkeypatch.delenv("SLACK_BOT_TOKEN", raising=False)
 
-    result = await execute_single_node(
-        engine,
-        context,
-        SlackReadMessagesNode,
-        input_fields={"channel_id": StringValue},
-        output_fields=_OUTPUT_FIELDS,
-        input={"channel_id": StringValue("C0123")},
+    result = await engine.execute_node(
+        context=context,
+        node=SlackReadMessagesNode,
+        input={"channel_id": "C0123"},
     )
 
     assert result.status is WorkflowExecutionResultStatus.ERROR
-    assert any("SLACK_BOT_TOKEN" in message for message in error_messages(result))
+    assert any("SLACK_BOT_TOKEN" in message for message in result.errors.messages())
 
 
 @pytest.mark.asyncio
@@ -161,14 +132,11 @@ async def test_api_error_raises_workflow_exception(
     captured = mock_client(monkeypatch)
     captured["error"] = slack_api_error("not_in_channel")
 
-    result = await execute_single_node(
-        engine,
-        context,
-        SlackReadMessagesNode,
-        input_fields={"channel_id": StringValue},
-        output_fields=_OUTPUT_FIELDS,
-        input={"channel_id": StringValue("C0123")},
+    result = await engine.execute_node(
+        context=context,
+        node=SlackReadMessagesNode,
+        input={"channel_id": "C0123"},
     )
 
     assert result.status is WorkflowExecutionResultStatus.ERROR
-    assert any("not_in_channel" in message for message in error_messages(result))
+    assert any("not_in_channel" in message for message in result.errors.messages())

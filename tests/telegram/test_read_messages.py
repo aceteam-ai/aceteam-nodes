@@ -1,26 +1,16 @@
 """Tests for TelegramReadMessagesNode."""
 
+from datetime import datetime, timezone
+
 import pytest
 from workflow_engine import (
-    DataValue,
     ExecutionContext,
-    IntegerValue,
-    NullValue,
-    SequenceValue,
-    UnionValue,
     WorkflowEngine,
     WorkflowExecutionResultStatus,
 )
 
-from aceteam_nodes.nodes.telegram.read_messages import (
-    TelegramMessageItem,
-    TelegramReadMessagesNode,
-)
+from aceteam_nodes.nodes.telegram.read_messages import TelegramReadMessagesNode
 from tests.telegram.mocks import FakeMessage, FakeUpdate, FakeUser, bad_request, mock_bot
-from tests.workflow_helpers import error_messages, execute_single_node
-
-OptionalOffset = UnionValue[IntegerValue, NullValue]
-_OUTPUT_FIELDS = {"messages": SequenceValue[DataValue[TelegramMessageItem]]}
 
 
 @pytest.mark.asyncio
@@ -36,12 +26,9 @@ async def test_reads_messages_and_maps_output(
         FakeUpdate(FakeMessage(100, text="world", sender=FakeUser(777, "alice"))),
     )
 
-    result = await execute_single_node(
-        engine,
-        context,
-        TelegramReadMessagesNode,
-        input_fields={},
-        output_fields=_OUTPUT_FIELDS,
+    result = await engine.execute_node(
+        context=context,
+        node=TelegramReadMessagesNode,
         input={},
     )
 
@@ -54,7 +41,7 @@ async def test_reads_messages_and_maps_output(
     assert first.sender_id.root == 555
     assert first.sender_username.root == "tester"
     assert first.text.root == "hello"
-    assert first.date.root == "2026-03-01T00:00:00+00:00"
+    assert first.date.root == datetime(2026, 3, 1, tzinfo=timezone.utc)
     assert captured["get_updates"]["limit"] == 100
     assert captured["get_updates"]["offset"] is None
 
@@ -71,12 +58,9 @@ async def test_nullable_fields_for_missing_text_and_username(
         FakeUpdate(FakeMessage(99, text=None, sender=FakeUser(555, username=None))),
     )
 
-    result = await execute_single_node(
-        engine,
-        context,
-        TelegramReadMessagesNode,
-        input_fields={},
-        output_fields=_OUTPUT_FIELDS,
+    result = await engine.execute_node(
+        context=context,
+        node=TelegramReadMessagesNode,
         input={},
     )
 
@@ -96,13 +80,10 @@ async def test_passes_offset(
     monkeypatch.setenv("TELEGRAM_BOT_TOKEN", "secret-token")
     captured = mock_bot(monkeypatch)
 
-    result = await execute_single_node(
-        engine,
-        context,
-        TelegramReadMessagesNode,
-        input_fields={"offset": OptionalOffset},
-        output_fields=_OUTPUT_FIELDS,
-        input={"offset": IntegerValue(42)},
+    result = await engine.execute_node(
+        context=context,
+        node=TelegramReadMessagesNode,
+        input={"offset": 42},
     )
 
     assert result.status is WorkflowExecutionResultStatus.SUCCESS
@@ -127,12 +108,9 @@ async def test_paginates_until_queue_is_exhausted(
         ),
     )
 
-    result = await execute_single_node(
-        engine,
-        context,
-        TelegramReadMessagesNode,
-        input_fields={},
-        output_fields=_OUTPUT_FIELDS,
+    result = await engine.execute_node(
+        context=context,
+        node=TelegramReadMessagesNode,
         input={},
     )
 
@@ -157,13 +135,10 @@ async def test_zero_poll_timeout_when_timeout_below_one(
     monkeypatch.setenv("TELEGRAM_BOT_TOKEN", "secret-token")
     captured = mock_bot(monkeypatch)
 
-    result = await execute_single_node(
-        engine,
-        context,
-        TelegramReadMessagesNode,
+    result = await engine.execute_node(
+        context=context,
+        node=TelegramReadMessagesNode,
         params={"timeout": 0},
-        input_fields={},
-        output_fields=_OUTPUT_FIELDS,
         input={},
     )
 
@@ -179,17 +154,14 @@ async def test_missing_token_raises(
 ):
     monkeypatch.delenv("TELEGRAM_BOT_TOKEN", raising=False)
 
-    result = await execute_single_node(
-        engine,
-        context,
-        TelegramReadMessagesNode,
-        input_fields={},
-        output_fields=_OUTPUT_FIELDS,
+    result = await engine.execute_node(
+        context=context,
+        node=TelegramReadMessagesNode,
         input={},
     )
 
     assert result.status is WorkflowExecutionResultStatus.ERROR
-    assert any("TELEGRAM_BOT_TOKEN" in message for message in error_messages(result))
+    assert any("TELEGRAM_BOT_TOKEN" in message for message in result.errors.messages())
 
 
 @pytest.mark.asyncio
@@ -202,14 +174,11 @@ async def test_api_error_raises_workflow_exception(
     captured = mock_bot(monkeypatch)
     captured["error"] = bad_request("Conflict")
 
-    result = await execute_single_node(
-        engine,
-        context,
-        TelegramReadMessagesNode,
-        input_fields={},
-        output_fields=_OUTPUT_FIELDS,
+    result = await engine.execute_node(
+        context=context,
+        node=TelegramReadMessagesNode,
         input={},
     )
 
     assert result.status is WorkflowExecutionResultStatus.ERROR
-    assert any("Conflict" in message for message in error_messages(result))
+    assert any("Conflict" in message for message in result.errors.messages())
