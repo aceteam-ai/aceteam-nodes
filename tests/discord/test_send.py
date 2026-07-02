@@ -1,5 +1,7 @@
 """Tests for DiscordSendMessageNode."""
 
+from typing import cast
+
 import discord
 import pytest
 from workflow_engine import (
@@ -25,7 +27,7 @@ def _mock_discord(monkeypatch: pytest.MonkeyPatch) -> dict:
             captured["kwargs"] = kwargs
             if "error" in captured:
                 raise captured["error"]
-            return _FakeMessage()
+            return cast(discord.Message, _FakeMessage())
 
     class FakeClient:
         def __init__(self, *, intents, **kwargs):

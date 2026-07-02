@@ -10,7 +10,13 @@ from workflow_engine import (
 )
 
 from aceteam_nodes.nodes.telegram.read_messages import TelegramReadMessagesNode
-from tests.telegram.mocks import FakeMessage, FakeUpdate, FakeUser, bad_request, mock_bot
+from tests.telegram.mocks import (
+    FakeMessage,
+    FakeUpdate,
+    FakeUser,
+    bad_request,
+    mock_bot,
+)
 
 
 @pytest.mark.asyncio
@@ -101,10 +107,12 @@ async def test_paginates_until_queue_is_exhausted(
     captured = mock_bot(monkeypatch)
     captured["update_batches"] = (
         tuple(
-            FakeUpdate(FakeMessage(update_id), update_id=update_id) for update_id in range(1, 101)
+            FakeUpdate(FakeMessage(update_id), update_id=update_id)
+            for update_id in range(1, 101)
         ),
         tuple(
-            FakeUpdate(FakeMessage(update_id), update_id=update_id) for update_id in range(101, 151)
+            FakeUpdate(FakeMessage(update_id), update_id=update_id)
+            for update_id in range(101, 151)
         ),
     )
 

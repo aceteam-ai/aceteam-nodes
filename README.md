@@ -118,8 +118,8 @@ export TELEGRAM_BOT_TOKEN=...  # Telegram send/read nodes
 ## Development
 
 ```bash
-# Setup (installs project + dev group: pyright, pytest, ruff, aceteam-aep, playwright, lxml)
-uv sync --group dev
+# Setup (installs project + dev deps: pyright, pytest, ruff, aceteam-aep, playwright, lxml)
+uv sync
 
 # Test
 uv run pytest

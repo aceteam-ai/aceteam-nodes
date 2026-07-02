@@ -21,7 +21,11 @@ from workflow_engine import (
     StringValue,
 )
 
-from .common import DISCORD_TOKEN_ENV_VAR, logged_in_discord_client, raise_discord_api_error
+from .common import (
+    DISCORD_TOKEN_ENV_VAR,
+    logged_in_discord_client,
+    raise_discord_api_error,
+)
 
 logger = logging.getLogger(__name__)
 

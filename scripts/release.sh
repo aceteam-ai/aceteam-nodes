@@ -118,7 +118,7 @@ fi
 
 # ── Step 1: Update version ──────────────────────────────────────────
 echo ""
-echo -e "${GREEN}Step 1/6: Update version to $VERSION_NUM${NC}"
+echo -e "${GREEN}Step 1/7: Update version to $VERSION_NUM${NC}"
 if [[ "$DRY_RUN" == true ]]; then
     echo -e "${BLUE}[DRY-RUN] Would update pyproject.toml and __init__.py${NC}"
 else
@@ -127,9 +127,25 @@ else
     echo "Done"
 fi
 
-# ── Step 2: Build ───────────────────────────────────────────────────
+# ── Step 2: Quality checks ──────────────────────────────────────────
 echo ""
-echo -e "${GREEN}Step 2/6: Build sdist + wheel${NC}"
+echo -e "${GREEN}Step 2/7: Quality checks${NC}"
+if [[ "$DRY_RUN" == true ]]; then
+    echo -e "${BLUE}[DRY-RUN] Would run: uv run pytest -q${NC}"
+    echo -e "${BLUE}[DRY-RUN] Would run: uv run ruff check${NC}"
+    echo -e "${BLUE}[DRY-RUN] Would run: uv run ruff format --check${NC}"
+    echo -e "${BLUE}[DRY-RUN] Would run: uv run pyright${NC}"
+else
+    uv run pytest -q
+    uv run ruff check
+    uv run ruff format --check
+    uv run pyright
+    echo "Done"
+fi
+
+# ── Step 3: Build ───────────────────────────────────────────────────
+echo ""
+echo -e "${GREEN}Step 3/7: Build sdist + wheel${NC}"
 if [[ "$DRY_RUN" == true ]]; then
     echo -e "${BLUE}[DRY-RUN] Would run: uv sync${NC}"
     echo -e "${BLUE}[DRY-RUN] Would run: uv build${NC}"
@@ -140,9 +156,9 @@ else
     echo "Done"
 fi
 
-# ── Step 3: Git commit + tag + push ────────────────────────────────
+# ── Step 4: Git commit + tag + push ────────────────────────────────
 echo ""
-echo -e "${GREEN}Step 3/6: Git commit + tag + push${NC}"
+echo -e "${GREEN}Step 4/7: Git commit + tag + push${NC}"
 if [[ "$DRY_RUN" == true ]]; then
     echo -e "${BLUE}[DRY-RUN] Would commit, tag $VERSION, and push${NC}"
 else
@@ -167,9 +183,9 @@ else
     echo "Done"
 fi
 
-# ── Step 4: Publish to PyPI ─────────────────────────────────────────
+# ── Step 5: Publish to PyPI ─────────────────────────────────────────
 echo ""
-echo -e "${GREEN}Step 4/6: Publish to PyPI${NC}"
+echo -e "${GREEN}Step 5/7: Publish to PyPI${NC}"
 if [[ "$DRY_RUN" == true ]]; then
     echo -e "${BLUE}[DRY-RUN] Would run: uv publish${NC}"
 else
@@ -182,9 +198,9 @@ else
     echo "Done"
 fi
 
-# ── Step 5: GitHub release ──────────────────────────────────────────
+# ── Step 6: GitHub release ──────────────────────────────────────────
 echo ""
-echo -e "${GREEN}Step 5/6: Create GitHub release${NC}"
+echo -e "${GREEN}Step 6/7: Create GitHub release${NC}"
 
 RELEASE_NOTES="## What's New
 
@@ -221,7 +237,7 @@ else
     echo "Done"
 fi
 
-# ── Step 6: Summary ─────────────────────────────────────────────────
+# ── Step 7: Summary ─────────────────────────────────────────────────
 echo ""
 if [[ "$DRY_RUN" == true ]]; then
     echo -e "${GREEN}Dry run complete${NC}"

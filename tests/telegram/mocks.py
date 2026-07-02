@@ -112,7 +112,9 @@ def mock_bot(monkeypatch: pytest.MonkeyPatch) -> dict:
             return captured.get(
                 "chat",
                 FakeChat(
-                    chat_id=int(chat_id) if str(chat_id).lstrip("-").isdigit() else 12345,
+                    chat_id=int(chat_id)
+                    if str(chat_id).lstrip("-").isdigit()
+                    else 12345,
                     title="Test Group",
                     username="testgroup",
                     description="A test chat",
@@ -124,7 +126,9 @@ def mock_bot(monkeypatch: pytest.MonkeyPatch) -> dict:
             captured["get_me"] = kwargs
             if "error" in captured:
                 raise captured["error"]
-            return captured.get("bot_user", FakeUser(user_id=4242, username="aceteam-bot"))
+            return captured.get(
+                "bot_user", FakeUser(user_id=4242, username="aceteam-bot")
+            )
 
     for target in (
         "aceteam_nodes.nodes.telegram.send.Bot",

@@ -157,7 +157,9 @@ class SlackReadMessagesNode(
                     items.append(
                         DataValue[SlackMessageItem](
                             root=SlackMessageItem(
-                                ts=require_string(message.get("ts"), "message timestamp"),
+                                ts=require_string(
+                                    message.get("ts"), "message timestamp"
+                                ),
                                 user=optional_string(message.get("user")),
                                 text=optional_string(message.get("text")),
                                 thread_ts=optional_string(message.get("thread_ts")),
@@ -165,7 +167,9 @@ class SlackReadMessagesNode(
                         ),
                     )
 
-                cursor = response.get("response_metadata", {}).get("next_cursor") or None
+                cursor = (
+                    response.get("response_metadata", {}).get("next_cursor") or None
+                )
                 if not cursor:
                     break
         except SlackApiError as e:

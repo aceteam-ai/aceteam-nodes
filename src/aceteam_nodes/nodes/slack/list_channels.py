@@ -178,15 +178,25 @@ class SlackListChannelsNode(
                     items.append(
                         DataValue[SlackChannelItem](
                             root=SlackChannelItem(
-                                channel_id=require_string(channel.get("id"), "channel id"),
-                                name=require_string(channel.get("name"), "channel name"),
-                                is_private=BooleanValue(bool(channel.get("is_private", False))),
-                                num_members=optional_integer(channel.get("num_members")),
+                                channel_id=require_string(
+                                    channel.get("id"), "channel id"
+                                ),
+                                name=require_string(
+                                    channel.get("name"), "channel name"
+                                ),
+                                is_private=BooleanValue(
+                                    bool(channel.get("is_private", False))
+                                ),
+                                num_members=optional_integer(
+                                    channel.get("num_members")
+                                ),
                             ),
                         ),
                     )
 
-                cursor = response.get("response_metadata", {}).get("next_cursor") or None
+                cursor = (
+                    response.get("response_metadata", {}).get("next_cursor") or None
+                )
                 if not cursor:
                     break
         except SlackApiError as e:

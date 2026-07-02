@@ -1,17 +1,4 @@
 {
-    "cSpell.words": [
-        "aceteam",
-        "aiohttp",
-        "asyncio",
-        "httpx",
-        "lxml",
-        "Ollama",
-        "platformdirs",
-        "pydantic",
-        "pyproject",
-        "pytest",
-        "pyyaml",
-        "testpaths",
-        "wengine"
-    ]
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "charliermarsh.ruff"
 }

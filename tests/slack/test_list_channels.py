@@ -97,12 +97,16 @@ async def test_paginates_channel_list(
     captured["list_batches"] = (
         {
             "ok": True,
-            "channels": [{"id": "C1", "name": "one", "is_private": False, "num_members": 1}],
+            "channels": [
+                {"id": "C1", "name": "one", "is_private": False, "num_members": 1}
+            ],
             "response_metadata": {"next_cursor": "cursor-1"},
         },
         {
             "ok": True,
-            "channels": [{"id": "C2", "name": "two", "is_private": True, "num_members": 2}],
+            "channels": [
+                {"id": "C2", "name": "two", "is_private": True, "num_members": 2}
+            ],
         },
     )
 
@@ -204,4 +208,6 @@ async def test_no_channel_types_selected_raises(
     )
 
     assert result.status is WorkflowExecutionResultStatus.ERROR
-    assert any("At least one channel type" in message for message in result.errors.messages())
+    assert any(
+        "At least one channel type" in message for message in result.errors.messages()
+    )
