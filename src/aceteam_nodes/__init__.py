@@ -1,44 +1,10 @@
-"""AceTeam workflow nodes for local execution."""
+"""AceTeam workflow nodes for local execution.
+
+This package is a repository of independently-installable nodes. Each node's
+dependencies are gated behind its own optional extra, so nodes must be
+imported from their leaf modules (e.g. ``aceteam_nodes.nodes.api_call``),
+never re-exported from package ``__init__`` files. The entry points in
+``pyproject.toml`` are the canonical map of node names to modules.
+"""
 
 __version__ = "0.7.0"
-
-
-from .nodes import (
-    APICallNode,
-    BrowserFetchNode,
-    DiscordBotInfoNode,
-    DiscordListChannelsNode,
-    DiscordReadMessagesNode,
-    DiscordSendMessageNode,
-    LLMNode,
-    ShellNode,
-    SlackListChannelsNode,
-    SlackReadMessagesNode,
-    SlackSearchMessagesNode,
-    SlackSendMessageNode,
-    TelegramBotInfoNode,
-    TelegramListChatsNode,
-    TelegramReadMessagesNode,
-    TelegramSendMessageNode,
-    XPathExtractNode,
-)
-
-__all__ = (
-    "APICallNode",
-    "BrowserFetchNode",
-    "DiscordBotInfoNode",
-    "DiscordListChannelsNode",
-    "DiscordReadMessagesNode",
-    "DiscordSendMessageNode",
-    "LLMNode",
-    "ShellNode",
-    "SlackListChannelsNode",
-    "SlackReadMessagesNode",
-    "SlackSearchMessagesNode",
-    "SlackSendMessageNode",
-    "TelegramBotInfoNode",
-    "TelegramListChatsNode",
-    "TelegramReadMessagesNode",
-    "TelegramSendMessageNode",
-    "XPathExtractNode",
-)
