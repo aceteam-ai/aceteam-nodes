@@ -4,7 +4,7 @@ import re
 from collections.abc import Mapping
 from typing import Any
 
-from jinja2 import BaseLoader, Environment, select_autoescape
+from jinja2 import BaseLoader, Environment, StrictUndefined, select_autoescape
 from workflow_engine import (
     DataMapping,
     IntegerValue,
@@ -67,6 +67,7 @@ def format_jinja(
     env = Environment(
         loader=BaseLoader(),
         autoescape=select_autoescape() if auto_escape else False,
+        undefined=StrictUndefined,
     )
 
     template = env.from_string(template_string)
