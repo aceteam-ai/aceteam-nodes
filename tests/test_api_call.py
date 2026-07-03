@@ -113,3 +113,74 @@ async def test_execute_node_substitutes_input_into_body(engine: WorkflowEngine):
     assert result.status is WorkflowExecutionResultStatus.SUCCESS
     assert capture["method"] == "POST"
     assert capture["json"] == {"employee_id": "42"}
+
+
+@pytest.mark.asyncio
+async def test_execute_node_substitutes_input_into_headers(engine: WorkflowEngine):
+    context = InMemoryExecutionContext()
+    capture: dict[str, object | None] = {"headers": None}
+    params = {
+        "url": "https://api.example.com/data",
+        "method": "GET",
+        "headers": {"Authorization": "Bearer {{ api_token }}"},
+        "body_template": "",
+        "parameters": {
+            "api_token": {
+                "type": "string",
+                "title": "api_token",
+            },
+        },
+        "timeout": 30,
+    }
+
+    mock_client = AsyncMock()
+    mock_response = MagicMock()
+    mock_response.status_code = 200
+    mock_response.headers = {"content-type": "application/json"}
+    mock_response.json.return_value = {"ok": True}
+
+    async def request(**kwargs: object) -> MagicMock:
+        capture["headers"] = kwargs.get("headers")
+        return mock_response
+
+    mock_client.request = request
+    mock_client.__aenter__ = AsyncMock(return_value=mock_client)
+    mock_client.__aexit__ = AsyncMock(return_value=None)
+
+    with patch(
+        "aceteam_nodes.nodes.api_call.httpx.AsyncClient",
+        return_value=mock_client,
+    ):
+        result = await engine.execute_node(
+            context=context,
+            node=APICallNode,
+            params=params,
+            input={"api_token": "secret-abc"},
+        )
+
+    assert result.status is WorkflowExecutionResultStatus.SUCCESS
+    assert capture["headers"] == {"Authorization": "Bearer secret-abc"}
+
+
+@pytest.mark.asyncio
+async def test_undefined_template_variable_fails(engine: WorkflowEngine):
+    """Undefined Jinja variables must fail loudly (StrictUndefined)."""
+    context = InMemoryExecutionContext()
+    params = {
+        "url": "https://api.example.com/users/{{ employee_id }}",
+        "method": "GET",
+        "headers": {},
+        "body_template": "",
+        "parameters": {},
+        "timeout": 30,
+    }
+
+    with patch("aceteam_nodes.nodes.api_call.httpx.AsyncClient"):
+        result = await engine.execute_node(
+            context=context,
+            node=APICallNode,
+            params=params,
+            input={},
+        )
+
+    assert result.status is WorkflowExecutionResultStatus.ERROR

@@ -45,7 +45,11 @@ class APICallParams(Params):
     )
     headers: StringMapValue[StringValue] = Field(
         title="Headers",
-        description="HTTP headers to include in the request.",
+        description=(
+            "HTTP headers to include in the request. Values support Jinja "
+            "substitution from the node's parameters (e.g. "
+            "`Bearer {{ api_token }}`)."
+        ),
         default=StringMapValue({}),
     )
     body_template: StringValue = Field(
@@ -55,7 +59,7 @@ class APICallParams(Params):
     )
     parameters: FieldSchemaMappingValue = Field(
         title="Parameters",
-        description="Parameters used in URL and body templates.",
+        description="Parameters used in URL, header, and body templates.",
         default=FieldSchemaMappingValue({}),
     )
     timeout: FloatValue = Field(
@@ -91,7 +95,10 @@ class APICallNode(
 
     TYPE_INFO: ClassVar[NodeTypeInfo] = NodeTypeInfo.from_parameter_type(
         display_name="API Call",
-        description="Makes HTTP API calls with Jinja templating for URL and request body.",
+        description=(
+            "Makes HTTP API calls with Jinja templating for URL, headers, "
+            "and request body."
+        ),
         version="0.4.0",
         parameter_type=APICallParams,
     )
@@ -145,6 +152,21 @@ class APICallNode(
                 ) from e
         return value.root
 
+    def _render_template(
+        self,
+        template: str,
+        parameters: dict[str, Any],
+        *,
+        label: str,
+    ) -> str:
+        try:
+            return format_jinja(template, parameters)
+        except Exception as e:
+            raise WorkflowException(
+                f"Failed to format {label}: {e}",
+                level=StakeholderLevel.USER,
+            ) from e
+
     def _is_json_response(self, response: httpx.Response) -> bool:
         content_type = response.headers.get("content-type", "")
         assert isinstance(content_type, str)
@@ -190,36 +212,37 @@ class APICallNode(
                     )
 
         # Format URL with Jinja templating
-        try:
-            url_template = self.params.url.root
-            url = format_jinja(url_template, parameters)
-        except Exception as e:
-            raise WorkflowException(
-                f"Failed to format URL template: {e}",
-                level=StakeholderLevel.USER,
-            ) from e
+        url = self._render_template(
+            self.params.url.root,
+            parameters,
+            label="URL template",
+        )
 
         # Format request body with Jinja templating
         request_body = None
         body_template = self.params.body_template.root
         if body_template.strip():
-            try:
-                body_text = format_jinja(body_template, parameters)
-                if body_text.strip().startswith(("{", "[")):
-                    try:
-                        request_body = json.loads(body_text)
-                    except JSONDecodeError:
-                        request_body = body_text
-                else:
+            body_text = self._render_template(
+                body_template,
+                parameters,
+                label="request body template",
+            )
+            if body_text.strip().startswith(("{", "[")):
+                try:
+                    request_body = json.loads(body_text)
+                except JSONDecodeError:
                     request_body = body_text
-            except Exception as e:
-                raise WorkflowException(
-                    f"Failed to format request body template: {e}",
-                    level=StakeholderLevel.USER,
-                ) from e
+            else:
+                request_body = body_text
 
-        # Prepare headers
-        headers = {k: v.root for k, v in self.params.headers.items()}
+        # Prepare headers (values are Jinja-templated; names are fixed)
+        headers: dict[str, str] = {}
+        for key, value in self.params.headers.items():
+            headers[key] = self._render_template(
+                value.root,
+                parameters,
+                label=f"header {key!r}",
+            )
 
         if request_body is not None and isinstance(request_body, (dict, list)):
             if "content-type" not in {k.lower() for k in headers.keys()}:
