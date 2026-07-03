@@ -174,11 +174,20 @@ class APICallNode(
         output_type: type[APICallOutput],
         input: Data,
     ) -> APICallOutput:
-        # Prepare template parameters
+        # Prepare template parameters from runtime input (field names come from
+        # params.parameters schemas — same pattern as JinjaNode).
         parameters: dict[str, Any] = {}
         if len(self.params.parameters) > 0:
-            for key, value in self.params.parameters.items():
-                parameters[key] = await self._expand_parameter_value(context, value)
+            for name in self.params.parameters.keys():
+                if hasattr(input, name):
+                    parameters[name] = await self._expand_parameter_value(
+                        context, getattr(input, name)
+                    )
+                else:
+                    raise WorkflowException(
+                        f"Parameter {name} is not set.",
+                        level=StakeholderLevel.USER,
+                    )
 
         # Format URL with Jinja templating
         try:
