@@ -26,14 +26,17 @@ import asyncio
 import io
 import json
 from pathlib import Path
+from typing import Any, cast
 
 from PIL import Image
+from workflow_engine import FloatValue
 from workflow_engine.contexts import InMemoryExecutionContext
 
 from aceteam_nodes.nodes.face_blur import (
     FaceBlurInput,
     FaceBlurNode,
     FaceBlurOutput,
+    FaceBlurParams,
     ImageFileValue,
 )
 
@@ -62,7 +65,9 @@ async def _run(
     source = await source.write(context, buffer.getvalue())
 
     node = FaceBlurNode(
-        id="faceblur", type="FaceBlur", params={"blur_strength": strength}
+        id="faceblur",
+        type="FaceBlur",
+        params=FaceBlurParams(blur_strength=FloatValue(strength)),
     )
     output = await node.run(
         context=context,
@@ -88,7 +93,8 @@ async def main() -> None:
     out_dir = Path(args.out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    faces = output.faces.root
+    # The node emits a list[dict]; narrow the wide JSON `.root` type for indexing.
+    faces = cast(list[dict[str, Any]], output.faces.root)
     print(f"Detected {output.count.root} face(s).")
     print(json.dumps(faces, indent=2))
 
