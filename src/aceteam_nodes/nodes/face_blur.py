@@ -309,7 +309,7 @@ class FaceBlurNode(Node[FaceBlurInput, FaceBlurOutput, FaceBlurParams]):
                 level=StakeholderLevel.USER,
             ) from e
 
-        strength = _clamp01(self.params.blur_strength.root)
+        strength = _clamp01(float(self.params.blur_strength.root))
         faces = self._detect(source)
         faces_meta = [{"index": face.index, "bbox": list(face.bbox)} for face in faces]
         logger.info("Detected %d face(s) in input image.", len(faces))
