@@ -221,6 +221,84 @@ async def test_node_single_face_returns_single_sharp_image(monkeypatch):
 
 
 # ---------------------------------------------------------------------------
+# Full workflow-graph execution (detector mocked — no model)
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_engine_execute_sequence_output(monkeypatch):
+    """Drive the node through a real Input -> FaceBlur -> Output graph.
+
+    Verifies that ``SequenceValue[ImageFileValue]`` resolves in the value
+    registry and flows through an Output node's field schema end-to-end.
+    """
+    from workflow_engine import (
+        Edge,
+        IntegerValue,
+        JSONValue,
+        SequenceValue,
+        Workflow,
+        WorkflowEngine,
+        WorkflowExecutionResultStatus,
+    )
+
+    faces = order_faces([tuple(float(v) for v in b) for b in FACE_BOXES])
+    monkeypatch.setattr(FaceBlurNode, "_detect", _mock_detect(faces))
+
+    engine = WorkflowEngine()
+    context = InMemoryExecutionContext()
+    buf = io.BytesIO()
+    _synthetic_faces_image().save(buf, format="PNG")
+    src = ImageFileValue.from_path("input.png")
+    src = await src.write(context, buf.getvalue())
+
+    workflow = Workflow(
+        input_node=(input_node := engine.create_input_node(image=ImageFileValue)),
+        output_node=(
+            output_node := engine.create_output_node(
+                images=SequenceValue[ImageFileValue],
+                faces=JSONValue,
+                count=IntegerValue,
+            )
+        ),
+        inner_nodes=[
+            fb := engine.create_node(
+                FaceBlurNode,
+                id="faceblur",
+                params=dict(blur_strength=0.7),
+            ),
+        ],
+        edges=[
+            Edge.from_nodes(
+                source=input_node, source_key="image", target=fb, target_key="image"
+            ),
+            *[
+                Edge.from_nodes(
+                    source=fb, source_key=key, target=output_node, target_key=key
+                )
+                for key in ("images", "faces", "count")
+            ],
+        ],
+    )
+
+    result = await engine.execute(
+        context=context, workflow=workflow, input={"image": src}
+    )
+
+    assert result.status is WorkflowExecutionResultStatus.SUCCESS
+    assert result.output["count"].root == len(FACE_BOXES)
+    images = list(result.output["images"])
+    assert len(images) == len(FACE_BOXES)
+    # Each emitted image decodes and keeps its target face sharp.
+    for i, image_value in enumerate(images):
+        assert isinstance(image_value, ImageFileValue)
+        rendered = _decode(await image_value.read(context))
+        assert _region_variance(rendered, faces[i].bbox) > _region_variance(
+            rendered, faces[(i + 1) % len(faces)].bbox
+        )
+
+
+# ---------------------------------------------------------------------------
 # Real detector (gated: downloads a model, needs a real face image)
 # ---------------------------------------------------------------------------
 
