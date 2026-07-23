@@ -88,8 +88,8 @@ def order_faces(
 
 def _to_int_bbox(box: tuple[float, float, float, float]) -> BBox:
     x1, y1, x2, y2 = box
-    lo_x, hi_x = sorted((int(round(x1)), int(round(x2))))
-    lo_y, hi_y = sorted((int(round(y1)), int(round(y2))))
+    lo_x, hi_x = sorted((round(x1), round(x2)))
+    lo_y, hi_y = sorted((round(y1), round(y2)))
     return (lo_x, lo_y, hi_x, hi_y)
 
 
@@ -311,9 +311,7 @@ class FaceBlurNode(Node[FaceBlurInput, FaceBlurOutput, FaceBlurParams]):
 
         strength = _clamp01(self.params.blur_strength.root)
         faces = self._detect(source)
-        faces_meta = [
-            {"index": face.index, "bbox": list(face.bbox)} for face in faces
-        ]
+        faces_meta = [{"index": face.index, "bbox": list(face.bbox)} for face in faces]
         logger.info("Detected %d face(s) in input image.", len(faces))
 
         images: list[ImageFileValue] = []
