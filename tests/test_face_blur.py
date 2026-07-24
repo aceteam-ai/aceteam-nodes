@@ -9,17 +9,21 @@ SCRFD detector is gated behind the ``RUN_FACE_MODEL=1`` environment variable
 
 import io
 import os
+from typing import Any, cast
 
 import numpy as np
 import pytest
 from PIL import Image
+from workflow_engine import FloatValue
 from workflow_engine.contexts import InMemoryExecutionContext
 
 from aceteam_nodes.nodes.face_blur import (
+    BBox,
     DetectedFace,
     FaceBlurInput,
     FaceBlurNode,
     FaceBlurOutput,
+    FaceBlurParams,
     ImageFileValue,
     blur_faces,
     order_faces,
@@ -31,8 +35,13 @@ from aceteam_nodes.nodes.face_blur import (
 
 # Known "face" boxes (x1, y1, x2, y2) painted as high-frequency checkerboards on
 # a flat background, left-to-right.
-FACE_BOXES = [(10, 20, 70, 80), (110, 20, 170, 80), (210, 20, 270, 80)]
+FACE_BOXES: list[BBox] = [(10, 20, 70, 80), (110, 20, 170, 80), (210, 20, 270, 80)]
 IMAGE_SIZE = (300, 100)  # width, height
+
+
+def _to_float_box(bbox: BBox) -> tuple[float, float, float, float]:
+    x1, y1, x2, y2 = bbox
+    return (float(x1), float(y1), float(x2), float(y2))
 
 
 def _checker(size: int, square: int = 6) -> Image.Image:
@@ -119,8 +128,9 @@ def test_blur_faces_lowers_variance_only_in_target_regions():
     assert _region_variance(out, kept) > 0.9 * _region_variance(img, kept)
 
 
-def _to_int(bbox):
-    return tuple(int(v) for v in bbox)
+def _to_int(bbox: BBox) -> BBox:
+    x1, y1, x2, y2 = bbox
+    return (int(x1), int(y1), int(x2), int(y2))
 
 
 # ---------------------------------------------------------------------------
@@ -153,12 +163,16 @@ async def _run_node(
 
 
 def _node() -> FaceBlurNode:
-    return FaceBlurNode(id="fb", type="FaceBlur", params={"blur_strength": 0.7})
+    return FaceBlurNode(
+        id="fb",
+        type="FaceBlur",
+        params=FaceBlurParams(blur_strength=FloatValue(0.7)),
+    )
 
 
 @pytest.mark.asyncio
 async def test_node_emits_one_image_per_face_with_one_sharp_region(monkeypatch):
-    faces = order_faces([tuple(float(v) for v in b) for b in FACE_BOXES])
+    faces = order_faces([_to_float_box(b) for b in FACE_BOXES])
     monkeypatch.setattr(FaceBlurNode, "_detect", _mock_detect(faces))
     img = _synthetic_faces_image()
 
@@ -168,8 +182,9 @@ async def test_node_emits_one_image_per_face_with_one_sharp_region(monkeypatch):
     images = list(output.images)
     assert len(images) == len(FACE_BOXES)
 
-    # Metadata mirrors the images, in stable order.
-    meta = output.faces.root
+    # Metadata mirrors the images, in stable order. The node produces a
+    # list[dict]; narrow the wide JSON `.root` type so it can be indexed.
+    meta = cast(list[dict[str, Any]], output.faces.root)
     assert [m["index"] for m in meta] == [0, 1, 2]
     assert [m["bbox"] for m in meta] == [list(f.bbox) for f in faces]
 
@@ -204,7 +219,7 @@ async def test_node_zero_faces_returns_original_unchanged(monkeypatch):
 
 @pytest.mark.asyncio
 async def test_node_single_face_returns_single_sharp_image(monkeypatch):
-    faces = order_faces([tuple(float(v) for v in FACE_BOXES[0])])
+    faces = order_faces([_to_float_box(FACE_BOXES[0])])
     monkeypatch.setattr(FaceBlurNode, "_detect", _mock_detect(faces))
     img = _synthetic_faces_image()
 
@@ -242,7 +257,7 @@ async def test_engine_execute_sequence_output(monkeypatch):
         WorkflowExecutionResultStatus,
     )
 
-    faces = order_faces([tuple(float(v) for v in b) for b in FACE_BOXES])
+    faces = order_faces([_to_float_box(b) for b in FACE_BOXES])
     monkeypatch.setattr(FaceBlurNode, "_detect", _mock_detect(faces))
 
     engine = WorkflowEngine()
@@ -322,5 +337,6 @@ async def test_real_detector_group_photo():
     assert output.count.root == 3
     assert len(list(output.images)) == 3
     # Faces are ordered left-to-right.
-    xs = [m["bbox"][0] for m in output.faces.root]
+    meta = cast(list[dict[str, Any]], output.faces.root)
+    xs = [m["bbox"][0] for m in meta]
     assert xs == sorted(xs)
