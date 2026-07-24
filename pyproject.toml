@@ -98,6 +98,21 @@ build-backend = "hatchling.build"
 [tool.hatch.build.targets.wheel]
 packages = ["src/aceteam_nodes"]
 
+[tool.hatch.build.targets.sdist]
+# Explicit include-list so no local virtualenv (e.g. ./.venv or a ./system env
+# created via UV_PROJECT_ENVIRONMENT=system) leaks into the sdist and breaks the
+# build on its absolute python symlink.
+include = [
+  "/src",
+  "/tests",
+  "/examples",
+  "/README.md",
+  "/LICENSE",
+  "/NOTICE",
+  "/pyproject.toml",
+  "/uv.lock",
+]
+
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["tests"]
