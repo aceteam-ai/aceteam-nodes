@@ -3,7 +3,7 @@ name = "aceteam-nodes"
 version = "0.8.0"
 description = "Workflow node types for aceteam-workflow-engine"
 readme = "README.md"
-license = "MIT"
+license = "LicenseRef-Elastic-2.0"
 requires-python = ">=3.12"
 dependencies = [
     "aceteam-workflow-engine>=2.0.0rc14",
