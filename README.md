@@ -1,7 +1,7 @@
 # aceteam-nodes
 
 [![PyPI version](https://img.shields.io/pypi/v/aceteam-nodes.svg)](https://pypi.org/project/aceteam-nodes/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
+[![License: Elastic-2.0](https://img.shields.io/badge/License-Elastic--2.0-blue.svg)](LICENSE)
 [![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
 
 A bundle of workflow node types for [aceteam-workflow-engine](https://github.com/adanomad/workflow-engine):
@@ -155,4 +155,4 @@ Add three things in lockstep:
 
 ## License
 
-MIT
+[Elastic License 2.0](LICENSE)
