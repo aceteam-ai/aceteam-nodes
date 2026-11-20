@@ -1,0 +1,144 @@
+name: Publish to PyPI
+
+on:
+  push:
+    branches: [main]
+    paths: [pyproject.toml]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pypi-main
+  cancel-in-progress: false
+
+jobs:
+  plan:
+    name: Check release plan
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    outputs:
+      run: ${{ steps.plan.outputs.run }}
+      published: ${{ steps.plan.outputs.published }}
+      version: ${{ steps.plan.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Validate version, changelog, tag and PyPI state
+        id: plan
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EVENT_NAME: ${{ github.event_name }}
+          BEFORE_SHA: ${{ github.event.before }}
+          RELEASE_SHA: ${{ github.sha }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          python3 scripts/release_plan.py plan \
+            --event "$EVENT_NAME" --before "$BEFORE_SHA" \
+            --sha "$RELEASE_SHA" --repository "$REPOSITORY"
+
+  test:
+    name: Release tests (Python 3.12)
+    needs: plan
+    if: needs.plan.outputs.run == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v4
+        with:
+          version: latest
+          enable-cache: true
+      - run: uv python install 3.12
+      - run: uv sync --locked --python 3.12
+      - run: uv run --locked ruff check .
+      - run: uv run --locked ruff format --check .
+      - run: uv run --locked pyright
+      - run: uv run --locked pytest -q
+
+  build:
+    name: Build and inspect distributions
+    needs: [plan, test]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v4
+        with:
+          version: latest
+      - run: uv python install 3.12
+      - run: uv build
+      - name: Check wheel and sdist contents
+        run: python3 scripts/release_plan.py verify-dist '${{ needs.plan.outputs.version }}' dist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+          if-no-files-found: error
+
+  publish:
+    name: Publish to PyPI
+    needs: [plan, build]
+    if: needs.plan.outputs.published == 'false'
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/aceteam-nodes
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+      - name: Publish with OIDC and attestations
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          attestations: true
+
+  release:
+    name: Tag and create GitHub release
+    needs: [plan, build, publish]
+    if: >-
+      always() && needs.plan.outputs.run == 'true' &&
+      needs.build.result == 'success' &&
+      (needs.publish.result == 'success' ||
+       (needs.plan.outputs.published == 'true' && needs.publish.result == 'skipped'))
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+      - name: Check already-published artifacts before recovery
+        if: needs.plan.outputs.published == 'true'
+        run: python3 scripts/release_plan.py verify-dist '${{ needs.plan.outputs.version }}' dist --published
+      - name: Create or verify annotated tag and GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_VERSION: ${{ needs.plan.outputs.version }}
+          RELEASE_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          tag="v${RELEASE_VERSION}"
+          if git rev-parse --verify "refs/tags/${tag}^{commit}" >/dev/null 2>&1; then
+            test "$(git rev-parse "refs/tags/${tag}^{commit}")" = "$RELEASE_SHA"
+          else
+            git config user.name 'github-actions[bot]'
+            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+            git tag -a "$tag" "$RELEASE_SHA" -m "Release $tag"
+            git push origin "refs/tags/$tag"
+          fi
+          if ! gh release view "$tag" >/dev/null 2>&1; then
+            python3 scripts/release_plan.py notes "$RELEASE_VERSION" > release-notes.md
+            if [[ "$RELEASE_VERSION" == *rc* ]]; then
+              gh release create "$tag" --verify-tag --title "aceteam-nodes $tag" --notes-file release-notes.md --prerelease
+            else
+              gh release create "$tag" --verify-tag --title "aceteam-nodes $tag" --notes-file release-notes.md
+            fi
+          fi

@@ -32,9 +32,8 @@ uv run pyright                    # Type checking
 # Build
 uv build                           # Creates sdist + wheel in dist/
 
-# Release
-./scripts/release.sh -v v0.2.0 --dry-run  # Preview release
-./scripts/release.sh -v v0.2.0 -y         # Publish to PyPI + GitHub
+# Prepare a release PR. CI publishes only after the version bump merges.
+./scripts/bump-version.sh --patch
 ```
 
 ## Architecture
