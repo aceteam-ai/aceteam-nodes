@@ -134,10 +134,11 @@ uv run pyright
 # Build
 uv build
 
-# Release
-scripts/release.sh -v vX.Y.Z --dry-run   # preview
-scripts/release.sh -v vX.Y.Z -y          # publish to PyPI + GitHub
+# Prepare a release PR (the merge publishes through CI)
+scripts/bump-version.sh --patch
 ```
+
+See [releasing](docs/engineering/releasing.md) for the OIDC publish flow and emergency recovery.
 
 ### Adding a node
 
